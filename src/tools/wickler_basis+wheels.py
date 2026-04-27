@@ -5,10 +5,10 @@ import math
 doc = App.newDocument("Wickelmaschine_Basis_Raeder")
 
 # ==========================================
-# ⚙️ PARAMETER (Teil 1: Basis & Räder)
+# ⚙️ PARAMETER (Basis & Räder)
 # ==========================================
 hex_loch_sw = 8.4         
-lager_loch_d = 12.0        
+lager_loch_d = 12.0        # Für die neuen, massiven 11.8mm Hülsen
 kleines_rad_d = 20.0      
 grosses_rad_d = 70.0      
 # ==========================================
@@ -43,64 +43,73 @@ def show_obj(shape, name):
     return obj
 
 # ==========================================
-# BAUTEIL 1: DIE MASCHINEN-BASIS (Tischkanten-Layout!)
+# BAUTEIL 1: DIE MASCHINEN-BASIS (L-Form mit Löchern)
 # ==========================================
-base_plate = make_centered_box(160, 100, 5, 0, 0, 2.5) # Y von -50 bis 50
+# Hauptplatte Rechts (Für die Türme): X von -25 bis 50 (Breite 75), Y von -5 bis 95 (Länge 100)
+base_right = make_centered_box(75, 100, 5, 12.5, 45, 2.5) 
+# Erweiterung Links (Für Dorn und Schiene): X von -80 bis -25 (Breite 55), Y von -5 bis 55 (Länge 60)
+base_left = make_centered_box(55, 60, 5, -52.5, 25, 2.5)
+base_plate = base_right.fuse(base_left)
 
-def make_crank_pillar(cx, cy):
-    p = make_centered_box(16, 12, 55, cx, cy, 32.5) 
-    cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 15)
+# 4 Bohrlöcher (D=4.4mm für M4 Schrauben) zur Befestigung am Tisch
+m4_loch = Part.makeCylinder(2.2, 10)
+loch1 = m4_loch.copy().translate(App.Vector(40, 85, -2))  # Hinten Rechts
+loch2 = m4_loch.copy().translate(App.Vector(40, 5, -2))   # Vorne Rechts
+loch3 = m4_loch.copy().translate(App.Vector(-70, 5, -2))  # Vorne Links
+loch4 = m4_loch.copy().translate(App.Vector(-70, 45, -2)) # Ecke der L-Form
+base_plate = base_plate.cut(loch1).cut(loch2).cut(loch3).cut(loch4)
+
+def make_pillar(cx, cy, height, hole_z):
+    p = make_centered_box(16, 12, height, cx, cy, height/2.0 + 5.0) 
+    cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 18)
     cut_cyl.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-    cut_cyl.translate(App.Vector(cx, cy+7.5, 45)) 
+    cut_cyl.translate(App.Vector(cx, cy+9.0, hole_z)) 
     return p.cut(cut_cyl)
 
-def make_spool_pillar(cx, cy):
-    p = make_centered_box(16, 12, 40, cx, cy, 25) 
-    cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 15)
-    cut_cyl.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-    cut_cyl.translate(App.Vector(cx, cy+7.5, 30)) 
-    return p.cut(cut_cyl)
+# Kurbel-Türme (Rechts, X=35. Achse Z=45) 
+p_cl = make_pillar(35, 45, 55, 45) 
+p_cr = make_pillar(35, 71, 55, 45)  
 
-# Türme jetzt ganz hinten an der Tischkante (Y=15 und Y=40)
-p_cl = make_crank_pillar(-45, 40) 
-p_cr = make_crank_pillar(-45, 15)  
+# Wickler-Türme (Mitte, X=-15. Achse Z=30)
+p_wl = make_pillar(-15, 45, 40, 30)  
+p_wr = make_pillar(-15, 71, 40, 30)   
 
-p_wl = make_spool_pillar(0, 40)  
-p_wr = make_spool_pillar(0, 15)   
-
-# 3. Die T-Träger-Schiene (Perfekt auf den Schlitten abgestimmt!)
-t_stem = make_centered_box(7.0, 45, 4.5, 35, -15, 7.25) # Z: 5 bis 9.5
-t_top = make_centered_box(13.0, 45, 5.0, 35, -15, 12.0) # Z: 9.5 bis 14.5
+# 3. T-Träger-Schiene (Näher an die Spindel gerückt! Jetzt auf X=-30)
+t_stem = make_centered_box(6.0, 50, 5.0, -30, 25, 7.5)  
+t_top = make_centered_box(12.0, 50, 5.0, -30, 25, 12.5) 
 schiene = t_stem.fuse(t_top)
 
-stop_1 = Part.makeCylinder(1.4, 10).translate(App.Vector(35, 5, 8))
-stop_2 = Part.makeCylinder(1.4, 10).translate(App.Vector(35, -35, 8))
+stop_1 = Part.makeCylinder(1.4, 10).translate(App.Vector(-30, 46, 8))
+stop_2 = Part.makeCylinder(1.4, 10).translate(App.Vector(-30, 4, 8))
 schiene = schiene.cut(stop_1).cut(stop_2)
 
-# 4. Dorn für die Kupferdraht-Rolle
-dorn_base = Part.makeCylinder(15, 2).translate(App.Vector(65, -15, 5))
-dorn = Part.makeCylinder(4.5, 60).translate(App.Vector(65, -15, 7))
+# 4. Dorn für die Kupferdraht-Rolle (Ganz Links, X=-65)
+dorn_base = Part.makeCylinder(15, 2).translate(App.Vector(-65, 25, 5))
+dorn = Part.makeCylinder(4.5, 60).translate(App.Vector(-65, 25, 7))
 
 basis = base_plate.fuse(p_wl).fuse(p_wr).fuse(p_cl).fuse(p_cr).fuse(dorn_base).fuse(dorn).fuse(schiene)
-show_obj(basis.removeSplitter(), "Maschinen_Basis")
+show_obj(basis.removeSplitter(), "Maschinen_Basis_L_Shape")
 
 # ==========================================
 # BAUTEILE 2 & 3: RÄDER & SCHLITTEN (Für Druck abgelegt)
 # ==========================================
-rad_k = make_wheel(grosses_rad_d, 1.5, hex_loch_sw, 10.0).translate(App.Vector(-45, -90, 0.0)) 
+rad_k = make_wheel(grosses_rad_d, 1.5, hex_loch_sw, 10.0).translate(App.Vector(35, -50, 0.0)) 
 show_obj(rad_k, "Rad_Gross_Kurbel")
 
-rad_w = make_wheel(kleines_rad_d, 1.5, hex_loch_sw, 10.0).translate(App.Vector(0, -90, 0.0))
+rad_w = make_wheel(kleines_rad_d, 1.5, hex_loch_sw, 10.0).translate(App.Vector(-15, -50, 0.0))
 show_obj(rad_w, "Rad_Klein_Wickler")
 
-sled = make_centered_box(24, 16, 20, 0, 0, 10)
-cut_stem = make_centered_box(7.5, 16.0, 4.5, 0, 0, 2.25) 
-cut_top = make_centered_box(13.5, 16.0, 5.0, 0, 0, 7.0) 
-wire_hole = Part.makeCylinder(0.5, 24)
-wire_hole.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+# Der Führungsschlitten
+sled = make_centered_box(24, 16, 25, 0, 0, 12.5)
+cut_stem = make_centered_box(6.6, 16.0, 5.0, 0, 0, 2.5)   
+cut_top = make_centered_box(12.6, 16.0, 5.5, 0, 0, 7.75)  
 
-sled = sled.cut(cut_stem).cut(cut_top).cut(wire_hole.translate(App.Vector(-12, 0, 15)))
-sled.translate(App.Vector(35, -90, 0)) 
+# Loch geht durch die X-Achse
+wire_hole = Part.makeCylinder(0.5, 30)
+wire_hole.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+sled = sled.cut(cut_stem).cut(cut_top).cut(wire_hole.translate(App.Vector(-15, 0, 20)))
+
+sled.translate(App.Vector(-65, -50, 0)) 
 show_obj(sled.removeSplitter(), "Schlitten_Drahtfuehrung_T_Form")
 
 doc.recompute()

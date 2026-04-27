@@ -23,6 +23,7 @@ def make_centered_box(l, w, h, cx, cy, cz):
     return box
 
 def make_hex_prism(sw, height):
+    # Durch den 30° Offset liegen die Sechskant-Achsen beim Rotieren perfekt flach!
     radius = (sw / 2.0) / math.cos(math.radians(30))
     points = []
     for j in range(6):
@@ -35,10 +36,11 @@ def make_hex_prism(sw, height):
     return Part.Face(Part.Wire(polygon)).extrude(App.Vector(0, 0, height))
 
 def get_m3_insert_cutout():
+    # Präzises Loch für Einschmelzmutter (D=4.2, T=5) + Madenschraube (D=3.2)
     ins = Part.makeCylinder(4.2/2.0, 5.0)
     pas = Part.makeCylinder(3.2/2.0, 15.0)
     cut = ins.fuse(pas).removeSplitter()
-    cut.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90) 
+    cut.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90) # Rotiert in -Y Richtung
     return cut
 
 def show_obj(shape, name):
@@ -49,13 +51,11 @@ def show_obj(shape, name):
 # ==========================================
 # BAUTEILE 1 & 2: DIE ACHSEN (Massiv gekürzt!)
 # ==========================================
-# Kurbel-Achse: Nur noch 45mm lang (Passt exakt durch die zwei Türme)
 achse_k = make_hex_prism(hex_achse_sw, 45.0)
 achse_k.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_k.translate(App.Vector(-30, 30, 4.0)) 
 show_obj(achse_k, "Achse_Kurbel_Kurz")
 
-# Wickler-Achse: 45mm dick (in den Türmen) + 40mm dünn (ragt frei heraus!)
 achse_w_base = make_hex_prism(hex_achse_sw, 45.0)
 achse_w_spindel = make_hex_prism(hex_spindel_sw, 40.0).translate(App.Vector(0,0,45.0))
 achse_w = achse_w_base.fuse(achse_w_spindel)
@@ -67,7 +67,6 @@ achse_w.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_w.translate(App.Vector(-30, 45, 4.0))
 show_obj(achse_w, "Achse_Wickler_Freischwebend")
 
-# NEU: Der 15mm Distanz-Spacer (Damit die Spule perfekt vor dem Schlitten sitzt)
 sp_spacer = Part.makeCylinder(10.0/2.0, 15.0)
 sp_spacer = sp_spacer.cut(make_hex_prism(hex_spindel_loch_sw, 20.0).translate(App.Vector(0,0,-2.0)))
 sp_spacer.translate(App.Vector(10, 30, 0))
@@ -77,13 +76,11 @@ show_obj(sp_spacer, "Spulen_Distanz_Spacer")
 # BAUTEIL 3: DER KURBEL-ARM (Schlank & 100% Bündig)
 # ==========================================
 arm_dicke = 6.0 
-# Arm-Breite auf elegante 12mm reduziert!
 arm_box = make_centered_box(40, 12, arm_dicke, 20, 0, arm_dicke/2.0) 
 hub = Part.makeCylinder(14.0/2.0, arm_dicke) 
 kurbel_arm = arm_box.fuse(hub)
 
 hole_a = make_hex_prism(hex_loch_sw, arm_dicke + 2.0).translate(App.Vector(0,0,-1.0))
-# M3 Ausschnitt an die schmalere Breite angepasst (Y=6)
 m3_cut_arm = get_m3_insert_cutout().translate(App.Vector(0, 6.0, arm_dicke/2.0))
 
 griff_steckplatz = make_hex_prism(6.2, 4.0).translate(App.Vector(35, 0, arm_dicke - 3.0)) 
@@ -140,28 +137,36 @@ deckel_fin.translate(App.Vector(20, -10, 0))
 show_obj(deckel_fin, "Spule_Aeusserer_Deckel_Flach")
 
 # ==========================================
-# BAUTEIL 6: LAGERHÜLSEN (Bearing Sleeves) - Kompakter!
+# BAUTEIL 6: LAGERHÜLSEN (Bearing Sleeves) - SAUBER & MASSIV
 # ==========================================
 def make_bearing_sleeve(x_pos, y_pos):
-    # Zapfen verkürzt auf 14mm, Kragen auf 4mm -> Spart massig Platz zwischen den Türmen!
-    zapfen = Part.makeCylinder(9.5/2.0, 14.0) 
-    kragen = Part.makeCylinder(14.0/2.0, 4.0).translate(App.Vector(0,0,14.0))
+    # Zapfen bleibt bei 14mm Länge und 11.8mm Durchmesser
+    zapfen = Part.makeCylinder(11.8/2.0, 14.0) 
+    # Kragen: Dicke auf satte 8.0mm verdoppelt!
+    kragen = Part.makeCylinder(16.0/2.0, 8.0).translate(App.Vector(0,0,14.0))
     huelse = zapfen.fuse(kragen)
     
-    hole = make_hex_prism(hex_loch_sw, 25.0).translate(App.Vector(0,0,-2.0))
-    m3_cut = get_m3_insert_cutout().translate(App.Vector(0, 7.0, 16.0))
+    hole = make_hex_prism(hex_loch_sw, 30.0).translate(App.Vector(0,0,-2.0))
+    
+    # M3 Ausschnitt im KRAGEN. (Kragen Mitte ist nun bei Z=18)
+    # Das 4.2mm Loch ist jetzt sicher umschlossen von 8mm Plastik!
+    m3_cut = get_m3_insert_cutout().translate(App.Vector(0, 8.0, 18.0))
     
     fin = huelse.cut(hole).cut(m3_cut).removeSplitter()
+    
+    # Flach auf Z=0 ablegen für perfekten Druck (auf dem dicken Kragen stehend)
     fin.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 180)
-    fin.translate(App.Vector(x_pos, y_pos, 18.0))
+    fin.translate(App.Vector(x_pos, y_pos, 22.0))
     return fin
 
-show_obj(make_bearing_sleeve(75, 10), "Lagerhuelse_1")
-show_obj(make_bearing_sleeve(75, 30), "Lagerhuelse_2")
-show_obj(make_bearing_sleeve(95, 10), "Lagerhuelse_3")
-show_obj(make_bearing_sleeve(95, 30), "Lagerhuelse_4")
+show_obj(make_bearing_sleeve(55, 10), "Lagerhuelse_1")
+show_obj(make_bearing_sleeve(55, 30), "Lagerhuelse_2")
+show_obj(make_bearing_sleeve(75, 10), "Lagerhuelse_3")
+show_obj(make_bearing_sleeve(75, 30), "Lagerhuelse_4")
 
 doc.recompute()
 if App.GuiUp:
     App.Gui.activeDocument().activeView().viewAxometric()
     App.Gui.SendMsgToActiveView("ViewFit")
+
+print("Massive Lagerhülsen mit perfektem M3-Einsatz repariert!")

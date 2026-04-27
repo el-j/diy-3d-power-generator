@@ -8,7 +8,7 @@ doc = App.newDocument("Wickelmaschine_Basis_Raeder")
 # ⚙️ PARAMETER (Teil 1: Basis & Räder)
 # ==========================================
 hex_loch_sw = 8.4         
-lager_loch_d = 9.8        
+lager_loch_d = 12.0        
 kleines_rad_d = 20.0      
 grosses_rad_d = 70.0      
 # ==========================================

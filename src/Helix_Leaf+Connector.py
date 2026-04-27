@@ -68,11 +68,12 @@ def create_blade_wire(offset_dicke, extra_radius=0):
     p_in_mid = App.Vector(cx, blatt_radius - offset_dicke - extra_radius, 0)
     p_in_end = App.Vector(cx + blatt_radius - offset_dicke - extra_radius, 0, 0)
     arc_in = Part.Arc(p_in_start, p_in_mid, p_in_end)
-
+    
     return Part.Wire([arc_out.toShape(), Part.makeLine(p_out_end, p_in_end), arc_in.toShape(), Part.makeLine(p_in_start, p_out_start)])
 
 base_wire = create_blade_wire(dicke)
 cutter_wire = create_blade_wire(dicke + toleranz, toleranz / 2.0)
+shell_wire = create_blade_wire(dicke + 6.0, 3.0)
 
 # ==========================================
 # 1. DAS DRUCKBARE HELIX-BLATT
@@ -93,34 +94,43 @@ show_obj(druck_blatt, "Coreless_Helix_Fluegel")
 # ==========================================
 # 2. SKELETT-VERBINDER (Mittelstück, Flachdruck)
 # ==========================================
-# A) Die 3mm dicke Außenhülle um den Flügel erzeugen (Skelett-Rahmen)
-shell_wire = create_blade_wire(dicke + 6.0, 3.0) 
-shell_1 = Part.Face(shell_wire).extrude(App.Vector(0,0,kappen_dicke))
+# A) Die Außenhülle um den Flügel erzeugen (Skelett-Rahmen mit runden Endkappen!)
+shell_1_base = Part.Face(shell_wire).extrude(App.Vector(0,0,kappen_dicke))
 
-shell_wire_180 = shell_wire.copy()
-shell_wire_180.rotate(App.Vector(0,0,0), App.Vector(0,0,1), 180)
-shell_2 = Part.Face(shell_wire_180).extrude(App.Vector(0,0,kappen_dicke))
+# Die perfekte runde Endkappe für die Hülle hinzufügen
+cap_x = cx + blatt_radius - (dicke / 2.0)
+shell_cap_radius = (dicke / 2.0) + 3.0
+shell_cap = Part.makeCylinder(shell_cap_radius, kappen_dicke)
+shell_cap.translate(App.Vector(cap_x, 0, 0))
+shell_1 = shell_1_base.fuse(shell_cap)
 
-# B) Zentraler Hub (Hält den Vielzahn sicher)
+shell_2 = shell_1.copy()
+shell_2.rotate(App.Vector(0,0,0), App.Vector(0,0,1), 180)
+
+# B) Zentraler Hub
 hub = Part.makeCylinder(22.0, kappen_dicke)
 verbinder = hub.fuse(shell_1).fuse(shell_2)
 
-# C) Vielzahn-Loch (+0.2 Toleranz zum Stecken)
+# C) Vielzahn-Loch
 verbinder = verbinder.cut(make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, kappen_dicke))
 
-# D) Rillen einschneiden (Unten UND Oben)
-cutter_0 = cutter_wire.copy()
-cutter_180 = cutter_wire.copy()
-cutter_180.rotate(App.Vector(0,0,0), App.Vector(0,0,1), 180)
+# D) Rillen einschneiden (Unten UND Oben) mit runden Cuttern am Ende!
+cutter_0_base = Part.Face(cutter_wire).extrude(App.Vector(0,0,rillen_tiefe))
+cutter_cap_radius = (dicke + toleranz) / 2.0
+cutter_cap_unten = Part.makeCylinder(cutter_cap_radius, rillen_tiefe)
+cutter_cap_unten.translate(App.Vector(cap_x, 0, 0))
 
-# Rillen von UNTEN (Z=0 bis 3mm) - Druckt sich problemlos frei schwebend (Bridging)!
-rille_unten_1 = Part.Face(cutter_0).extrude(App.Vector(0,0,rillen_tiefe))
-rille_unten_2 = Part.Face(cutter_180).extrude(App.Vector(0,0,rillen_tiefe))
+# Den geraden Cutter mit der runden Endkappe verschmelzen
+rille_unten_1 = cutter_0_base.fuse(cutter_cap_unten)
+rille_unten_2 = rille_unten_1.copy()
+rille_unten_2.rotate(App.Vector(0,0,0), App.Vector(0,0,1), 180)
 verbinder = verbinder.cut(rille_unten_1).cut(rille_unten_2)
 
-# Rillen von OBEN (Z=5mm bis 8mm)
-rille_oben_1 = Part.Face(cutter_0).extrude(App.Vector(0,0,rillen_tiefe)).translate(App.Vector(0,0, kappen_dicke - rillen_tiefe))
-rille_oben_2 = Part.Face(cutter_180).extrude(App.Vector(0,0,rillen_tiefe)).translate(App.Vector(0,0, kappen_dicke - rillen_tiefe))
+# Kopie für die obere Seite anfertigen
+rille_oben_1 = rille_unten_1.copy()
+rille_oben_1.translate(App.Vector(0,0, kappen_dicke - rillen_tiefe))
+rille_oben_2 = rille_unten_2.copy()
+rille_oben_2.translate(App.Vector(0,0, kappen_dicke - rillen_tiefe))
 verbinder = verbinder.cut(rille_oben_1).cut(rille_oben_2)
 
 verbinder = verbinder.removeSplitter()
@@ -166,4 +176,4 @@ if App.GuiUp:
     App.Gui.activeDocument().activeView().viewAxometric()
     App.Gui.SendMsgToActiveView("ViewFit")
 
-print("Skelett-Verbinder & Hex-Plug System erfolgreich hinzugefügt!")
+print("Skelett-Verbinder mit runden, geschlossenen Enden erfolgreich generiert!")

@@ -2,23 +2,15 @@ import FreeCAD as App
 import Part
 import math
 
-doc = App.newDocument("Coil_Winder_Tool")
+doc = App.newDocument("Wickelmaschine_Basis_Raeder")
 
 # ==========================================
-# ⚙️ PARAMETER (Offene Tisch-Wickelmaschine)
+# ⚙️ PARAMETER (Teil 1: Basis & Räder)
 # ==========================================
-# Spulen-Maße des Generators
-spule_innen_d = 7.0       
-spule_aussen_d = 14.0     
-spule_dicke = 3.5         
-
-# M3 Hardware (Für Klemmschraube)
 m3_loch = 3.6             
-m3_mutter_sw = 5.8        # Leichtes Spiel für M3 Mutter (SW 5.5)
-m3_mutter_tiefe = 2.5     
+hex_loch_sw = 8.4         # 8.4mm Loch (Toleranz fürs leichte Aufschieben auf 8mm Achse)
+lager_loch_d = 9.6        # 9.6mm Rundloch für perfekten Lauf der Sechskant-Wellen
 
-# Antrieb & Mechanik
-uebersetzung = 4.0        # 4:1 Getriebe per Gummiband
 kleines_rad_d = 20.0      
 grosses_rad_d = 80.0 
 # ==========================================
@@ -36,8 +28,22 @@ def make_hex_prism(sw, height):
         x = radius * math.cos(angle)
         y = radius * math.sin(angle)
         points.append(App.Vector(x, y, 0))
+    points.append(points[0]) # Polygon schließen
     polygon = Part.makePolygon(points)
     return Part.Face(Part.Wire(polygon)).extrude(App.Vector(0, 0, height))
+
+def make_wheel(outer_d, groove_r, hex_sw, thickness):
+    w = Part.makeCylinder(outer_d/2.0, thickness)
+    nut = Part.makeTorus(outer_d/2.0, groove_r)
+    w = w.cut(nut.translate(App.Vector(0,0,thickness/2.0)))
+    
+    # Integrierte Abstandshalter (Spacer) - 2mm auf jeder Seite
+    hub = Part.makeCylinder(14.0/2.0, thickness + 4.0).translate(App.Vector(0,0,-2.0))
+    w = w.fuse(hub)
+    
+    # Sechskant-Loch für das Steck-System
+    hole = make_hex_prism(hex_sw, thickness + 10.0).translate(App.Vector(0,0,-5.0))
+    return w.cut(hole).removeSplitter()
 
 def show_obj(shape, name):
     obj = doc.addObject("Part::Feature", name)
@@ -45,112 +51,69 @@ def show_obj(shape, name):
     return obj
 
 # ==========================================
-# BAUTEIL 1: DIE TISCH-BASIS
+# BAUTEIL 1: DIE MASCHINEN-BASIS (Flach liegend)
 # ==========================================
-# Grundplatte
-basis = make_centered_box(180, 120, 5, 0, 0, 2.5)
+base_plate = make_centered_box(150, 90, 5, 0, 0, 2.5)
 
-# Turm Links (Für die Kurbel)
-turm_k = make_centered_box(10, 20, 50, -20, -30, 30)
-loch_k = Part.makeCylinder(4.25, 20)
-loch_k.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
-turm_k = turm_k.cut(loch_k.translate(App.Vector(-30, -30, 45)))
+# Die 4 Stütztürme (Abstand jetzt extrem großzügige 24mm!)
+def make_pillar(cx, cy):
+    p = make_centered_box(16, 12, 40, cx, cy, 25) # Z: 5 bis 45
+    # Drop-In Schlitz von oben (Breite 9.6mm)
+    cut_box = make_centered_box(9.6, 13, 15, cx, cy, 37.5) 
+    # Rundes Bett für die Achse
+    cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 13)
+    cut_cyl.rotate(App.Vector(1,0,0), 90)
+    cut_cyl.translate(App.Vector(cx, cy+6.5, 30))
+    return p.cut(cut_box).cut(cut_cyl)
 
-# Turm Rechts (Für die Spule)
-turm_w = make_centered_box(10, 20, 50, 20, 30, 30)
-loch_w = Part.makeCylinder(4.25, 20)
-loch_w.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
-turm_w = turm_w.cut(loch_w.translate(App.Vector(10, 30, 45)))
+# Platzierung der Türme:
+p_wl = make_pillar(40, -18)  # Wickler Front
+p_wr = make_pillar(40, 18)   # Wickler Hinten
+p_cl = make_pillar(-35, -18) # Kurbel Front
+p_cr = make_pillar(-35, 18)  # Kurbel Hinten
 
 # Dorn für die Kupferdraht-Rolle
-pin_base = Part.makeCylinder(15, 2).translate(App.Vector(60, -30, 5))
-pin = Part.makeCylinder(4.5, 60).translate(App.Vector(60, -30, 7))
+dorn_base = Part.makeCylinder(15, 2).translate(App.Vector(55, 25, 5))
+dorn = Part.makeCylinder(4.5, 60).translate(App.Vector(55, 25, 7))
 
 # Gleitschiene für die Drahtführung
-schiene = make_centered_box(60, 8, 8, 43, 45, 9)
+schiene = make_centered_box(50, 8, 8, 40, -35, 9)
 
-basis = basis.fuse(turm_k).fuse(turm_w).fuse(pin_base).fuse(pin).fuse(schiene)
+basis = base_plate.fuse(p_wl).fuse(p_wr).fuse(p_cl).fuse(p_cr).fuse(dorn_base).fuse(dorn).fuse(schiene)
 show_obj(basis.removeSplitter(), "Maschinen_Basis")
 
 
 # ==========================================
-# BAUTEIL 2: DER WICKELKOPF (Hängt frei in der Luft!)
+# BAUTEIL 2: GROSSES KURBEL-RAD (Flach liegend)
 # ==========================================
-# Wir bauen ihn entlang der Z-Achse und rotieren ihn dann in Position
-hex_drive = make_hex_prism(8.0, 10.0) # Sechskant für Akkuschrauber-Option
-pulley_w = Part.makeCylinder(10.0, 10.0).translate(App.Vector(0,0,10))
-nut_w = Part.makeTorus(10.0, 1.5).translate(App.Vector(0,0,15))
-pulley_w = pulley_w.cut(nut_w)
-
-shaft_w = Part.makeCylinder(4.0, 33.0).translate(App.Vector(0,0,20))
-flansch_w = Part.makeCylinder(9.0, 3.0).translate(App.Vector(0,0,53))
-core_w = Part.makeCylinder(spule_innen_d / 2.0, spule_dicke).translate(App.Vector(0,0,56))
-
-wickelkopf = hex_drive.fuse(pulley_w).fuse(shaft_w).fuse(flansch_w).fuse(core_w)
-
-# M3 Loch & Draht-Klemmschlitz
-wickelkopf = wickelkopf.cut(Part.makeCylinder(m3_loch / 2.0, 40.0).translate(App.Vector(0,0,30)))
-slot_w = make_centered_box(9, 0.8, 4, 4.5, 0, 54.5)
-wickelkopf = wickelkopf.cut(slot_w)
-
-# 14mm Füllstands-Markierung (Gravur)
-ring = Part.makeCylinder(7, 0.5).cut(Part.makeCylinder(6.5, 0.5))
-wickelkopf = wickelkopf.cut(ring.translate(App.Vector(0,0,53)))
-
-# In Arbeits-Position bringen (Rotiert & Verschoben)
-wickelkopf.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
-wickelkopf.translate(App.Vector(-15, 30, 45))
-show_obj(wickelkopf.removeSplitter(), "Wickelkopf_Spindel")
+rad_k = make_wheel(grosses_rad_d, 1.5, hex_loch_sw, 10.0)
+rad_k.translate(App.Vector(-45, 95, 2.0)) # Flach über der Basis platzieren
+show_obj(rad_k, "Rad_Gross_Kurbel")
 
 
 # ==========================================
-# BAUTEIL 3: DER DECKEL (Wird mit M3 Schraube fixiert)
+# BAUTEIL 3: KLEINES WICKEL-RAD (Flach liegend)
 # ==========================================
-deckel = Part.makeCylinder(9.0, 3.0)
-deckel = deckel.cut(Part.makeCylinder(m3_loch / 2.0, 10.0).translate(App.Vector(0,0,-1)))
-deckel = deckel.cut(make_hex_prism(m3_mutter_sw, 2.5).translate(App.Vector(0,0,0.5)))
-deckel = deckel.cut(ring) # Markierung auch hier
-
-deckel.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
-deckel.translate(App.Vector(44.5, 30, 45)) # Sitzt exakt auf der Spule!
-show_obj(deckel.removeSplitter(), "Spulen_Deckel")
+rad_w = make_wheel(kleines_rad_d, 1.5, hex_loch_sw, 10.0)
+rad_w.translate(App.Vector(20, 95, 2.0))
+show_obj(rad_w, "Rad_Klein_Wickler")
 
 
 # ==========================================
-# BAUTEIL 4: DAS KURBELRAD
+# BAUTEIL 4: DRAHTFÜHRUNGS-SCHLITTEN (Flach liegend)
 # ==========================================
-pulley_k = Part.makeCylinder(40.0, 10.0)
-nut_k = Part.makeTorus(40.0, 1.5).translate(App.Vector(0,0,5))
-pulley_k = pulley_k.cut(nut_k)
-
-shaft_k = Part.makeCylinder(4.0, 40.0).translate(App.Vector(0,0,10))
-arm_k = make_centered_box(35, 15, 10, 17.5, 0, 55)
-griff_k = Part.makeCylinder(6.0, 30.0).translate(App.Vector(30, 0, 60))
-
-kurbelrad = pulley_k.fuse(shaft_k).fuse(arm_k).fuse(griff_k)
-
-kurbelrad.rotate(App.Vector(0,0,0), App.Vector(0,1,0), -90)
-kurbelrad.translate(App.Vector(5, -30, 45))
-show_obj(kurbelrad.removeSplitter(), "Kurbelrad_Antrieb")
-
-
-# ==========================================
-# BAUTEIL 5: DER DRAHTFÜHRUNGS-SCHLITTEN
-# ==========================================
-schlitten = Part.makeBox(15.0, 16.0, 12.0).translate(App.Vector(-7.5, -8.0, 0))
-schlitten = schlitten.cut(Part.makeBox(16.0, 8.5, 8.5).translate(App.Vector(-8.0, -8.0, 0)))
-
-# Winziges Loch für den 0.1mm Kupferdraht
-loch_s = Part.makeCylinder(1.0, 20.0)
-loch_s.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-schlitten = schlitten.cut(loch_s.translate(App.Vector(0, 10, 8)))
-
-schlitten.translate(App.Vector(43, 45, 5)) # Sitzt exakt auf der Schiene
-show_obj(schlitten.removeSplitter(), "Draht_Schlitten")
+sled = make_centered_box(16, 14, 12, 0, 0, 6)
+sled = sled.cut(make_centered_box(8.6, 16, 8.6, 0, 0, 2)) # Schienen-Nut
+# 1mm Führung-Loch
+loch_s = Part.makeCylinder(1.0, 20)
+loch_s.rotate(App.Vector(1,0,0), 90)
+sled = sled.cut(loch_s.translate(App.Vector(0, 10, 9)))
+sled.translate(App.Vector(60, 95, 0))
+show_obj(sled.removeSplitter(), "Schlitten_Drahtfuehrung")
 
 doc.recompute()
 if App.GuiUp:
     App.Gui.activeDocument().activeView().viewAxometric()
     App.Gui.SendMsgToActiveView("ViewFit")
 
-print("Offene Tisch-Wickelmaschine generiert! (Vollständig montierte Ansicht)")
+print("Teil 1: Basis & Räder erfolgreich generiert und flach ausgelegt!")

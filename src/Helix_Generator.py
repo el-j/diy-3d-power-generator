@@ -21,7 +21,7 @@ spule_aussen_d = 14.0
 spule_dicke = 3.5         
 
 stator_radius = 45.0
-stator_dicke = spule_dicke
+stator_dicke = 5.0 # Exakt 5.0mm, passend für die Einschub-Schienen der Basis
 rotor_radius = 38.0
 rotor_platte_h = 6.0  
 backplate_h = 3.0
@@ -31,8 +31,7 @@ kragen_h = 12.0
 einschmelzmutter_d = 4.2 
 einschmelzmutter_t = 5.0       
 
-# NEU: Der perfekte Radius für die Rotor-Backplate Verschraubung 
-# (Zentral zwischen Magneten und Außenkante)
+# Der perfekte Radius für die Rotor-Backplate Verschraubung 
 rotor_schraub_r = 34.5 
 # ==========================================
 
@@ -69,7 +68,7 @@ def make_rotor(is_top):
         r = r.fuse(lip.translate(App.Vector(x,y,lip_z)))
     r = r.cut(make_square_prism(achse_kantenlaenge + toleranz, rotor_platte_h))
     
-    # NEU: 4 Verschraubungslöcher & Muttern-Taschen (von außen!)
+    # 4 Verschraubungslöcher & Muttern-Taschen (von außen!)
     for i in range(4):
         angle = math.radians(i * 90 + 45)
         x = rotor_schraub_r * math.cos(angle)
@@ -92,7 +91,7 @@ def make_backplate(is_top):
     else: k.translate(App.Vector(0,0, -kragen_h))
     p = p.fuse(k).cut(make_square_prism(achse_kantenlaenge+toleranz, 30.0).translate(App.Vector(0,0,-5)))
     
-    # NEU: 4 Durchgangslöcher & Schraubenkopf-Senkungen (von ganz außen!)
+    # 4 Durchgangslöcher & Schraubenkopf-Senkungen (von ganz außen!)
     for i in range(4):
         angle = math.radians(i * 90 + 45)
         x = rotor_schraub_r * math.cos(angle)
@@ -107,15 +106,52 @@ def make_backplate(is_top):
         
     return p
 
-# 3. STATOR
-def make_stator():
-    s = Part.makeCylinder(stator_radius, stator_dicke)
-    win = create_circular_array(mag_kreis_r, (spule_aussen_d+0.4)/2.0, stator_dicke, anzahl_spulen)
-    s = s.cut(win).cut(Part.makeCylinder(18.0/2.0, stator_dicke))
-    term = Part.makeBox(25, 15, stator_dicke).translate(App.Vector(-12.5, -stator_radius-10, 0))
-    s = s.fuse(term)
+# 3. STATOR WIRD ZUM SCHLITTEN (Fusion aus Spulenhalter & Einschub)
+def make_stator_schlitten():
+    # A) Die Form des Schlittens (hinten rund, vorne eckig)
+    s_rad = 47.0
+    schlitten_b = Part.makeCylinder(s_rad, stator_dicke)
+    schlitten_f = Part.makeBox(s_rad*2, 70.0, stator_dicke).translate(App.Vector(-s_rad, -70.0, 0))
+    s = schlitten_b.fuse(schlitten_f)
     
-    # Schraublöcher außen (Radius 41.5)
+    # B) Der Griff zum Rausziehen
+    griff = Part.makeBox(30.0, 15.0, stator_dicke).translate(App.Vector(-15.0, -85.0, 0))
+    s = s.fuse(griff)
+    
+    # C) Zentrale Öffnung für die Achse (24mm Durchmesser für 100% Freilauf)
+    s = s.cut(Part.makeCylinder(12.0, stator_dicke))
+    
+    # D) Die 12 Löcher für die Kupferspulen (MIT VERJÜNGUNG / FASE UNTEN!)
+    spulen_r_oben = (spule_aussen_d + 0.4) / 2.0 # 7.2mm
+    spulen_r_unten = 5.0 # Verjüngt sich auf 10mm Durchmesser
+    
+    for i in range(anzahl_spulen):
+        angle = math.radians(i * (360.0 / anzahl_spulen))
+        x = mag_kreis_r * math.cos(angle)
+        y = mag_kreis_r * math.sin(angle)
+        
+        # Die Trichter-Fase am Boden (Cone: von Radius 5.0 auf 7.2, Höhe 1.5mm)
+        fase = Part.makeCone(spulen_r_unten, spulen_r_oben, 1.5)
+        # Der restliche gerade Zylinder für die Spule (Radius 7.2, Höhe 3.5mm)
+        zyl = Part.makeCylinder(spulen_r_oben, stator_dicke - 1.5).translate(App.Vector(0, 0, 1.5))
+        
+        spulen_loch = fase.fuse(zyl).translate(App.Vector(x, y, 0))
+        s = s.cut(spulen_loch)
+    
+    # E) NEU: Ringkanal zum Sammeln der Kabel (entlang der äußeren Spulenkante)
+    ring_kanal = Part.makeCylinder(mag_kreis_r + 8.0, 2.5).cut(Part.makeCylinder(mag_kreis_r + 4.0, 2.5))
+    ring_kanal.translate(App.Vector(0, 0, stator_dicke - 2.5))
+    s = s.cut(ring_kanal)
+    
+    # F) NEU: Der integrierte Kabelkanal im Griff (schließt an den Ringkanal an)
+    kanal = Part.makeBox(12.0, 60.0, 2.5).translate(App.Vector(-6.0, -90.0, stator_dicke - 2.5))
+    s = s.cut(kanal)
+    
+    # G) Löcher für einen Kabelbinder am Griffende (Zugentlastung)
+    s = s.cut(Part.makeCylinder(1.5, stator_dicke).translate(App.Vector(-10, -75, 0)))
+    s = s.cut(Part.makeCylinder(1.5, stator_dicke).translate(App.Vector(10, -75, 0)))
+    
+    # H) Schraublöcher für den Deckel (Radius 41.5)
     for i in range(4):
         angle = math.radians(i * 90 + 45)
         x = 41.5 * math.cos(angle)
@@ -123,22 +159,27 @@ def make_stator():
         loch = Part.makeCylinder(1.7, stator_dicke).translate(App.Vector(x, y, 0))
         s = s.cut(loch)
         
-    return s
+    return s.removeSplitter()
 
-# 4. DECKEL (STATOR-HALTERUNG)
+# 4. DECKEL (STATOR-HALTERUNG) - Jetzt bereinigt!
 def make_deckel():
+    # Eine saubere, runde Scheibe (Radius passend zum Innenraum der Basisstation)
     d = Part.makeCylinder(stator_radius, 1.2).cut(Part.makeCylinder(18.0/2.0, 1.2))
     ch = create_circular_array(mag_kreis_r, (spule_aussen_d-1.6)/2.0, 1.2, anzahl_spulen)
     d = d.cut(ch)
-    for i in range(6):
-        angle = math.radians(i * 60 + 15)
-        x = (stator_radius - 3.5) * math.cos(angle); y = (stator_radius - 3.5) * math.sin(angle)
+
+    # Exakt dieselben 4 Schraublöcher wie in der Stator-Basis
+    for i in range(4):
+        angle = math.radians(i * 90 + 45)
+        x = 41.5 * math.cos(angle)
+        y = 41.5 * math.sin(angle)
         d = d.cut(Part.makeCylinder(1.7, 1.2).translate(App.Vector(x,y,0)))
+        
     return d
 
 r_o = make_rotor(True); r_u = make_rotor(False)
 b_o = make_backplate(True); b_u = make_backplate(False)
-s_b = make_stator(); s_d = make_deckel()
+s_schlitten = make_stator_schlitten(); s_d = make_deckel()
 
 r_o.translate(App.Vector(0,0,30)); b_o.translate(App.Vector(0,0,45))
 s_d.translate(App.Vector(0,0,15))
@@ -146,6 +187,9 @@ r_u.translate(App.Vector(0,0,-20)); b_u.translate(App.Vector(0,0,-40))
 
 show_obj(r_o, "Rotor_Oben"); show_obj(r_u, "Rotor_Unten")
 show_obj(b_o, "Backplate_Oben"); show_obj(b_u, "Backplate_Unten")
-show_obj(s_b, "Stator_Basis"); show_obj(s_d, "Stator_Deckel")
+show_obj(s_schlitten, "Stator_Schlitten_KOMBI"); show_obj(s_d, "Stator_Deckel")
 
 doc.recompute()
+if App.GuiUp:
+    App.Gui.activeDocument().activeView().viewAxometric()
+    App.Gui.SendMsgToActiveView("ViewFit")

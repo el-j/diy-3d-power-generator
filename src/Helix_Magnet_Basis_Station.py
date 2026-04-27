@@ -2,42 +2,50 @@ import FreeCAD as App
 import Part
 import math
 
-doc = App.newDocument("Wickelmaschine_Basis_Raeder")
+doc = App.newDocument("Savonius_Base_Station")
 
 # ==========================================
-# ⚙️ PARAMETER (Teil 1: Basis & Räder)
+# ⚙️ PARAMETER FÜR DIE BASIS-STATION
 # ==========================================
-hex_loch_sw = 8.4         # 8.4mm Loch (Toleranz fürs leichte Aufschieben)
-lager_loch_d = 9.8        # 9.8mm Rundloch für perfekten Lauf der Sechskant-Wellen
+achse_kantenlaenge = 10.0 
+toleranz = 0.5 
 
-kleines_rad_d = 20.0      
-grosses_rad_d = 70.0      
+# Maße für das Kegelrollenlager (32005)
+lager_innen_d = 25.0      
+lager_aussen_d = 47.0     
+lager_dicke = 15.0        
+
+# Schlitten & Generator
+schlitten_breite = 95.0 
+fuss_radius = 60.0 
+gehaeuse_h = 110.0 
+
+# Turm Daten & Hex-System (Modifiziert für Flachdruck)
+blatt_radius = 66.0       
+dicke = 2.4               
+versatz = 12.0            
+kappen_dicke = 8.0        # Leicht erhöht auf 8mm für stabilen Hex-Halt
+hex_radius = 10.0         # REDUZIERT & GEDREHT für perfekten Freiraum!
+hex_h = kappen_dicke
+
+einschmelzmutter_d = 4.2 
+einschmelzmutter_t = 5.0  
 # ==========================================
 
-def make_centered_box(l, w, h, cx, cy, cz):
-    box = Part.makeBox(l, w, h)
-    box.translate(App.Vector(cx - l/2.0, cy - w/2.0, cz - h/2.0))
-    return box
-
-def make_hex_prism(sw, height):
-    # Radius angepasst, sodass eine flache Seite auf dem Druckbett liegt (30° Offset)
-    radius = (sw / 2.0) / math.cos(math.radians(30))
+def make_hex_prism(radius, height):
     points = []
-    for j in range(6):
-        angle = math.radians(60 * j + 30)
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        points.append(App.Vector(x, y, 0))
-    points.append(points[0])
+    for j in range(7):
+        # +30 Grad Drehung, damit die FLACHE Seite des Sechskants zu den Flügeln zeigt!
+        angle = math.radians(60 * j + 30) 
+        points.append(App.Vector(radius * math.cos(angle), radius * math.sin(angle), 0))
     polygon = Part.makePolygon(points)
-    return Part.Face(Part.Wire(polygon)).extrude(App.Vector(0, 0, height))
+    face = Part.Face(Part.Wire(polygon))
+    return face.extrude(App.Vector(0, 0, height))
 
-def make_wheel(outer_d, groove_r, hex_sw, thickness):
-    w = Part.makeCylinder(outer_d/2.0, thickness)
-    nut = Part.makeTorus(outer_d/2.0, groove_r)
-    w = w.cut(nut.translate(App.Vector(0,0,thickness/2.0)))
-    hole = make_hex_prism(hex_sw, thickness + 10.0).translate(App.Vector(0,0,-5.0))
-    return w.cut(hole).removeSplitter()
+def make_square_prism(size, height):
+    box = Part.makeBox(size, size, height)
+    box.translate(App.Vector(-size / 2.0, -size / 2.0, 0))
+    return box
 
 def show_obj(shape, name):
     obj = doc.addObject("Part::Feature", name)
@@ -45,88 +53,172 @@ def show_obj(shape, name):
     return obj
 
 # ==========================================
-# BAUTEIL 1: DIE MASCHINEN-BASIS (Flach liegend)
+# BAUTEIL 1: DER MASCHINEN-FUSS (Mit gerundetem Heck-Einschub!)
 # ==========================================
-# Kompakte Basisplatte: 140x100 mm
-base_plate = make_centered_box(140, 100, 5, 0, 0, 2.5)
+gehaeuse = Part.makeCylinder(fuss_radius, gehaeuse_h)
 
-# 1. Kurbel-Türme (Hoch: Achse auf Z=45) - GESCHLOSSENE LÖCHER!
-def make_crank_pillar(cx, cy):
-    p = make_centered_box(16, 12, 55, cx, cy, 32.5) # Z: 5 bis 60
-    cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 15)
-    cut_cyl.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-    cut_cyl.translate(App.Vector(cx, cy+7.5, 45)) # Loch exakt auf Z=45
-    return p.cut(cut_cyl)
+# 1. Der Lagersitz ganz oben
+lager_sitz = Part.makeCylinder((lager_aussen_d + 0.2) / 2.0, lager_dicke)
+lager_sitz.translate(App.Vector(0, 0, gehaeuse_h - lager_dicke))
+gehaeuse = gehaeuse.cut(lager_sitz)
 
-# 2. Wickler-Türme (Flach: Achse auf Z=30) - GESCHLOSSENE LÖCHER!
-def make_spool_pillar(cx, cy):
-    p = make_centered_box(16, 12, 40, cx, cy, 25) # Z: 5 bis 45
-    cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 15)
-    cut_cyl.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-    cut_cyl.translate(App.Vector(cx, cy+7.5, 30)) # Loch exakt auf Z=30
-    return p.cut(cut_cyl)
+# 2. Die dicke Schulter, die das Lager stützt
+schulter_durchlass = Part.makeCylinder(14.0, 10.0)
+schulter_durchlass.translate(App.Vector(0, 0, gehaeuse_h - lager_dicke - 10.0))
+gehaeuse = gehaeuse.cut(schulter_durchlass)
 
-p_cl = make_crank_pillar(-45, -20) 
-p_cr = make_crank_pillar(-45, 20)  
+# --- DIE 3 EINSCHUB-ETAGEN (Jetzt mit perfekt gerundetem Rücken!) ---
+# Etage A: Der Keller für den unteren Rotor
+k_cyl = Part.makeCylinder(40.0, 30.0)
+k_box = Part.makeBox(80.0, 80.0, 30.0).translate(App.Vector(-40.0, -80.0, 0))
+gehaeuse = gehaeuse.cut(k_cyl).cut(k_box)
 
-p_wl = make_spool_pillar(0, -20)  
-p_wr = make_spool_pillar(0, 20)   
+# Etage B: Die Schlitten-Führungsschienen (Gerundetes Ende)
+s_cyl = Part.makeCylinder(47.5, 5.2).translate(App.Vector(0,0,30.0))
+s_box = Part.makeBox(95.0, 80.0, 5.2).translate(App.Vector(-47.5, -80.0, 30.0))
+gehaeuse = gehaeuse.cut(s_cyl).cut(s_box)
 
-# 3. Die T-Träger-Schiene (Fest auf der Basis) - FLACHER & KOMPAKTER
-# Basis der Schiene (Nur noch 4mm hoch)
-t_stem = make_centered_box(6, 60, 4, 25, 0, 7) # Z: 5 bis 9
-# Das breite Top-Profil der Schiene
-t_top = make_centered_box(12, 60, 4, 25, 0, 11) # Z: 9 bis 13
-schiene = t_stem.fuse(t_top)
+# Etage C: Der Generator-Raum für Stator & oberen Rotor
+g_cyl = Part.makeCylinder(46.0, 49.8).translate(App.Vector(0, 0, 35.2))
+g_box = Part.makeBox(92.0, 80.0, 49.8).translate(App.Vector(-46.0, -80.0, 35.2))
+gehaeuse = gehaeuse.cut(g_cyl).cut(g_box)
 
-# M3-Endanschlag-Löcher (An den Enden der Schiene, tiefer gesetzt)
-stop_1 = Part.makeCylinder(1.4, 10).translate(App.Vector(25, 26, 8))
-stop_2 = Part.makeCylinder(1.4, 10).translate(App.Vector(25, -26, 8))
-schiene = schiene.cut(stop_1).cut(stop_2)
+# --- Baumhalterung ---
+baum_rohr = Part.makeCylinder(20.0, 30.0)
+baum_rohr.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+baum_rohr.translate(App.Vector(fuss_radius - 5.0, 0, 50.0))
 
-# 4. Dorn für die Kupferdraht-Rolle
-dorn_base = Part.makeCylinder(15, 2).translate(App.Vector(55, 25, 5))
-dorn = Part.makeCylinder(4.5, 60).translate(App.Vector(55, 25, 7))
+baum_platte = Part.makeBox(10.0, 60.0, 60.0)
+baum_platte.translate(App.Vector(fuss_radius + 20.0, -30.0, 20.0))
 
-basis = base_plate.fuse(p_wl).fuse(p_wr).fuse(p_cl).fuse(p_cr).fuse(dorn_base).fuse(dorn).fuse(schiene)
-show_obj(basis.removeSplitter(), "Maschinen_Basis")
+for y in [-20, 20]:
+    for z in [30, 70]:
+        loch = Part.makeCylinder(3.0, 10.0)
+        loch.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+        loch.translate(App.Vector(fuss_radius + 20.0, y, z))
+        baum_platte = baum_platte.cut(loch)
 
-
-# ==========================================
-# BAUTEILE 2 & 3: RÄDER (Flach liegend)
-# ==========================================
-rad_k = make_wheel(grosses_rad_d, 1.5, hex_loch_sw, 10.0)
-rad_k.translate(App.Vector(-35, 90, 0.0)) 
-show_obj(rad_k, "Rad_Gross_Kurbel")
-
-rad_w = make_wheel(kleines_rad_d, 1.5, hex_loch_sw, 10.0)
-rad_w.translate(App.Vector(35, 90, 0.0))
-show_obj(rad_w, "Rad_Klein_Wickler")
+gehaeuse = gehaeuse.fuse(baum_rohr).fuse(baum_platte).removeSplitter()
+show_obj(gehaeuse, "Basis_Gehaeuse")
 
 
 # ==========================================
-# BAUTEIL 4: T-SCHLITTEN DRAHTFÜHRUNG (Flach liegend)
+# BAUTEIL 2: DER SCHLITTEN (Mit rundem Heck!)
 # ==========================================
-# Der Schlitten umschließt das T-Profil und hat oben jetzt VIEL MASSIVES MATERIAL! (20mm Höhe)
-sled = make_centered_box(24, 16, 20, 0, 0, 10)
+schlitten_radius = 47.0 # Leicht unter 47.5 für minimales Spiel beim Einschieben
+schlitten_back = Part.makeCylinder(schlitten_radius, 5.0)
+schlitten_front = Part.makeBox(schlitten_radius * 2, 70.0, 5.0)
+schlitten_front.translate(App.Vector(-schlitten_radius, -70.0, 0))
 
-# Ausschnitt für den T-Stem (Unten, angepasst an das flachere Profil)
-cut_stem = make_centered_box(7.5, 16.0, 4.5, 0, 0, 2.25) 
-# Ausschnitt für das T-Top (Mitte, angepasst)
-cut_top = make_centered_box(13.5, 16.0, 5.0, 0, 0, 7.0) 
-sled = sled.cut(cut_stem).cut(cut_top)
+schlitten = schlitten_back.fuse(schlitten_front)
 
-# 1mm Führung-Loch für den Draht 
-# (Sitzt nun bei Z=15, also exakt in der Mitte der fetten, massiven 10.5mm Kunststoffschicht oben!)
-wire_hole = Part.makeCylinder(0.5, 24)
-wire_hole.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
-sled = sled.cut(wire_hole.translate(App.Vector(-12, 0, 15)))
+# Griff-Lasche vorne zum leichten Herausziehen
+griff = Part.makeBox(30.0, 10.0, 5.0).translate(App.Vector(-15.0, -80.0, 0))
+schlitten = schlitten.fuse(griff)
 
-sled.translate(App.Vector(70, 90, 0)) # Zum Drucken flach abgelegt
-show_obj(sled.removeSplitter(), "Schlitten_Drahtfuehrung_T_Form")
+# Zentrales Durchlass-Loch für die Achse
+schlitten = schlitten.cut(Part.makeCylinder(20.0, 5.0))
+
+# 4 Befestigungslöcher für den Stator (Exakt auf Radius 41.5mm)
+for i in range(4):
+    angle = math.radians(i * 90 + 45)
+    x = 41.5 * math.cos(angle)
+    y = 41.5 * math.sin(angle)
+    loch = Part.makeCylinder(1.7, 5.0).translate(App.Vector(x, y, 0))
+    schlitten = schlitten.cut(loch)
+
+schlitten = schlitten.removeSplitter()
+schlitten.translate(App.Vector(0, -fuss_radius * 2.0, 0)) # Layout Position
+show_obj(schlitten, "Schiebe_Schlitten")
+
+
+# ==========================================
+# BAUTEIL 3: FLACHE START-SCHEIBE (Easy Print)
+# ==========================================
+kappen_radius = blatt_radius - versatz + blatt_radius + 5.0 
+scheibe = Part.makeCylinder(kappen_radius, kappen_dicke)
+
+# Hexagon-Loch für den Adapter (+0.2mm Toleranz für leichten Steck-Sitz)
+hex_cut = make_hex_prism(hex_radius + 0.2, kappen_dicke)
+scheibe = scheibe.cut(hex_cut)
+
+# S-Schlitze für die Flügel
+cx = blatt_radius - versatz
+po_s = App.Vector(-versatz, 0, 0)
+po_m = App.Vector(cx, blatt_radius, 0)
+po_e = App.Vector(cx + blatt_radius, 0, 0)
+pi_s = App.Vector(-versatz + dicke + toleranz, 0, 0)
+pi_m = App.Vector(cx, blatt_radius - dicke - toleranz, 0)
+pi_e = App.Vector(cx + blatt_radius - dicke - toleranz, 0, 0)
+
+blade_wire = Part.Wire([
+    Part.Arc(po_s, po_m, po_e).toShape(), 
+    Part.makeLine(po_e, pi_e), 
+    Part.Arc(pi_e, pi_m, pi_s).toShape(), 
+    Part.makeLine(pi_s, po_s)
+])
+
+# Rille ist 5mm tief, damit 3mm stabil als Boden bleiben
+blade_cut = Part.Face(blade_wire).extrude(App.Vector(0,0,5.0))
+blade_cut.translate(App.Vector(0,0, kappen_dicke - 5.0))
+
+scheibe = scheibe.cut(blade_cut)
+blade_cut2 = blade_cut.copy()
+blade_cut2.rotate(App.Vector(0,0,0), App.Vector(0,0,1), 180)
+scheibe = scheibe.cut(blade_cut2)
+
+scheibe = scheibe.removeSplitter()
+scheibe.translate(App.Vector(0, fuss_radius * 2.8, 0)) 
+show_obj(scheibe, "Start_Scheibe_FLACH")
+
+
+# ==========================================
+# BAUTEIL 4: MODULARER VERBINDER-ADAPTER (Hex-Plug)
+# ==========================================
+# 1. Hex-Teil in der Mitte (Drehung um 30 Grad ist jetzt direkt in make_hex_prism!)
+plug = make_hex_prism(hex_radius, hex_h)
+
+# 2. Lagerschaft (unten, in das Kegelrollenlager passend)
+lager_schaft = Part.makeCylinder((lager_innen_d - 0.2) / 2.0, lager_dicke + 2.0)
+lager_schaft.translate(App.Vector(0,0, -lager_dicke - 2.0))
+plug = plug.fuse(lager_schaft)
+
+# 3. Kragen (oben) für Madenschrauben (17.5mm Durchmesser für genügend Abstand zu Flügeln)
+kragen_h = 15.0
+kragen_d = 17.5 
+kragen = Part.makeCylinder(kragen_d / 2.0, kragen_h)
+kragen.translate(App.Vector(0,0, hex_h))
+plug = plug.fuse(kragen)
+
+# 4. 10x10 Achse durch alles
+achse_cut = make_square_prism(achse_kantenlaenge + toleranz, hex_h + lager_dicke + kragen_h + 5.0)
+achse_cut.translate(App.Vector(0,0, -lager_dicke - 3.0))
+plug = plug.cut(achse_cut)
+
+# 5. NEU: 4x M3 Gewindeeinsatz und Löcher im Kragen für absolut ausbalancierten Grip (0 Unwucht!)
+einschmelzmutter_t_kragen = 4.0 
+for i in range(4):
+    angle = i * 90
+    
+    # Durchgangsloch
+    m3_loch = Part.makeCylinder(3.4 / 2.0, 30.0)
+    m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+    m3_loch.translate(App.Vector(-15, 0, hex_h + (kragen_h / 2.0)))
+    m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
+    
+    # Tasche für die Heat-Set Mutter
+    m3_insert = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t_kragen)
+    m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+    m3_insert.translate(App.Vector((kragen_d / 2.0) - einschmelzmutter_t_kragen, 0, hex_h + (kragen_h / 2.0)))
+    m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
+    
+    plug = plug.cut(m3_loch).cut(m3_insert)
+
+plug = plug.removeSplitter()
+plug.translate(App.Vector(fuss_radius * 2.5, 0, 0)) 
+show_obj(plug, "Adapter_Hex_Verbinder")
 
 doc.recompute()
 if App.GuiUp:
     App.Gui.activeDocument().activeView().viewAxometric()
     App.Gui.SendMsgToActiveView("ViewFit")
-print("Flacheres T-Profil und massiver Anti-Säge-Schlitten generiert!")

@@ -7,14 +7,14 @@ doc = App.newDocument("Wickelmaschine_Zubehoer")
 # ==========================================
 # ⚙️ PARAMETER (Achsen & Zubehör)
 # ==========================================
-spule_innen_d = 7.0       
-spule_aussen_d = 14.0     
-spule_dicke = 3.5         
+spule_innen_d = 14.0      # XXL: 14mm Kern
+spule_aussen_d = 36.0     # XXL: 36mm Außen-D
+spule_dicke = 6.0         # XXL: 6mm dick
 
 hex_achse_sw = 8.0        
 hex_loch_sw = 8.4         
-hex_spindel_sw = 4.0      
-hex_spindel_loch_sw = 4.4 
+quad_spindel_sw = 6.0      # NEU: 6mm Vierkant für extremen Halt
+quad_spindel_loch_sw = 6.4 # NEU: 6.4mm Vierkant-Loch
 # ==========================================
 
 def make_centered_box(l, w, h, cx, cy, cz):
@@ -34,6 +34,11 @@ def make_hex_prism(sw, height):
     polygon = Part.makePolygon(points)
     return Part.Face(Part.Wire(polygon)).extrude(App.Vector(0, 0, height))
 
+def make_square_prism(size, height):
+    box = Part.makeBox(size, size, height)
+    box.translate(App.Vector(-size / 2.0, -size / 2.0, 0))
+    return box
+
 def get_m3_insert_cutout():
     ins = Part.makeCylinder(4.2/2.0, 5.0)
     pas = Part.makeCylinder(3.2/2.0, 15.0) 
@@ -47,18 +52,15 @@ def show_obj(shape, name):
     return obj
 
 # ==========================================
-# BAUTEILE 1 & 2: DIE ACHSEN (Exakt berechnete Längen!)
+# BAUTEILE 1 & 2: DIE ACHSEN 
 # ==========================================
-# Kurbel-Achse: Geht durch den gesamten Block und hängt 10mm über die Tischkante!
 achse_k = make_hex_prism(hex_achse_sw, 95.0)
 achse_k.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_k.translate(App.Vector(35, 85, 4.0)) 
 show_obj(achse_k, "Achse_Kurbel_95mm")
 
-# Wickler-Achse: Die dicke 8mm-Basis füllt exakt die Türme (56mm). 
-# Danach beginnen die 30mm freischwebende 4mm-Spindel für die Spule!
 achse_w_base = make_hex_prism(hex_achse_sw, 56.0)
-achse_w_spindel = make_hex_prism(hex_spindel_sw, 30.0).translate(App.Vector(0,0,56.0))
+achse_w_spindel = make_square_prism(quad_spindel_sw, 30.0).translate(App.Vector(0,0,56.0))
 achse_w = achse_w_base.fuse(achse_w_spindel)
 
 pas_w = Part.makeCylinder(2.5/2.0, 15.0).translate(App.Vector(0,0,76.0))
@@ -66,15 +68,15 @@ achse_w = achse_w.cut(pas_w).removeSplitter()
 
 achse_w.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_w.translate(App.Vector(-15, 85, 4.0))
-show_obj(achse_w, "Achse_Wickler_Zweistufig")
+show_obj(achse_w, "Achse_Wickler_Zweistufig_Quad")
 
-sp_spacer = Part.makeCylinder(10.0/2.0, 10.0)
-sp_spacer = sp_spacer.cut(make_hex_prism(hex_spindel_loch_sw, 20.0).translate(App.Vector(0,0,-2.0)))
+sp_spacer = Part.makeCylinder(16.0/2.0, 10.0) # Spacer dicker für Vierkant-Ausschnitt
+sp_spacer = sp_spacer.cut(make_square_prism(quad_spindel_loch_sw, 20.0).translate(App.Vector(0,0,-2.0)))
 sp_spacer.translate(App.Vector(10, 30, 0))
-show_obj(sp_spacer, "Spulen_Distanz_Spacer")
+show_obj(sp_spacer, "Spulen_Distanz_Spacer_Quad")
 
 # ==========================================
-# BAUTEIL 3: DER KURBEL-ARM (Schlank & 100% Bündig)
+# BAUTEIL 3: DER KURBEL-ARM 
 # ==========================================
 arm_dicke = 6.0 
 arm_box = make_centered_box(40, 12, arm_dicke, 20, 0, arm_dicke/2.0) 
@@ -109,10 +111,14 @@ show_obj(griff_fin, "Kurbel_Griff_Steckbar")
 # BAUTEIL 4: SPULE - INNENTEIL
 # ==========================================
 flansch_dicke = 3.0 
-flansch_b = Part.makeCylinder(18.0/2.0, flansch_dicke)
+flansch_r = (spule_aussen_d / 2.0) + 2.0 # Extra großer Flansch für die XXL Spulen (D=40mm)
+flansch_b = Part.makeCylinder(flansch_r, flansch_dicke)
+
 core_b = Part.makeCylinder(spule_innen_d/2.0, spule_dicke + 1.0).translate(App.Vector(0,0,flansch_dicke))
-hole_b = make_hex_prism(hex_spindel_loch_sw, flansch_dicke + spule_dicke + 2.0).translate(App.Vector(0,0,-1.0))
-slot_b = Part.makeBox(10, 0.8, 5).translate(App.Vector(0, -0.4, 0))
+hole_b = make_square_prism(quad_spindel_loch_sw, flansch_dicke + spule_dicke + 2.0).translate(App.Vector(0,0,-1.0))
+
+# Längerer & breiterer Schlitz für dickeren Kupferdraht
+slot_b = Part.makeBox(20, 1.2, 5).translate(App.Vector(0, -0.6, 0)) 
 
 ring_out = Part.makeCylinder(spule_aussen_d / 2.0, 0.5)
 ring_in = Part.makeCylinder((spule_aussen_d / 2.0) - 0.5, 0.5)
@@ -126,30 +132,28 @@ show_obj(basis_w, "Spule_Inneres_Teil")
 # ==========================================
 # BAUTEIL 5: SPULE - DECKEL
 # ==========================================
-deckel = Part.makeCylinder(18.0/2.0, flansch_dicke)
+deckel = Part.makeCylinder(flansch_r, flansch_dicke)
 recess = Part.makeCylinder((spule_innen_d + 0.4)/2.0, 1.0).translate(App.Vector(0,0, flansch_dicke - 1.0))
-hole_d = make_hex_prism(hex_spindel_loch_sw, flansch_dicke + 2.0).translate(App.Vector(0,0,-1.0))
 
+# M3 Senkkopf wie gehabt, aber mit dem neuen Vierkant-Loch
+hole_d = make_square_prism(quad_spindel_loch_sw, flansch_dicke + 2.0).translate(App.Vector(0,0,-1.0))
 senkkopf_d = Part.makeCone(3.2, 1.7, 2.5) 
 ring_deckel = ring.copy().translate(App.Vector(0,0, flansch_dicke - 0.5))
 
 deckel_fin = deckel.cut(recess).cut(hole_d).cut(senkkopf_d).cut(ring_deckel).removeSplitter()
-deckel_fin.translate(App.Vector(40, 5, 0))
+deckel_fin.translate(App.Vector(60, 5, 0)) # Auf X=60 gerückt, da der Radius jetzt riesig ist
 show_obj(deckel_fin, "Spule_Aeusserer_Deckel_Flach")
 
 # ==========================================
-# BAUTEIL 6: LAGERHÜLSEN (Die fetten Nüsse!)
+# BAUTEIL 6: LAGERHÜLSEN (Anti-Reibungs-Edition!)
 # ==========================================
 def make_bearing_sleeve(x_pos, y_pos):
-    # Dicker 11.8mm Zapfen für das 12mm Loch im Turm
-    zapfen = Part.makeCylinder(11.8/2.0, 14.0) 
-    # Fetter 8mm Kragen
+    # Zapfen auf 11.4mm geschrumpft! (Gibt fette 0.6mm Spiel in den Türmen)
+    zapfen = Part.makeCylinder(11.4/2.0, 14.0) 
     kragen = Part.makeCylinder(16.0/2.0, 8.0).translate(App.Vector(0,0,14.0))
     huelse = zapfen.fuse(kragen)
     
     hole = make_hex_prism(hex_loch_sw, 30.0).translate(App.Vector(0,0,-2.0))
-    
-    # Das M3 Loch sitzt jetzt perfekt in der Mitte der dicken 8mm Kragen-Wand!
     m3_cut = get_m3_insert_cutout().translate(App.Vector(0, 8.0, 18.0))
     
     fin = huelse.cut(hole).cut(m3_cut).removeSplitter()
@@ -157,10 +161,10 @@ def make_bearing_sleeve(x_pos, y_pos):
     fin.translate(App.Vector(x_pos, y_pos, 22.0))
     return fin
 
-show_obj(make_bearing_sleeve(-20, 45), "Lagerhuelse_1")
-show_obj(make_bearing_sleeve(-20, 65), "Lagerhuelse_2")
-show_obj(make_bearing_sleeve(0, 45), "Lagerhuelse_3")
-show_obj(make_bearing_sleeve(0, 65), "Lagerhuelse_4")
+show_obj(make_bearing_sleeve(-20, 45), "Lagerhuelse_1_Lose")
+show_obj(make_bearing_sleeve(-20, 65), "Lagerhuelse_2_Lose")
+show_obj(make_bearing_sleeve(0, 45), "Lagerhuelse_3_Lose")
+show_obj(make_bearing_sleeve(0, 65), "Lagerhuelse_4_Lose")
 
 doc.recompute()
 if App.GuiUp:

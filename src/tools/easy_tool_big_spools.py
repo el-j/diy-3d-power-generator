@@ -4,29 +4,29 @@ import math
 
 doc = App.newDocument("Coil_Winder_Tool")
 
-    # ==========================================
+# ==========================================
 # ⚙️ PARAMETER FÜR DEN EASY COIL WINDER
 # ==========================================
 # Maße der Spule (Exakt abgestimmt auf die XXL-Kapsel-Spulen)
 spule_innen_l = 22.0  
 spule_innen_w = 8.0   
 spule_dicke = 6.0     
-spule_aussen_l = 40.0 # NEU: Zielmaß für die Markierung
-spule_aussen_w = 26.0 # NEU: Zielmaß für die Markierung
+spule_aussen_l = 40.0 # Zielmaß für die Markierung
+spule_aussen_w = 26.0 # Zielmaß für die Markierung
 
-# Winder-Wände (Sollen die Spule beim Wickeln sicher in Form halten)
+# Winder-Wände (Verstärkt für den Support-freien Druck)
 wand_l = 44.0         
 wand_w = 30.0         
-wand_dicke = 2.0      
+wand_dicke = 3.0      # Erhöht auf 3mm für mehr Stabilität beim Festziehen
 
 # Hex-Bit Aufnahme (Standard 1/4 Zoll Bit = 6.35mm)
-bit_aufnahme_d = 6.5  # Minimales Spiel (Toleranz), damit der Metall-Bit satt passt
+bit_aufnahme_d = 6.5  
 bit_tiefe = 10.0      
 
-# Verschraubung (M3 Schraube hält den Deckel)
+# Verschraubung (M3x12 Schraube empfohlen!)
 einschmelzmutter_d = 4.2 
 einschmelzmutter_t = 5.0 
-    # ==========================================
+# ==========================================
 
 def make_capsule(l, w, h):
     r = w / 2.0
@@ -38,7 +38,6 @@ def make_capsule(l, w, h):
     return cyl1.fuse(cyl2).fuse(box)
 
 def make_hex_prism(flat_to_flat, height):
-    # Umrechnung von Flat-to-Flat zu Radius für das Polygon
     r = (flat_to_flat / 2.0) / math.cos(math.radians(30))
     points = []
     for j in range(7):
@@ -52,70 +51,66 @@ def show_obj(shape, name):
     obj.Shape = shape
     return obj
 
-    # 1. BAUTEIL: BASIS MIT BIT-AUFNAHME
+# 1. BAUTEIL: BASIS MIT BIT-AUFNAHME (Support-frei: Z=0 liegt auf dem Druckbett)
 def make_winder_basis():
-    # A) Zylindrischer Schaft für den Bit (Hinten)
-    schaft = Part.makeCylinder(7.0, 12.0).translate(App.Vector(0, 0, -12.0))
-        
-    # B) Rückwand (Hält den Draht)
-    back_wall = make_capsule(wand_l, wand_w, wand_dicke)
+    # A) Die Wand (Z=0 bis Z=3)
+    basis = make_capsule(wand_l, wand_w, wand_dicke)
     
-    # C) Der Wickel-Kern (Spulen-Innenmaß + 1mm für Arretierung in den Deckel)
-    kern = make_capsule(spule_innen_l, spule_innen_w, spule_dicke + 1.0)
-    kern.translate(App.Vector(0, 0, wand_dicke))
+    # B) Zylindrischer Schaft für den Bit auf der Außenseite (Z=3 bis Z=19)
+    schaft = Part.makeCylinder(12.0 / 2.0, 16.0).translate(App.Vector(0, 0, wand_dicke))
+    basis = basis.fuse(schaft)
     
-    basis = schaft.fuse(back_wall).fuse(kern)
-    
-    # D) Hex-Loch für den Akkuschrauber-Bit (Tiefe 10mm)
-    bit_loch = make_hex_prism(bit_aufnahme_d, bit_tiefe).translate(App.Vector(0, 0, -12.0))
+    # C) Hex-Loch für den Akkuschrauber-Bit (Z=9 bis Z=19)
+    bit_loch = make_hex_prism(bit_aufnahme_d, bit_tiefe).translate(App.Vector(0, 0, wand_dicke + 16.0 - bit_tiefe))
     basis = basis.cut(bit_loch)
     
-    # E) Durchgangsloch für die M3 Schraube (Komplett durchlaufend)
-    schrauben_loch = Part.makeCylinder(1.7, 30.0).translate(App.Vector(0, 0, -15.0))
+    # D) Arretierungs-Tasche für den Kern auf der Innenseite (Z=0 bis Z=1)
+    # Druckt sich als perfektes Brücken-Infill (Bridging)
+    pocket = make_capsule(spule_innen_l + 0.4, spule_innen_w + 0.4, 1.0)
+    basis = basis.cut(pocket)
+    
+    # E) Tasche für M3 Einschmelzmutter (wird von der Innenseite Z=1 eingeschmolzen)
+    mutter_loch = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t).translate(App.Vector(0, 0, 1.0))
+    basis = basis.cut(mutter_loch)
+    
+    # F) Durchgangsloch für überstehendes Schraubengewinde
+    schrauben_loch = Part.makeCylinder(3.4 / 2.0, 8.0).translate(App.Vector(0, 0, 1.0))
     basis = basis.cut(schrauben_loch)
     
-    # F) Tasche für M3 Einschmelzmutter (oben im Kern)
-    # Du drückst die Mutter einfach von oben (vorne) heiß in den Kern
-    mutter_loch = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t)
-    mutter_loch.translate(App.Vector(0, 0, wand_dicke + spule_dicke + 1.0 - einschmelzmutter_t))
-    basis = basis.cut(mutter_loch)
-        
-    # G) Einlegeschlitz für den Kupferdraht-Anfang!
-    # Ein 1.5mm breiter Schnitt in der Rückwand, um den Draht sicher nach außen zu führen
-    slit = Part.makeBox(1.5, wand_w, wand_dicke).translate(App.Vector(-0.75, spule_innen_w / 2.0, 0))
-    basis = basis.cut(slit)
-    
-    # H) NEU: Füllstands-Markierung (0.5mm tiefe Rille auf der Innenseite)
+    # G) Füllstands-Markierung (direkt auf der Druckbett-Fläche Z=0)
     mark_out = make_capsule(spule_aussen_l + 0.5, spule_aussen_w + 0.5, 0.5)
     mark_in = make_capsule(spule_aussen_l - 0.5, spule_aussen_w - 0.5, 0.5)
     markierung_basis = mark_out.cut(mark_in)
-    markierung_basis.translate(App.Vector(0, 0, wand_dicke - 0.5))
     basis = basis.cut(markierung_basis)
     
     return basis.removeSplitter()
 
-# 2. BAUTEIL: DECKEL
+# 2. BAUTEIL: DECKEL MIT KERN (Support-frei: Z=0 liegt auf dem Druckbett)
 def make_winder_deckel():
-    # A) Frontwand
-    front_wall = make_capsule(wand_l, wand_w, wand_dicke)
-        
-        # B) Arretierungs-Tasche (Negativ des Kerns, 1mm tief, mit 0.4mm Toleranz für leichten Sitz)
-    tasche = make_capsule(spule_innen_l + 0.4, spule_innen_w + 0.4, 1.0)
-    deckel = front_wall.cut(tasche)
+    # A) Die Wand (Z=0 bis Z=3)
+    deckel = make_capsule(wand_l, wand_w, wand_dicke)
     
-    # C) Durchgangsloch für M3 Schraube
-    schrauben_loch = Part.makeCylinder(1.7, 10.0).translate(App.Vector(0, 0, -5.0))
+    # B) Der Wickel-Kern auf der Innenseite (Z=3 bis Z=10)
+    # 6mm für die Spule + 1mm Überstand, der in die Tasche der Basis einrastet!
+    kern = make_capsule(spule_innen_l, spule_innen_w, spule_dicke + 1.0).translate(App.Vector(0, 0, wand_dicke))
+    deckel = deckel.fuse(kern)
+    
+    # C) Durchgangsloch für M3 Schraube (Z=0 bis Z=10)
+    schrauben_loch = Part.makeCylinder(3.4 / 2.0, 20.0)
     deckel = deckel.cut(schrauben_loch)
-        
-        # D) Senkung für den M3 Schraubenkopf (damit alles schön flach abschließt)
-    senk = Part.makeCylinder(3.0, 1.5).translate(App.Vector(0, 0, wand_dicke - 1.5))
+    
+    # D) Senkung für den M3 Schraubenkopf auf der Druckbett-Seite (Z=0 bis Z=2.5)
+    senk = Part.makeCylinder(6.0 / 2.0, 2.5)
     deckel = deckel.cut(senk)
     
-    # E) NEU: Füllstands-Markierung auch im Deckel (auf der Innenseite bei Z=0)
+    # E) Einlegeschlitz für den Kupferdraht-Anfang (schneidet komplett durch die Wand)
+    slit = Part.makeBox(1.5, wand_w, wand_dicke).translate(App.Vector(-0.75, spule_innen_w / 2.0, 0))
+    deckel = deckel.cut(slit)
+    
+    # F) Füllstands-Markierung auf der Innenseite der Wand (Z=2.5 bis Z=3.0)
     mark_out = make_capsule(spule_aussen_l + 0.5, spule_aussen_w + 0.5, 0.5)
     mark_in = make_capsule(spule_aussen_l - 0.5, spule_aussen_w - 0.5, 0.5)
-    markierung_deckel = mark_out.cut(mark_in)
-    markierung_deckel.translate(App.Vector(0, 0, 0))
+    markierung_deckel = mark_out.cut(mark_in).translate(App.Vector(0, 0, wand_dicke - 0.5))
     deckel = deckel.cut(markierung_deckel)
     
     return deckel.removeSplitter()
@@ -123,11 +118,12 @@ def make_winder_deckel():
 basis = make_winder_basis()
 deckel = make_winder_deckel()
 
-    # Positionierung für die Vorschau (Zusammenbau-Ansicht)
-deckel.translate(App.Vector(0, 0, 15.0))
+# Nebeneinander anordnen, wie sie auf dem Druckbett (Z=0) liegen würden!
+basis.translate(App.Vector(30, 0, 0))
+deckel.translate(App.Vector(-30, 0, 0))
 
 show_obj(basis, "Winder_Basis_Bit")
-show_obj(deckel, "Winder_Deckel")
+show_obj(deckel, "Winder_Deckel_Kern")
 
 doc.recompute()
 if App.GuiUp:

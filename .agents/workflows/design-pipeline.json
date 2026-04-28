@@ -1,0 +1,117 @@
+{
+  "name": "design-pipeline",
+  "version": "1.0.0",
+  "description": "Full design-to-documentation pipeline for component changes",
+  "trigger": "New component design or modification of existing component",
+  "phases": [
+    {
+      "id": "P1",
+      "name": "Design",
+      "agent": "cad-engineer",
+      "description": "Define component geometry, parameters, tolerances, and print settings",
+      "inputs": [
+        "Design request (description of new/changed component)",
+        "shared/parameters.json",
+        "shared/materials.json"
+      ],
+      "outputs": [
+        "assemblies/<assembly>/components/<component>/component.json"
+      ],
+      "quality_gate": "Parameters validated, fits within 256mm print volume, tolerances specified",
+      "on_failure": "Revise parameters based on QA feedback"
+    },
+    {
+      "id": "P2",
+      "name": "3-View Drawing",
+      "agent": "drawing-agent",
+      "description": "Create front, side, and top view technical drawings with dimensions",
+      "inputs": [
+        "component.json from P1"
+      ],
+      "outputs": [
+        "assemblies/<assembly>/components/<component>/drawings/front.svg",
+        "assemblies/<assembly>/components/<component>/drawings/side.svg",
+        "assemblies/<assembly>/components/<component>/drawings/top.svg"
+      ],
+      "quality_gate": "All 3 views present, dimensions match component.json, tolerances annotated",
+      "on_failure": "Regenerate drawings with corrected dimensions"
+    },
+    {
+      "id": "P3",
+      "name": "FreeCAD Implementation",
+      "agent": "freecad-coder",
+      "description": "Write parametric FreeCAD Python script and generate exports",
+      "inputs": [
+        "component.json from P1",
+        "drawings/* from P2",
+        "shared/freecad_utils.py",
+        "shared/parameters.json"
+      ],
+      "outputs": [
+        "assemblies/<assembly>/components/<component>/<component>.py",
+        "exports/<assembly>/<Component_Name>.stl"
+      ],
+      "quality_gate": "Script executes headless without errors, STL generated, params from JSON",
+      "on_failure": "Fix script errors based on execution output"
+    },
+    {
+      "id": "P4",
+      "name": "BOM Update",
+      "agent": "bom-manager",
+      "description": "Update assembly and master Bills of Materials",
+      "inputs": [
+        "component.json from P1",
+        "shared/fasteners.json",
+        "shared/materials.json",
+        "Existing assembly BOM"
+      ],
+      "outputs": [
+        "assemblies/<assembly>/<assembly>_bom.md",
+        "docs/bom/master_bom.json",
+        "docs/bom/master_bom.md"
+      ],
+      "quality_gate": "All parts listed, quantities correct, no orphan references",
+      "on_failure": "Fix BOM entries and re-aggregate"
+    },
+    {
+      "id": "P5",
+      "name": "Build Guide Update",
+      "agent": "build-guide-author",
+      "description": "Update assembly instructions to reflect changes",
+      "inputs": [
+        "Assembly BOM from P4",
+        "component.json from P1",
+        "drawings/* from P2"
+      ],
+      "outputs": [
+        "docs/build-guide/<NN>_<assembly>.md"
+      ],
+      "quality_gate": "Instructions reference current BOM IDs, steps are clear, safety notes present",
+      "on_failure": "Revise instructions based on QA feedback"
+    },
+    {
+      "id": "P6",
+      "name": "QA Inspection",
+      "agent": "qa-inspector",
+      "description": "Validate completeness and consistency across all outputs",
+      "inputs": [
+        "ALL outputs from P1-P5"
+      ],
+      "outputs": [
+        "QA report (structured JSON)"
+      ],
+      "quality_gate": "All checks pass, or specific actionable failures documented",
+      "on_failure": "Route back to earliest failing phase with specific feedback"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 3,
+    "on_fixable_failure": "Update plan with pitfalls, re-enqueue at failing phase",
+    "on_structural_failure": "Skip and document, flag for manual review"
+  },
+  "state_tracking": {
+    "file": ".agents/state.json",
+    "task_statuses": ["backlog", "approved", "in_progress", "done", "blocked", "skipped"],
+    "orchestrator_statuses": ["idle", "running", "paused", "completed", "error"]
+  }
+}

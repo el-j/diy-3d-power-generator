@@ -1,0 +1,49 @@
+{
+  "name": "component-change",
+  "version": "1.0.0",
+  "description": "Streamlined pipeline for modifying an existing component (skips initial design phase)",
+  "trigger": "Parameter change, tolerance adjustment, or bug fix on existing component",
+  "phases": [
+    {
+      "id": "P1",
+      "name": "Update Parameters",
+      "agent": "cad-engineer",
+      "description": "Modify component.json and shared/parameters.json if needed",
+      "outputs": ["Updated component.json"]
+    },
+    {
+      "id": "P2",
+      "name": "Update Drawings",
+      "agent": "drawing-agent",
+      "description": "Regenerate affected views with new dimensions",
+      "outputs": ["Updated SVG drawings"]
+    },
+    {
+      "id": "P3",
+      "name": "Update FreeCAD Script",
+      "agent": "freecad-coder",
+      "description": "Modify script to reflect parameter changes, re-export STL",
+      "outputs": ["Updated .py script", "New STL export"]
+    },
+    {
+      "id": "P4",
+      "name": "BOM Check",
+      "agent": "bom-manager",
+      "description": "Verify BOM still correct (quantities, materials unchanged?)",
+      "outputs": ["Updated BOM if needed"]
+    },
+    {
+      "id": "P5",
+      "name": "Build Guide Check",
+      "agent": "build-guide-author",
+      "description": "Update guide if assembly steps changed",
+      "outputs": ["Updated guide if needed"]
+    },
+    {
+      "id": "P6",
+      "name": "QA",
+      "agent": "qa-inspector",
+      "outputs": ["QA report"]
+    }
+  ]
+}

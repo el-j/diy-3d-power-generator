@@ -1,0 +1,13 @@
+{
+  "orchestrator": {
+    "status": "idle",
+    "phase": null,
+    "base_branch": "main",
+    "last_run": null
+  },
+  "tasks": {},
+  "queue": [],
+  "active": [],
+  "history": [],
+  "errors": []
+}

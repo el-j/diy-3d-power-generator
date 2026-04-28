@@ -1,0 +1,35 @@
+{
+  "id": "TWR-CONN-01",
+  "name": "Mittelverbinder (Skelett)",
+  "name_en": "Middle Connector (Skeleton)",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 40,
+    "supports": false,
+    "wall_count": 4,
+    "orientation": "flat (Z = 8mm Kappenhöhe)",
+    "notes": "Flachdruck. Hoher Infill für strukturelle Steifigkeit. Kein Support nötig."
+  },
+  "dimensions": {
+    "diameter_mm": 250.0,
+    "height_mm": 8.0,
+    "hub_diameter_mm": 44.0,
+    "description": "Flacher Skelett-Verbinder mit S-Rillen für Flügel und Vielzahn-Loch"
+  },
+  "quantity_per_assembly": 1,
+  "quantity_note": "1 pro Etage. Obere + untere Rille für Flügel der benachbarten Etagen.",
+  "purchased_parts": [],
+  "parameters_ref": "shared/parameters.json#tower",
+  "key_parameters": {
+    "kappen_dicke": 8.0,
+    "rillen_tiefe": 3.0,
+    "vielzahn_zaehne": 12,
+    "vielzahn_r_out": 9.0,
+    "vielzahn_r_in": 7.8
+  },
+  "freecad_script": "src/Helix_Leaf+Connector.py",
+  "exports": ["Mittel_Verbinder_Skelett_FLACH.stl"]
+}

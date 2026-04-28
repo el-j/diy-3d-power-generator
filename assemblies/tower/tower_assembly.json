@@ -1,0 +1,41 @@
+{
+  "assembly_id": "tower",
+  "name": "Helix-Turm / Helix Tower",
+  "description": "Modularer Helix-Windturm mit Stecksystem. Jede Etage besteht aus 2 Helix-Flügeln, einem Mittelverbinder und einem Vielzahn-Plug.",
+  "version": "1.0.0",
+  "components": [
+    {
+      "id": "TWR-LEAF-01",
+      "name": "Helix-Flügel / Helix Leaf",
+      "directory": "helix-leaf",
+      "quantity_per_stage": 2,
+      "stages_min": 1,
+      "stages_max": 8
+    },
+    {
+      "id": "TWR-CONN-01",
+      "name": "Mittelverbinder / Middle Connector",
+      "directory": "middle-connector",
+      "quantity_per_stage": 1
+    },
+    {
+      "id": "TWR-PLUG-01",
+      "name": "Vielzahn-Plug / Spline Plug",
+      "directory": "spline-plug",
+      "quantity_per_stage": 1
+    }
+  ],
+  "source_scripts": {
+    "original": "src/Helix_Leaf+Connector.py",
+    "note": "Original script generates all tower components in one file"
+  },
+  "assembly_sequence": [
+    "1. Flügel drucken (2 Stück pro Etage, spiegelbildlich)",
+    "2. Mittelverbinder drucken (flach)",
+    "3. Vielzahn-Plug drucken",
+    "4. Einschmelzmuttern in Plug einsetzen",
+    "5. Flügel in Verbinder-Rillen einstecken",
+    "6. Plug in Verbinder einsetzen",
+    "7. Achse durchschieben und mit Madenschrauben sichern"
+  ]
+}

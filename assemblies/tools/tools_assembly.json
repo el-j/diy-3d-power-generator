@@ -1,0 +1,14 @@
+{
+  "assembly_id": "tools",
+  "name": "Werkzeuge / Manufacturing Tools",
+  "description": "Hilfs-Werkzeuge zum Spulenwickeln und Achsen-Zuschnitt.",
+  "version": "1.0.0",
+  "components": [
+    { "id": "TOOL-WIND-01", "name": "Spulen-Wickler Basis", "directory": "coil-winder", "quantity": 1 },
+    { "id": "TOOL-AXIS-01", "name": "Achsen-Lehre", "directory": "axis-jig", "quantity": 1 }
+  ],
+  "source_scripts": {
+    "coil-winder": "src/tools/wickler_basis+wheels.py",
+    "axis-jig": "src/tools/achsen+spule.py"
+  }
+}

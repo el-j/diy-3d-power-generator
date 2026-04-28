@@ -1,0 +1,72 @@
+{
+  "$schema": "windpower-3d-params-v1",
+  "version": "1.0.0",
+  "description": "Zentrale Parameter-Registry für alle Bauteile des Helix Wind-Generators",
+
+  "global": {
+    "achse_kantenlaenge":  { "value": 10.0, "unit": "mm", "desc": "Vierkant-Achse Kantenlänge" },
+    "toleranz":            { "value": 0.5,  "unit": "mm", "desc": "Standard-Drucktoleranz (FDM)" },
+    "einschmelzmutter_d":  { "value": 4.2,  "unit": "mm", "desc": "M3 Einschmelzmutter Außen-Ø" },
+    "einschmelzmutter_t":  { "value": 5.0,  "unit": "mm", "desc": "M3 Einschmelzmutter Einpresstiefe" }
+  },
+
+  "tower": {
+    "blatt_radius":        { "value": 66.0,  "unit": "mm",  "desc": "Helix-Blatt Radius (halber Halbkreis)" },
+    "dicke":               { "value": 2.4,   "unit": "mm",  "desc": "Flügel-Wandstärke" },
+    "versatz":             { "value": 12.0,  "unit": "mm",  "desc": "S-Versatz der Blatt-Achse" },
+    "twist_winkel":        { "value": 90.0,  "unit": "deg", "desc": "Helix-Drehwinkel pro Etage" },
+    "hohe":                { "value": 240.0, "unit": "mm",  "desc": "Etagen-Höhe (max. Bambu P1S Druckbett)" },
+    "loft_steps":          { "value": 60,    "unit": "count", "desc": "Loft-Auflösung (Schritte)" },
+    "kappen_dicke":        { "value": 8.0,   "unit": "mm",  "desc": "Verbinder-Kappenhöhe" },
+    "rillen_tiefe":        { "value": 3.0,   "unit": "mm",  "desc": "Flügel-Einsteckrillen Tiefe" },
+    "vielzahn_zaehne":     { "value": 12,    "unit": "count", "desc": "Vielzahn-Profil Zähnezahl" },
+    "vielzahn_r_out":      { "value": 9.0,   "unit": "mm",  "desc": "Vielzahn Außenradius" },
+    "vielzahn_r_in":       { "value": 7.8,   "unit": "mm",  "desc": "Vielzahn Innenradius" },
+    "kragen_d":            { "value": 17.5,  "unit": "mm",  "desc": "Madenschrauben-Kragen Ø" },
+    "kragen_h":            { "value": 15.0,  "unit": "mm",  "desc": "Madenschrauben-Kragen Höhe" }
+  },
+
+  "generator": {
+    "magnet_l":            { "value": 20.0,  "unit": "mm",  "desc": "Neodym-Magnet Länge" },
+    "magnet_w":            { "value": 5.0,   "unit": "mm",  "desc": "Neodym-Magnet Breite" },
+    "magnet_h":            { "value": 3.0,   "unit": "mm",  "desc": "Neodym-Magnet Höhe/Dicke" },
+    "mag_kreis_r":         { "value": 27.0,  "unit": "mm",  "desc": "Magnetkreis-Radius (Mitte-zu-Mitte)" },
+    "rotor_radius":        { "value": 38.0,  "unit": "mm",  "desc": "Rotor-Plattenradius" },
+    "rotor_platte_h":      { "value": 6.0,   "unit": "mm",  "desc": "Rotor-Plattenhöhe" },
+    "backplate_h":         { "value": 3.0,   "unit": "mm",  "desc": "Backplate Höhe" },
+    "kragen_d":            { "value": 16.0,  "unit": "mm",  "desc": "Achskragen Ø" },
+    "kragen_h":            { "value": 12.0,  "unit": "mm",  "desc": "Achskragen Höhe" },
+    "stator_radius":       { "value": 45.0,  "unit": "mm",  "desc": "Stator-Außenradius" },
+    "stator_dicke":        { "value": 5.0,   "unit": "mm",  "desc": "Stator-Dicke" },
+    "anzahl_spulen":       { "value": 12,    "unit": "count", "desc": "Anzahl Kupferspulen" },
+    "spule_innen_d":       { "value": 7.0,   "unit": "mm",  "desc": "Spulen-Kern Innen-Ø" },
+    "spule_aussen_d":      { "value": 14.0,  "unit": "mm",  "desc": "Spulen Außen-Ø" },
+    "spule_dicke":         { "value": 3.5,   "unit": "mm",  "desc": "Spulenkörper-Dicke" },
+    "rotor_schraub_r":     { "value": 34.5,  "unit": "mm",  "desc": "Verschraubungsloch-Radius" },
+    "variants": {
+      "10-pole": { "anzahl_magnete": 10, "schrauben_offset_deg": 18 },
+      "20-pole": { "anzahl_magnete": 20, "schrauben_offset_deg": 9 }
+    }
+  },
+
+  "base_station": {
+    "lager_innen_d":       { "value": 25.0,  "unit": "mm",  "desc": "Kegelrollenlager 32005 Innen-Ø" },
+    "lager_aussen_d":      { "value": 47.0,  "unit": "mm",  "desc": "Kegelrollenlager 32005 Außen-Ø" },
+    "lager_dicke":         { "value": 15.0,  "unit": "mm",  "desc": "Kegelrollenlager 32005 Bauhöhe" },
+    "fuss_radius":         { "value": 60.0,  "unit": "mm",  "desc": "Basis-Gehäuse Radius" },
+    "gehaeuse_h":          { "value": 110.0, "unit": "mm",  "desc": "Basis-Gehäuse Gesamthöhe" },
+    "schlitten_breite":    { "value": 95.0,  "unit": "mm",  "desc": "Schlitten-Breite" },
+    "hex_radius":          { "value": 10.0,  "unit": "mm",  "desc": "Hex-Adapter Radius" }
+  },
+
+  "print_constraints": {
+    "printer":             "Bambu Lab P1S",
+    "max_x":               256.0,
+    "max_y":               256.0,
+    "max_z":               256.0,
+    "unit":                "mm",
+    "default_material":    "PETG",
+    "default_layer_height": 0.2,
+    "default_infill":      20
+  }
+}

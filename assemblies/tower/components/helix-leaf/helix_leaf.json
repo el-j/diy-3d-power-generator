@@ -1,0 +1,36 @@
+{
+  "id": "TWR-LEAF-01",
+  "name": "Helix-Flügel",
+  "name_en": "Helix Leaf",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 15,
+    "supports": false,
+    "wall_count": 3,
+    "orientation": "standing (Z-axis = blade height)",
+    "notes": "Kein Support nötig dank Helix-Twist. Spiral-Vase-Modus NICHT verwenden (Wandstärke!)."
+  },
+  "dimensions": {
+    "height_mm": 240.0,
+    "max_diameter_mm": 250.0,
+    "wall_thickness_mm": 2.4,
+    "description": "S-förmiger Helix-Flügel mit 90° Twist über 240mm Höhe"
+  },
+  "quantity_per_assembly": 2,
+  "quantity_note": "2 Flügel pro Etage (um 180° versetzt), beliebig viele Etagen stapelbar",
+  "purchased_parts": [],
+  "parameters_ref": "shared/parameters.json#tower",
+  "key_parameters": {
+    "blatt_radius": 66.0,
+    "dicke": 2.4,
+    "versatz": 12.0,
+    "twist_winkel": 90.0,
+    "hohe": 240.0,
+    "loft_steps": 60
+  },
+  "freecad_script": "src/Helix_Leaf+Connector.py",
+  "exports": ["Coreless_Helix_Fluegel.stl"]
+}

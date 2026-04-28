@@ -1,0 +1,28 @@
+{
+  "id": "GEN-STAT-01",
+  "name": "Stator-Schlitten",
+  "name_en": "Stator Sled",
+  "assembly": "generator",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2, "infill": 25, "supports": false, "wall_count": 3,
+    "orientation": "flat (Spulenlöcher nach oben)"
+  },
+  "dimensions": { "diameter_mm": 94.0, "height_mm": 5.0, "handle_length_mm": 85.0 },
+  "quantity_per_assembly": 1,
+  "purchased_parts": [],
+  "key_parameters": {
+    "stator_radius": 45.0, "stator_dicke": 5.0, "anzahl_spulen": 12,
+    "spule_aussen_d": 14.0, "mag_kreis_r": 27.0
+  },
+  "features": [
+    "12 konische Spulenlöcher (Fase 5.0→7.2mm Radius)",
+    "Kabelkanal-Ring auf R31-35mm",
+    "Auszieh-Griff für Basis-Station",
+    "4× Befestigungslöcher auf R41.5mm (für Deckel)",
+    "2× Kabel-Durchführungen im Griff"
+  ],
+  "freecad_script": "src/Helix_Generator_eckige-magnete-10er_rotor.py",
+  "exports": ["Stator_Schlitten_KOMBI.stl"]
+}

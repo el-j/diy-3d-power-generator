@@ -1,0 +1,73 @@
+{
+  "$schema": "windpower-3d-materials-v1",
+  "version": "1.0.0",
+  "materials": {
+    "PETG": {
+      "name": "PETG",
+      "name_de": "PETG",
+      "type": "filament",
+      "properties": {
+        "density_g_cm3": 1.27,
+        "print_temp_c": [230, 250],
+        "bed_temp_c": [75, 85],
+        "uv_resistant": true,
+        "water_resistant": true,
+        "flexibility": "medium"
+      },
+      "usage": "Standardmaterial für alle Strukturteile (UV- und wetterbeständig)",
+      "color_options": ["Schwarz", "Weiß", "Transparent", "Grau"]
+    },
+    "PLA": {
+      "name": "PLA",
+      "name_de": "PLA",
+      "type": "filament",
+      "properties": {
+        "density_g_cm3": 1.24,
+        "print_temp_c": [190, 220],
+        "bed_temp_c": [50, 60],
+        "uv_resistant": false,
+        "water_resistant": false,
+        "flexibility": "rigid"
+      },
+      "usage": "Nur für Prototypen und Werkzeuge (NICHT für Außeneinsatz!)",
+      "color_options": ["beliebig"]
+    },
+    "TPU": {
+      "name": "TPU 95A",
+      "name_de": "TPU 95A",
+      "type": "filament",
+      "properties": {
+        "density_g_cm3": 1.21,
+        "print_temp_c": [220, 240],
+        "bed_temp_c": [50, 60],
+        "shore_hardness": "95A",
+        "flexibility": "flexible"
+      },
+      "usage": "Vibrationsdämpfer, Dichtungen",
+      "color_options": ["Schwarz"]
+    },
+    "kupferlackdraht": {
+      "name": "Enameled Copper Wire",
+      "name_de": "Kupferlackdraht",
+      "type": "wire",
+      "properties": {
+        "diameter_mm": 0.5,
+        "awg": 24,
+        "insulation": "polyurethane"
+      },
+      "usage": "Spulenwicklung für den Axialfluss-Generator"
+    },
+    "neodym_n52": {
+      "name": "Neodymium N52",
+      "name_de": "Neodym N52",
+      "type": "magnet",
+      "properties": {
+        "grade": "N52",
+        "coating": "Nickel",
+        "max_temp_c": 80,
+        "remanence_T": 1.45
+      },
+      "usage": "Permanentmagnete im Generator-Rotor"
+    }
+  }
+}

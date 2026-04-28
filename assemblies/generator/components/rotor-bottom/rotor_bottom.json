@@ -1,0 +1,27 @@
+{
+  "id": "GEN-ROT-02",
+  "name": "Rotor Unten",
+  "name_en": "Rotor Bottom",
+  "assembly": "generator",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2, "infill": 30, "supports": false, "wall_count": 4,
+    "orientation": "flat (Magnet-Taschen nach oben)"
+  },
+  "dimensions": { "diameter_mm": 76.0, "height_mm": 6.0 },
+  "quantity_per_assembly": 1,
+  "purchased_parts": [
+    { "id": "F-M3-HI", "quantity": 5 },
+    { "id": "MAG-20x5x3", "quantity": 10, "note": "10-Pol Variante" }
+  ],
+  "key_parameters": {
+    "rotor_radius": 38.0, "rotor_platte_h": 6.0, "mag_kreis_r": 27.0
+  },
+  "features": [
+    "Identisch zu Rotor Oben, aber mit 2× Seitenpunkten = UNTEN Markierung",
+    "Einschmelzmutter-Taschen auf der ANDEREN Seite"
+  ],
+  "freecad_script": "src/Helix_Generator_eckige-magnete-10er_rotor.py",
+  "exports": ["Rotor_Unten.stl"]
+}

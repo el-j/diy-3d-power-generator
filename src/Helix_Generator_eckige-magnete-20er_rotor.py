@@ -2,7 +2,7 @@ import FreeCAD as App
 import Part
 import math
 
-doc = App.newDocument("Savonius_Mini_Generator")
+doc = App.newDocument("Helix_Mini_Generator")
 
 # ==========================================
 # ⚙️ PARAMETER (Industrial Sandwich Generator)

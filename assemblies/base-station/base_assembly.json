@@ -1,0 +1,27 @@
+{
+  "assembly_id": "base-station",
+  "name": "Basis-Station / Base Station",
+  "description": "Baumontage-fähiges Gehäuse mit Kegelrollenlager, Einschub-System für Generator-Schlitten und Baumklemme.",
+  "version": "1.0.0",
+  "components": [
+    { "id": "BASE-HOUS-01", "name": "Basis-Gehäuse", "directory": "housing", "quantity": 1 },
+    { "id": "BASE-SLED-01", "name": "Schiebe-Schlitten", "directory": "sled", "quantity": 1 },
+    { "id": "BASE-DISC-01", "name": "Start-Scheibe", "directory": "start-disc", "quantity": 1 },
+    { "id": "BASE-HEX-01", "name": "Hex-Adapter", "directory": "hex-adapter", "quantity": 1 }
+  ],
+  "source_scripts": {
+    "original": "src/Helix_Magnet_Basis_Station.py"
+  },
+  "assembly_sequence": [
+    "1. Gehäuse drucken (evtl. in 2 Teilen bei kleinerem Drucker)",
+    "2. Schlitten drucken",
+    "3. Start-Scheibe drucken",
+    "4. Hex-Adapter drucken",
+    "5. Einschmelzmuttern in Hex-Adapter einsetzen (4×)",
+    "6. Kegelrollenlager in Gehäuse-Lagersitz einpressen",
+    "7. Hex-Adapter mit Lagerschaft in Lager einsetzen",
+    "8. Achse durchschieben und mit Madenschrauben sichern",
+    "9. Schlitten mit Generator-Sandwich einschieben",
+    "10. Baumklemme an Gehäuse verschrauben"
+  ]
+}

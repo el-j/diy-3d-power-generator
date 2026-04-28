@@ -1,5 +1,19 @@
-obsolete
-
+# macOS
 .DS_Store
-Thumbs.db
-*.log
+._*
+obsolete
+# FreeCAD
+*.FCBak
+*.FCStd1
+*.py~
+
+# Runtime artifacts
+.build/
+
+# IDE
+.vscode/
+.idea/
+
+# Temp
+*.tmp
+*.bak

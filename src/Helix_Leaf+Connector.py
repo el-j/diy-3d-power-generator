@@ -2,7 +2,7 @@ import FreeCAD as App
 import Part
 import math
 
-doc = App.newDocument("Savonius_Coreless_Tower")
+doc = App.newDocument("Helix_Coreless_Tower")
 
 # ==========================================
 # ⚙️ PARAMETER (Bambu Lab P1S - 256x256mm)

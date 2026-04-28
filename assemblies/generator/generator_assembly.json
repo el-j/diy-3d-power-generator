@@ -1,0 +1,29 @@
+{
+  "assembly_id": "generator",
+  "name": "Axialfluss-Generator / Axial Flux Generator",
+  "description": "Sandwich-Bauweise Axialfluss-Generator mit 2 Magnet-Rotoren und einem Spulen-Stator. Verfügbar in 10-Pol und 20-Pol Variante.",
+  "version": "1.0.0",
+  "variants": ["10-pole", "20-pole"],
+  "components": [
+    { "id": "GEN-ROT-01", "name": "Rotor Oben", "directory": "rotor-top", "quantity": 1 },
+    { "id": "GEN-ROT-02", "name": "Rotor Unten", "directory": "rotor-bottom", "quantity": 1 },
+    { "id": "GEN-BP-01", "name": "Backplate Oben", "directory": "backplate-top", "quantity": 1 },
+    { "id": "GEN-BP-02", "name": "Backplate Unten", "directory": "backplate-bottom", "quantity": 1 },
+    { "id": "GEN-STAT-01", "name": "Stator-Schlitten", "directory": "stator-sled", "quantity": 1 },
+    { "id": "GEN-STAT-02", "name": "Stator-Deckel", "directory": "stator-cover", "quantity": 1 }
+  ],
+  "source_scripts": {
+    "10-pole": "src/Helix_Generator_eckige-magnete-10er_rotor.py",
+    "20-pole": "src/Helix_Generator_eckige-magnete-20er_rotor.py"
+  },
+  "assembly_sequence": [
+    "1. Alle 6 Teile drucken",
+    "2. Einschmelzmuttern in Rotoren einsetzen (je 5×)",
+    "3. Magnete in Rotoren einsetzen (Polarität beachten! Dreiecke = N-Pol)",
+    "4. Backplates als Deckel aufsetzen und verschrauben",
+    "5. Kupferspulen wickeln (12×) und in Stator-Schlitten einsetzen",
+    "6. Spulen verdrahten (3-Phasen Stern-Schaltung)",
+    "7. Stator-Deckel aufsetzen und verschrauben",
+    "8. Generator in Basis-Station einschieben"
+  ]
+}

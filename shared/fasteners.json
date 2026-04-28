@@ -1,0 +1,62 @@
+{
+  "$schema": "windpower-3d-fasteners-v1",
+  "version": "1.0.0",
+  "fasteners": {
+    "F-M3-HI": {
+      "name": "M3 Einschmelzmutter / Heat-Set Insert",
+      "spec": "M3 × Ø4.2 × 5.0mm",
+      "material": "Messing",
+      "usage": "Verschraubungspunkte in PETG-Druckteilen",
+      "outer_diameter_mm": 4.2,
+      "length_mm": 5.0,
+      "thread": "M3",
+      "source_url": "https://www.amazon.de/dp/B0XXXXXX"
+    },
+    "F-M3x16-SK": {
+      "name": "M3×16 Senkkopfschraube / Countersunk Screw",
+      "spec": "DIN 7991, M3 × 16mm",
+      "material": "Edelstahl A2",
+      "head_diameter_mm": 6.0,
+      "head_height_mm": 1.5,
+      "usage": "Rotor-Backplate Verschraubung"
+    },
+    "F-M3x8-MDS": {
+      "name": "M3×8 Madenschraube / Grub Screw",
+      "spec": "DIN 913, M3 × 8mm",
+      "material": "Edelstahl A2",
+      "usage": "Anti-Unwucht Klemmung am Achskragen"
+    },
+    "F-M3x12": {
+      "name": "M3×12 Zylinderkopfschraube",
+      "spec": "DIN 912, M3 × 12mm",
+      "material": "Edelstahl A2",
+      "usage": "Stator-Befestigung"
+    },
+    "B-32005": {
+      "name": "Kegelrollenlager 32005",
+      "spec": "25 × 47 × 15mm",
+      "material": "Chromstahl",
+      "inner_d_mm": 25.0,
+      "outer_d_mm": 47.0,
+      "width_mm": 15.0,
+      "usage": "Hauptlager in der Basis-Station",
+      "source_url": "https://www.amazon.de/dp/B0XXXXXX"
+    },
+    "A-SQ10": {
+      "name": "Vierkantrohr 10×10mm",
+      "spec": "Aluminium / Stahl, 10×10mm, Wandstärke 1mm",
+      "material": "Aluminium 6060",
+      "usage": "Hauptachse des Windgenerators",
+      "length_note": "Auf Projektlänge zuschneiden (ca. 800–1200mm)"
+    },
+    "MAG-20x5x3": {
+      "name": "Neodym-Magnet 20×5×3mm N52",
+      "spec": "Quadermagnet, vernickelt, N52",
+      "material": "NdFeB N52",
+      "dimensions_mm": [20, 5, 3],
+      "usage": "Generator-Rotor Permanentmagnete",
+      "source_url": "https://www.amazon.de/dp/B0XXXXXX",
+      "warning": "⚠️ Starke Magnete! Vorsicht bei der Handhabung. Von Elektronik fernhalten."
+    }
+  }
+}

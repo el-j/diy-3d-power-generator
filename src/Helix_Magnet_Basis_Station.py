@@ -2,7 +2,7 @@ import FreeCAD as App
 import Part
 import math
 
-doc = App.newDocument("Savonius_Base_Station")
+doc = App.newDocument("Helix_Base_Station")
 
 # ==========================================
 # ⚙️ PARAMETER FÜR DIE BASIS-STATION

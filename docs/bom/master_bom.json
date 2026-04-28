@@ -1,0 +1,52 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-04-28",
+  "variant": "10-pole",
+  "assemblies": {
+    "tower": {
+      "printed_parts": [
+        { "id": "TWR-LEAF-01", "name": "Helix-Flügel", "material": "PETG", "qty_per_stage": 2 },
+        { "id": "TWR-CONN-01", "name": "Mittelverbinder", "material": "PETG", "qty_per_stage": 1 },
+        { "id": "TWR-PLUG-01", "name": "Vielzahn-Plug", "material": "PETG", "qty_per_stage": 1 }
+      ],
+      "purchased_parts": [
+        { "id": "F-M3-HI", "qty_per_stage": 4 },
+        { "id": "F-M3x8-MDS", "qty_per_stage": 4 }
+      ]
+    },
+    "generator": {
+      "printed_parts": [
+        { "id": "GEN-ROT-01", "name": "Rotor Oben", "material": "PETG", "qty": 1 },
+        { "id": "GEN-ROT-02", "name": "Rotor Unten", "material": "PETG", "qty": 1 },
+        { "id": "GEN-BP-01", "name": "Backplate Oben", "material": "PETG", "qty": 1 },
+        { "id": "GEN-BP-02", "name": "Backplate Unten", "material": "PETG", "qty": 1 },
+        { "id": "GEN-STAT-01", "name": "Stator-Schlitten", "material": "PETG", "qty": 1 },
+        { "id": "GEN-STAT-02", "name": "Stator-Deckel", "material": "PETG", "qty": 1 }
+      ],
+      "purchased_parts": [
+        { "id": "F-M3-HI", "qty": 10 },
+        { "id": "F-M3x16-SK", "qty": 10 },
+        { "id": "MAG-20x5x3", "qty": 20 }
+      ]
+    },
+    "base-station": {
+      "printed_parts": [
+        { "id": "BASE-HOUS-01", "name": "Basis-Gehäuse", "material": "PETG", "qty": 1 },
+        { "id": "BASE-SLED-01", "name": "Schiebe-Schlitten", "material": "PETG", "qty": 1 },
+        { "id": "BASE-DISC-01", "name": "Start-Scheibe", "material": "PETG", "qty": 1 },
+        { "id": "BASE-HEX-01", "name": "Hex-Adapter", "material": "PETG", "qty": 1 }
+      ],
+      "purchased_parts": [
+        { "id": "F-M3-HI", "qty": 4 },
+        { "id": "F-M3x8-MDS", "qty": 4 },
+        { "id": "B-32005", "qty": 1 },
+        { "id": "A-SQ10", "qty": 1 }
+      ]
+    }
+  },
+  "totals": {
+    "unique_printed_parts": 13,
+    "unique_purchased_parts": 7,
+    "magnets": 20
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "GEN-ROT-01",
+  "name": "Rotor Oben",
+  "name_en": "Rotor Top",
+  "assembly": "generator",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2, "infill": 30, "supports": false, "wall_count": 4,
+    "orientation": "flat (Magnet-Taschen nach oben)"
+  },
+  "dimensions": { "diameter_mm": 76.0, "height_mm": 6.0 },
+  "quantity_per_assembly": 1,
+  "purchased_parts": [
+    { "id": "F-M3-HI", "quantity": 5 },
+    { "id": "MAG-20x5x3", "quantity": 10, "note": "10-Pol Variante" }
+  ],
+  "key_parameters": {
+    "rotor_radius": 38.0, "rotor_platte_h": 6.0, "mag_kreis_r": 27.0,
+    "achse_kantenlaenge": 10.0, "toleranz": 0.5
+  },
+  "features": [
+    "Magnet-Taschen mit 0.4mm Gleitpassung und Haltelippe (0.6mm)",
+    "Dreiecks-Polaritäts-Markierungen (jeder 2. Magnet)",
+    "Ausrichtungskerbe bei 54° für eindeutige Montageposition",
+    "1× Seitenpunkt = OBEN Markierung",
+    "5× M3 Einschmelzmutter-Taschen auf R34.5mm"
+  ],
+  "freecad_script": "src/Helix_Generator_eckige-magnete-10er_rotor.py",
+  "exports": ["Rotor_Oben.stl"]
+}

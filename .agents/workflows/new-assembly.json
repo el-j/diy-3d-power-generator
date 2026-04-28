@@ -1,0 +1,43 @@
+{
+  "name": "new-assembly",
+  "version": "1.0.0",
+  "description": "Pipeline for creating an entirely new assembly with multiple components",
+  "trigger": "New assembly design request (e.g., new mounting system, new generator variant)",
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Assembly Planning",
+      "agent": "cad-engineer",
+      "description": "Define assembly structure, component list, and dependency graph",
+      "outputs": ["assemblies/<name>/<name>_assembly.json"]
+    },
+    {
+      "id": "P1-N",
+      "name": "Component Design Loop",
+      "description": "Run design-pipeline.json for EACH component in dependency order",
+      "workflow_ref": "design-pipeline.json",
+      "iteration": "For each component defined in P0, respecting dependency order"
+    },
+    {
+      "id": "P2",
+      "name": "Assembly BOM",
+      "agent": "bom-manager",
+      "description": "Aggregate all component BOMs into assembly BOM",
+      "outputs": ["assemblies/<name>/<name>_bom.md", "Updated master_bom"]
+    },
+    {
+      "id": "P3",
+      "name": "Assembly Build Guide",
+      "agent": "build-guide-author",
+      "description": "Write complete assembly instructions",
+      "outputs": ["docs/build-guide/<NN>_<name>.md"]
+    },
+    {
+      "id": "P4",
+      "name": "Assembly QA",
+      "agent": "qa-inspector",
+      "description": "Full assembly-level validation",
+      "outputs": ["QA report"]
+    }
+  ]
+}

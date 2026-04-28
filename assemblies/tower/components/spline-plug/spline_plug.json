@@ -1,0 +1,40 @@
+{
+  "id": "TWR-PLUG-01",
+  "name": "Vielzahn-Plug",
+  "name_en": "Spline Plug",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 60,
+    "supports": false,
+    "wall_count": 4,
+    "orientation": "standing (Vielzahn unten, Kragen oben)",
+    "notes": "Hoher Infill für maximale Festigkeit bei Madenschrauben-Belastung."
+  },
+  "dimensions": {
+    "vielzahn_diameter_mm": 18.0,
+    "kragen_diameter_mm": 17.5,
+    "total_height_mm": 23.0,
+    "description": "12-Zahn Vielzahn-Adapter mit Madenschrauben-Kragen für Achsklemmung"
+  },
+  "quantity_per_assembly": 1,
+  "quantity_note": "1 pro Etage",
+  "purchased_parts": [
+    { "id": "F-M3-HI", "name": "M3 Einschmelzmutter", "quantity": 4 },
+    { "id": "F-M3x8-MDS", "name": "M3×8 Madenschraube", "quantity": 4 }
+  ],
+  "parameters_ref": "shared/parameters.json#tower",
+  "key_parameters": {
+    "vielzahn_zaehne": 12,
+    "vielzahn_r_out": 9.0,
+    "vielzahn_r_in": 7.8,
+    "kragen_d": 17.5,
+    "kragen_h": 15.0,
+    "achse_kantenlaenge": 10.0,
+    "toleranz": 0.5
+  },
+  "freecad_script": "src/Helix_Leaf+Connector.py",
+  "exports": ["Zwischen_Vielzahn_Plug.stl"]
+}

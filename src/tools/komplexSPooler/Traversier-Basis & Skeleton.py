@@ -5,13 +5,11 @@ import math
 doc = App.newDocument("Wickelmaschine_Ortho_Basis")
 
 # ==========================================
-# ⚙️ PARAMETER (Traversier-Basis & Skeleton)
+# ⚙️ PARAMETER (Kompakte Basis)
 # ==========================================
 hex_loch_sw = 8.4         
 lager_loch_d = 12.0        
 zahnrad_dicke = 8.0      
-
-# Achsen-Höhe (Auf 75.0mm für das 60Z Zahnrad!)
 achse_z = 75.0
 # ==========================================
 
@@ -21,7 +19,6 @@ def make_centered_box(l, w, h, cx, cy, cz):
     return box
 
 def make_capsule_cut(l, w, h, cx, cy, cz):
-    # Erstellt abgerundete Taschen (Kapseln) für die Skeleton-Bodenplatte
     r = w / 2.0
     d = l - w
     if d < 0: d = 0
@@ -94,9 +91,9 @@ def show_obj(shape, name):
     return obj
 
 # ==========================================
-# 1. BAUTEIL: FUNDAMENT (Skeleton-Waben von unten!)
+# 1. BAUTEIL: FUNDAMENT (Kompakt, Y=130mm tief)
 # ==========================================
-base_plate = make_centered_box(200, 100, 5, -50.0, 50.0, 2.5)
+base_plate = make_centered_box(200, 130, 5, -50.0, 60.0, 2.5)
 
 # --- SKELETON BODENPLATTE ---
 def add_base_capsule(cx, cy, l, w):
@@ -110,18 +107,17 @@ add_base_capsule(-40, 20, 35, 18)
 add_base_capsule(-90, 20, 35, 18)
 add_base_capsule(-135, 20, 20, 18)
 
-# Reihe 2: Mittlere Aussparungen zwischen den Türmen (Y=60)
+# Reihe 2: Aussparungen zwischen den Türmen (Y=60)
 add_base_capsule(10, 60, 35, 12)
 add_base_capsule(-40, 60, 35, 12)
 add_base_capsule(-80, 60, 18, 12)
 add_base_capsule(-120, 60, 18, 12)
 
-# Reihe 3: Hintere Aussparungen (Y=90)
-add_base_capsule(10, 90, 35, 12)
-add_base_capsule(-40, 90, 35, 12)
-add_base_capsule(-90, 90, 35, 12)
-add_base_capsule(-135, 90, 20, 12)
-
+# Reihe 3: Hintere Aussparungen (Y=115) - T-Schiene liegt bei Y=95!
+add_base_capsule(10, 115, 35, 12)
+add_base_capsule(-40, 115, 35, 12)
+add_base_capsule(-90, 115, 35, 12)
+add_base_capsule(-135, 115, 20, 12)
 
 recess_depth = 1.5
 base_z_top = 5.0
@@ -146,22 +142,18 @@ def create_pluggable_pillar(name, cx, cy, pr_x, pr_y):
     local_hz = achse_z - pillar_bottom_z
     p = make_centered_box(16, 12, local_h, 0, 0, local_h/2.0)
     
-    # Lager-Ausschnitt
     cut_cyl = Part.makeCylinder(lager_loch_d / 2.0, 18)
     cut_cyl.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
     p = p.cut(cut_cyl.translate(App.Vector(0, 9.0, local_hz)))
     
-    # Diagonale Einschmelzmuttern-Löcher im Boden
     p = p.cut(m3_insert.copy().translate(App.Vector(4.5, 3.0, 0)))
     p = p.cut(m3_insert.copy().translate(App.Vector(-4.5, -3.0, 0)))
 
-    # SKELETON-TURM (Materialsparend)
     cut_h = local_h - 36.0 
     if cut_h > 0:
         pillar_cut = make_centered_box(7.0, 20.0, cut_h, 0, 0, 16.0 + cut_h/2.0)
         p = p.cut(pillar_cut)
 
-    # TOP-EINSCHMELZ-MUTTER
     insert_top = Part.makeCylinder(4.2 / 2.0, 5.0)
     screw_clearance = Part.makeCylinder(1.7, 15.0)
     p = p.cut(insert_top.translate(App.Vector(0, 0, local_h - 5.0)))
@@ -172,35 +164,29 @@ def create_pluggable_pillar(name, cx, cy, pr_x, pr_y):
     p.translate(App.Vector(pr_x, pr_y, 6.0)) 
     show_obj(p, name)
 
-# 4 ACHSEN IN REIHE (Druckbett-Layout gefixt: Türme liegen jetzt sauber nebeneinander!)
-create_pluggable_pillar("Turm_1_Kurbel_V",   35, 45,  -130, 120)
-create_pluggable_pillar("Turm_1_Kurbel_H",   35, 75,  -130, 220)
+# 4 ACHSEN IN REIHE (Türme liegen jetzt eng beieinander)
+create_pluggable_pillar("Turm_1_Kurbel_V",   35, 45,  -130, 150)
+create_pluggable_pillar("Turm_1_Kurbel_H",   35, 75,  -130, 250)
 
-create_pluggable_pillar("Turm_2_Spule_V",   -15, 45,  -100, 120)
-create_pluggable_pillar("Turm_2_Spule_H",   -15, 75,  -100, 220)
+create_pluggable_pillar("Turm_2_Spule_V",   -15, 45,  -100, 150)
+create_pluggable_pillar("Turm_2_Spule_H",   -15, 75,  -100, 250)
 
-create_pluggable_pillar("Turm_3_Int_V",     -65, 45,  -70, 120)
-create_pluggable_pillar("Turm_3_Int_H",     -65, 75,  -70, 220)
+create_pluggable_pillar("Turm_3_Int_V",     -65, 45,  -70, 150)
+create_pluggable_pillar("Turm_3_Int_H",     -65, 75,  -70, 250)
 
-create_pluggable_pillar("Turm_4_Cam_V",    -135, 45,  -40, 120)
-create_pluggable_pillar("Turm_4_Cam_H",    -135, 75,  -40, 220)
-
-# ==========================================
-# 2. SCHIENEN-SYSTEM FÜR DEN SCHLITTEN
-# ==========================================
-t_stem = make_centered_box(6.0, 70, 5.0, -100, 60, 7.5)  
-t_top = make_centered_box(12.0, 70, 5.0, -100, 60, 12.5) 
-schiene = t_stem.fuse(t_top)
-
-gummi_haken = Part.makeCylinder(3.0, 15.0).translate(App.Vector(-100, 20, 5.0))
-gummi_kragen = Part.makeCylinder(4.5, 2.0).translate(App.Vector(-100, 20, 18.0))
-
-basis = base_plate.fuse(schiene).fuse(gummi_haken).fuse(gummi_kragen).removeSplitter()
-show_obj(basis, "Maschinen_Basis_Skeleton")
+create_pluggable_pillar("Turm_4_Cam_V",    -135, 45,  -40, 150)
+create_pluggable_pillar("Turm_4_Cam_H",    -135, 75,  -40, 250)
 
 # ==========================================
-# 3. ZAHNRÄDER (Druckbett-Layout gefixt: Keine Überlappung mehr!)
+# 2. BASIS FINALISIEREN (T-Schiene entfernt!)
 # ==========================================
+basis = base_plate.removeSplitter()
+show_obj(basis, "Maschinen_Basis_Kompakt")
+
+# ==========================================
+# 3. ZAHNRÄDER (1:24 Ratio!)
+# ==========================================
+# Die Zahnräder werden flach auf das Druckbett generiert
 rad_kurbel = make_gear(40.0, zahnrad_dicke, 40, hex_loch_sw).translate(App.Vector(35, -70, 0)) 
 show_obj(rad_kurbel, "Z1_Kurbel_40Z")
 
@@ -215,10 +201,7 @@ show_obj(rad_int_in, "Z4_Zwischen_In_40Z")
 show_obj(rad_int_out, "Z5_Zwischen_Out_10Z")
 
 rad_cam = make_gear(60.0, zahnrad_dicke, 60, hex_loch_sw).translate(App.Vector(-145, -80, 0))
-show_obj(rad_cam, "Z6_Nockenwelle_60Z")
-
-# ACHTUNG: Taumelscheibe V1 wurde hier restlos entfernt! 
-# Bitte die "Taumelscheibe_V2_Kompakt" aus dem Zubehör-Skript drucken!
+show_obj(rad_cam, "Z6_Trommel_60Z")
 
 doc.recompute()
 if App.GuiUp:

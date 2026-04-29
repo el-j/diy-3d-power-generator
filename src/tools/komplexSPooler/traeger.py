@@ -45,7 +45,7 @@ traeger = box.fuse(cyl_vorne).fuse(cyl_hinten)
 
 # 2. BEFESTIGUNGSLÖCHER (Für M3 Schrauben)
 screw_hole = Part.makeCylinder(schrauben_loch_d / 2.0, traeger_dicke + 2.0).translate(App.Vector(0, 0, -1.0))
-sink_hole = Part.makeCylinder(6.0 / 2.0, 3.0).translate(App.Vector(0, 0, traeger_dicke - 2.5)) # Senkkopf
+sink_hole = Part.makeCylinder(6.0 / 2.0, 3.0).translate(App.Vector(0, 0, traeger_dicke - 2.5)) # Senkkopf / Zylinderkopf
 
 for x in turm_x_positionen:
     traeger = traeger.cut(screw_hole.copy().translate(App.Vector(x, 0, 0)))
@@ -73,10 +73,12 @@ traeger = traeger.removeSplitter()
 
 # ZWEIMAL anzeigen (Einen für die vordere Turmreihe, einen für die hintere)
 obj1 = doc.addObject("Part::Feature", "Skeleton_Traeger_Vorne")
-obj1.Shape = traeger.copy().translate(App.Vector(0, 45, 60)) # Setzt ihn virtuell auf die vorderen Türme
+# GEFIXT: Absolute Höhe Z=85 für eine korrekte virtuelle Vorschau auf den Türmen
+obj1.Shape = traeger.copy().translate(App.Vector(0, 45, 85)) 
 
 obj2 = doc.addObject("Part::Feature", "Skeleton_Traeger_Hinten")
-obj2.Shape = traeger.copy().translate(App.Vector(0, 75, 60)) # Setzt ihn virtuell auf die hinteren Türme
+# GEFIXT: Absolute Höhe Z=85 für eine korrekte virtuelle Vorschau auf den Türmen
+obj2.Shape = traeger.copy().translate(App.Vector(0, 75, 85)) 
 
 doc.recompute()
 if App.GuiUp:

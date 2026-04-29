@@ -54,81 +54,86 @@ def show_obj(shape, name):
 # ==========================================
 # 1. DIE 4 ACHSEN (Liegend für den perfekten Druck)
 # ==========================================
-# Achse 1: Kurbel (80mm)
-achse_1 = make_hex_prism(hex_achse_sw, 80.0)
+achse_1 = make_hex_prism(hex_achse_sw, 110.0)
 achse_1.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_1.translate(App.Vector(0, 0, 4.0)) 
-show_obj(achse_1, "Achse_1_Kurbel_80mm")
+show_obj(achse_1, "Achse_1_Kurbel_110mm")
 
-# Achse 2: Spule (70mm Hex + 30mm Vierkant)
-achse_2_hex = make_hex_prism(hex_achse_sw, 70.0)
-achse_2_quad = make_square_prism(quad_spindel_sw, 30.0).translate(App.Vector(0,0,70.0))
+achse_2_hex = make_hex_prism(hex_achse_sw, 80.0)
+achse_2_quad = make_square_prism(quad_spindel_sw, 35.0).translate(App.Vector(0,0,80.0))
 achse_2 = achse_2_hex.fuse(achse_2_quad)
 achse_2.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_2.translate(App.Vector(15, 0, 4.0))
-show_obj(achse_2, "Achse_2_Spule_100mm")
+show_obj(achse_2, "Achse_2_Spule_115mm")
 
-# Achse 3: Zwischengetriebe (70mm)
-achse_3 = make_hex_prism(hex_achse_sw, 70.0)
+achse_3 = make_hex_prism(hex_achse_sw, 110.0)
 achse_3.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_3.translate(App.Vector(30, 0, 4.0)) 
-show_obj(achse_3, "Achse_3_Zwischen_70mm")
+show_obj(achse_3, "Achse_3_Zwischen_110mm")
 
-# Achse 4: Nockenwelle (70mm)
-achse_4 = make_hex_prism(hex_achse_sw, 70.0)
+achse_4 = make_hex_prism(hex_achse_sw, 120.0)
 achse_4.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
 achse_4.translate(App.Vector(45, 0, 4.0)) 
-show_obj(achse_4, "Achse_4_Nockenwelle_70mm")
-
+show_obj(achse_4, "Achse_4_Trommel_120mm")
 
 # ==========================================
 # 2. DIE LAGERHÜLSEN (8 Stück benötigt)
 # ==========================================
 def make_bearing_sleeve(x_pos, y_pos):
-    # Zapfen: 11.4mm (für 12mm Loch im Turm = 0.6mm Spiel)
     zapfen = Part.makeCylinder(11.4/2.0, 14.0) 
-    
-    # Kragen: Wieder massiv auf 8.0mm gesetzt für die M3-Einschmelzmutter!
     kragen = Part.makeCylinder(16.0/2.0, 8.0).translate(App.Vector(0,0,14.0))
     huelse = zapfen.fuse(kragen)
     
-    # Durchgangsloch für die Sechskant-Achse
     hole = make_hex_prism(hex_loch_sw, 30.0).translate(App.Vector(0,0,-2.0))
-    
-    # Loch für die M3-Einschmelzmutter
     m3_cut = get_m3_insert_cutout().translate(App.Vector(0, 8.0, 18.0))
     
     fin = huelse.cut(hole).cut(m3_cut).removeSplitter()
-    fin.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 180) # Flach auf den Kragen legen
-    fin.translate(App.Vector(x_pos, y_pos, 22.0)) # Angepasst auf Gesamthöhe 22mm
+    fin.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 180) 
+    fin.translate(App.Vector(x_pos, y_pos, 22.0)) 
     return fin
 
-# 8 Hülsen im Raster anordnen
 for i in range(4):
     show_obj(make_bearing_sleeve(-20, i*20), f"Lagerhuelse_A{i+1}")
     show_obj(make_bearing_sleeve(-40, i*20), f"Lagerhuelse_B{i+1}")
 
-
 # ==========================================
-# 3. TAUMEL-TROMMEL (Grün) - AUSSEN MONTIERT
+# 3. TAUMEL-SCHEIBEN (2 identische Hälften für flachen Druck)
 # ==========================================
-COLOR_GUIDE = (0.2, 0.8, 0.2)
-
-def make_wobble_drum():
-    # Massiver Zylinder mit schrägem Spalt (Nut)
-    drum = Part.makeCylinder(20.0, 20.0)
-    slot = Part.makeBox(50, 50, 2.5).translate(App.Vector(-25, -25, -1.25))
-    slot.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 10.0) # 10 Grad Neigung
-    slot.translate(App.Vector(0,0, 10.0))
+def make_wobble_half():
+    # Flache Basis - massiv verdickt auf 16mm für extremen Halt der Schraube!
+    drum = Part.makeCylinder(20.0, 16.0)
     
-    drum = drum.cut(slot)
-    drum = drum.cut(make_hex_prism(hex_loch_sw, 25).translate(App.Vector(0,0,-2)))
+    # Schräger Schnitt (10 Grad für 6mm Hub) - Beginnt jetzt erst bei Z=8.0
+    cut_box = Part.makeBox(60, 60, 30).translate(App.Vector(-30, -30, 0))
+    cut_box.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 10.0) 
+    cut_box.translate(App.Vector(0,0, 8.0))
+    drum = drum.cut(cut_box)
+    
+    # Hex-Loch
+    hex_hole = make_hex_prism(hex_loch_sw, 30).translate(App.Vector(0,0,-5))
+    drum = drum.cut(hex_hole)
+    
+    # M3-Loch jetzt auf Z=6.0 zentriert (sitzt absolut mittig in der fetten 8mm Basis)
+    m3_hole = Part.makeCylinder(3.6/2.0, 25)
+    m3_hole.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
+    m3_hole.translate(App.Vector(0, 25, 6.0)) 
+    
+    m3_insert = Part.makeCylinder(4.6/2.0, 5.8)
+    m3_insert.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
+    m3_insert.translate(App.Vector(0, 20.5, 6.0))
+    
+    drum = drum.cut(m3_hole.fuse(m3_insert))
+    
     return drum.removeSplitter()
 
-drum = make_wobble_drum()
-drum.rotate(App.Vector(0,0,0), App.Vector(1,0,0), -90)
-drum.translate(App.Vector(-135, 85, achse_z)) # Zentriert exakt auf Y=95!
-show_obj(drum, "Taumel_Trommel")
+# Wir drucken einfach zwei exakt gleiche Hälften!
+half1 = make_wobble_half()
+half1.translate(App.Vector(80, -20, 0))
+show_obj(half1, "Taumel_Scheibe_Haelfte_1")
+
+half2 = make_wobble_half()
+half2.translate(App.Vector(80, 30, 0))
+show_obj(half2, "Taumel_Scheibe_Haelfte_2")
 
 # ==========================================
 # 4. KURBEL-ARM & GRIFF
@@ -144,19 +149,17 @@ griff_m3_loch = Part.makeCylinder(1.7, arm_dicke).translate(App.Vector(35, 0, 0)
 senkkopf = Part.makeCone(3.2, 1.7, 2.5).translate(App.Vector(35, 0, 0)) 
 
 kurbel_arm = kurbel_arm.cut(hole_a).cut(griff_steckplatz).cut(griff_m3_loch).cut(senkkopf).removeSplitter()
-kurbel_arm.translate(App.Vector(80, 40, 0)) 
+kurbel_arm.translate(App.Vector(130, 0, 0)) 
 show_obj(kurbel_arm, "Kurbel_Arm")
 
-# Griffteil
 griff_koerper = Part.makeCylinder(12.0/2.0, 30.0).translate(App.Vector(0, 0, 3.0))
 griff_zapfen = make_hex_prism(5.8, 3.0) 
 griff_teil = griff_koerper.fuse(griff_zapfen)
 griff_freiraum = Part.makeCylinder(1.8, 35.0) 
 
 griff_fin = griff_teil.cut(griff_freiraum).removeSplitter()
-griff_fin.translate(App.Vector(110, 40, 0))
+griff_fin.translate(App.Vector(130, 30, 0))
 show_obj(griff_fin, "Kurbel_Griff")
-
 
 # ==========================================
 # 5. SPULE (Vierkant-Aufnahme)
@@ -168,7 +171,6 @@ flansch_b = Part.makeCylinder(flansch_r, flansch_dicke)
 core_b = Part.makeCylinder(spule_innen_d/2.0, spule_dicke + 1.0).translate(App.Vector(0,0,flansch_dicke))
 hole_b = make_square_prism(quad_spindel_loch_sw, flansch_dicke + spule_dicke + 2.0).translate(App.Vector(0,0,-1.0))
 
-# Schlitz für den Drahtanfang
 slot_b = Part.makeBox(20, 1.2, 5).translate(App.Vector(0, -0.6, 0)) 
 ring_out = Part.makeCylinder(spule_aussen_d / 2.0, 0.5)
 ring_in = Part.makeCylinder((spule_aussen_d / 2.0) - 0.5, 0.5)
@@ -176,7 +178,7 @@ ring = ring_out.cut(ring_in)
 ring_innen = ring.copy().translate(App.Vector(0,0, flansch_dicke - 0.5)) 
 
 spule_in = flansch_b.fuse(core_b).cut(hole_b).cut(slot_b).cut(ring_innen).removeSplitter()
-spule_in.translate(App.Vector(80, -40, 0))
+spule_in.translate(App.Vector(130, -50, 0))
 show_obj(spule_in, "Spule_Innen_Quad")
 
 deckel = Part.makeCylinder(flansch_r, flansch_dicke)
@@ -186,9 +188,8 @@ senkkopf_d = Part.makeCone(3.2, 1.7, 2.5)
 ring_deckel = ring.copy().translate(App.Vector(0,0, flansch_dicke - 0.5))
 
 spule_out = deckel.cut(recess).cut(hole_d).cut(senkkopf_d).cut(ring_deckel).removeSplitter()
-spule_out.translate(App.Vector(130, -40, 0))
+spule_out.translate(App.Vector(180, -50, 0))
 show_obj(spule_out, "Spule_Deckel_Quad")
-
 
 doc.recompute()
 if App.GuiUp:

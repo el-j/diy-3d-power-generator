@@ -1,14 +1,86 @@
 {
   "assembly_id": "tools",
   "name": "Werkzeuge / Manufacturing Tools",
-  "description": "Hilfs-Werkzeuge zum Spulenwickeln und Achsen-Zuschnitt.",
-  "version": "1.0.0",
-  "components": [
-    { "id": "TOOL-WIND-01", "name": "Spulen-Wickler Basis", "directory": "coil-winder", "quantity": 1 },
-    { "id": "TOOL-AXIS-01", "name": "Achsen-Lehre", "directory": "axis-jig", "quantity": 1 }
-  ],
-  "source_scripts": {
-    "coil-winder": "src/tools/wickler_basis+wheels.py",
-    "axis-jig": "src/tools/achsen+spule.py"
-  }
+  "description": "Komplettsystem zum Spulenwickeln, Drahtspannen und Magnethandling. Von einfachen Akkuschrauber-Aufsätzen bis zur professionellen Traversier-Wickelmaschine.",
+  "version": "2.0.0",
+  "status": "active",
+  "tool_sets": [
+    {
+      "id": "easy-tooler",
+      "name": "Easy-Tool (Akkuschrauber)",
+      "description": "Einfacher Spulen-Wickler Aufsatz für den Akkuschrauber. Schnell und unkompliziert.",
+      "directory": "easy-tool",
+      "source_script": "src/tools/easy_tool_big_spools-accuschrauber.py",
+      "components": [
+        { "id": "TOOL-EASY-01", "name": "Winder Basis Bit", "quantity": 1 },
+        { "id": "TOOL-EASY-02", "name": "Winder Deckel Kern", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "first-spooler",
+      "name": "First Spooler (Zahnrad-Handkurbel)",
+      "description": "Erster Spulen-Wickler mit Zahnrad-Übersetzung und Handkurbel. Die originale Wickelmaschine.",
+      "directory": "first-spooler",
+      "source_scripts": [
+        "src/tools/firstSpooler/wickler_basis+wheels.py",
+        "src/tools/firstSpooler/achsen+spule.py"
+      ],
+      "components": [
+        { "id": "TOOL-FS-01", "name": "Maschinen-Basis Modular", "quantity": 1 },
+        { "id": "TOOL-FS-02", "name": "Rad Groß Kurbel", "quantity": 1 },
+        { "id": "TOOL-FS-03", "name": "Rad Klein Wickler", "quantity": 1 },
+        { "id": "TOOL-FS-04", "name": "Rollen Dorn Steckbar", "quantity": 1 },
+        { "id": "TOOL-FS-05", "name": "Schlitten Drahtführung T-Form", "quantity": 1 },
+        { "id": "TOOL-FS-06", "name": "Turm Kurbel (Vorne + Hinten)", "quantity": 2 },
+        { "id": "TOOL-FS-07", "name": "Turm Wickler (Vorne + Hinten)", "quantity": 2 }
+      ]
+    },
+    {
+      "id": "komplex-spooler",
+      "name": "Komplex-Spooler (Traversier-Wickelmaschine)",
+      "description": "Professionelle Traversier-Wickelmaschine mit 4 Achsen, 1:24 Zahnrad-Untersetzung und Kurvenscheiben-Traversierung. Orthogonales Skeleton-Design.",
+      "directory": "komplex-spooler",
+      "source_scripts": [
+        "src/tools/komplexSPooler/Traversier-Basis & Skeleton.py",
+        "src/tools/komplexSPooler/achsen_zubehoer.py",
+        "src/tools/komplexSPooler/easy_tool_big_spools_4kant.py",
+        "src/tools/komplexSPooler/traeger.py"
+      ],
+      "components": [
+        { "id": "TOOL-KS-01", "name": "Maschinen-Basis Kompakt (Skeleton)", "quantity": 1 },
+        { "id": "TOOL-KS-02", "name": "Steck-Türme (4 Achsen × 2)", "quantity": 8 },
+        { "id": "TOOL-KS-03", "name": "Z1 Kurbel-Zahnrad 40Z", "quantity": 1 },
+        { "id": "TOOL-KS-04", "name": "Z2/Z3 Spulen-Zahnräder 10Z", "quantity": 2 },
+        { "id": "TOOL-KS-05", "name": "Z4 Zwischen-Zahnrad 40Z", "quantity": 1 },
+        { "id": "TOOL-KS-06", "name": "Z5 Zwischen-Zahnrad 10Z", "quantity": 1 },
+        { "id": "TOOL-KS-07", "name": "Z6 Trommel-Zahnrad 60Z", "quantity": 1 },
+        { "id": "TOOL-KS-08", "name": "Achsen-Zubehör", "quantity": 1 },
+        { "id": "TOOL-KS-09", "name": "Spulen-Wickler 4-Kant", "quantity": 1 },
+        { "id": "TOOL-KS-10", "name": "Träger", "quantity": 1 }
+      ],
+      "gear_train": {
+        "ratio": "1:24",
+        "description": "Kurbel(40Z) → Spule(10Z) × Zwischen(40Z→10Z) × Trommel(60Z)",
+        "note": "1 Kurbelumdrehung = 24 Spulenumdrehungen (extrem schnell!)"
+      }
+    },
+    {
+      "id": "magnet-buffer",
+      "name": "Magnet-Puffer / Drahtspanner",
+      "description": "Magnetischer Drahtspanner (Gizeh-Puffer) mit T-Nut-Schiene, Filz-Bremse und schraubbarem Magnet-Block. Sorgt für konstante Drahtspannung beim Wickeln.",
+      "directory": "magnet-buffer",
+      "source_script": "src/tools/ magnetPuffer/magnetBuffer.py",
+      "components": [
+        { "id": "TOOL-MB-01", "name": "Basis mit Bremse", "quantity": 1 },
+        { "id": "TOOL-MB-02", "name": "Endblock (Magnet-Halter)", "quantity": 1 },
+        { "id": "TOOL-MB-03", "name": "Magnet-Schlitten (Pilz)", "quantity": 1 }
+      ],
+      "purchased_parts": [
+        { "name": "Neodym-Magnete Ø5×3mm", "quantity": 6, "note": "3 pro Block × 2 Seiten" },
+        { "name": "Filz-Pads 8×40mm", "quantity": 2 },
+        { "name": "M3×20 Schraube", "quantity": 1, "note": "Tensioner-Klemmschraube" },
+        { "name": "M3 Sechskantmutter", "quantity": 1 }
+      ]
+    }
+  ]
 }

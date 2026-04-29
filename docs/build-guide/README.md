@@ -11,9 +11,10 @@ Dieser Wind-Generator besteht aus 3 Hauptbaugruppen + optionalen Werkzeugen:
 | # | Baugruppe | Beschreibung | Dauer* |
 |---|-----------|-------------|:------:|
 | 1 | [🗼 Helix-Turm](01_tower.md) | Modulare Helix-Flügel mit Stecksystem | ~6h |
-| 2 | [⚡ Generator](02_generator.md) | Axialfluss-Generator (Sandwich-Bauweise) | ~8h |
-| 3 | [🏗️ Basis-Station](03_base_station.md) | Gehäuse mit Lager und Baumklemme | ~4h |
+| 2 | [⚡ Generator](02_generator.md) | XXL Axialfluss-Generator (Capsule-Spulen) | ~8h |
+| 3 | [🏗️ XXL Basis-Station](03_base_station.md) | 220mm Gehäuse mit Lager und Wartungsklappe | ~4h |
 | 4 | [🔧 Endmontage](04_final_assembly.md) | Alles zusammenbauen und testen | ~2h |
+| 5 | [🛠️ Werkzeuge](05_tools.md) | Wickelmaschine, Magnet-Puffer, Easy-Tool | ~3h |
 
 *\* Reine Montagezeit ohne Druckzeit*
 

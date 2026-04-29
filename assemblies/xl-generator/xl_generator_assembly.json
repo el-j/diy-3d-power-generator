@@ -1,0 +1,39 @@
+{
+  "assembly_id": "xl-generator",
+  "name": "XXL Axialfluss-Generator / XL Axial Flux Generator",
+  "description": "Massiver 20-Pol Sandwich-Generator mit 180mm Rotoren, ovalen Gigant-Spulen (Capsule-Form) und Leichtbau-Skelettierung.",
+  "version": "2.0.0",
+  "status": "active",
+  "replaces": "generator (smalBasis 10/20-pole)",
+  "components": [
+    { "id": "XLG-ROT-01", "name": "XXL Rotor Oben", "directory": "rotor-top-xl", "quantity": 1 },
+    { "id": "XLG-ROT-02", "name": "XXL Rotor Unten", "directory": "rotor-bottom-xl", "quantity": 1 },
+    { "id": "XLG-BP-01", "name": "XXL Backplate Oben", "directory": "backplate-top-xl", "quantity": 1 },
+    { "id": "XLG-BP-02", "name": "XXL Backplate Unten", "directory": "backplate-bottom-xl", "quantity": 1 },
+    { "id": "XLG-STAT-01", "name": "XXL Stator-Schlitten", "directory": "stator-sled-xl", "quantity": 1 },
+    { "id": "XLG-STAT-02", "name": "XXL Stator-Deckel", "directory": "stator-cover-xl", "quantity": 1 }
+  ],
+  "source_scripts": {
+    "generator": "src/bigBasis/big_base_generator.py"
+  },
+  "key_parameters": {
+    "rotor_radius": 90.0,
+    "mag_kreis_r": 74.0,
+    "anzahl_magnete": 20,
+    "stator_radius": 99.0,
+    "stator_dicke": 8.0,
+    "spule_type": "oval/capsule",
+    "spule_aussen_l": 40.0,
+    "spule_aussen_w": 26.0,
+    "spule_dicke": 6.0,
+    "note": "Capsule-Spulen statt runde! Mehr Kupfer = mehr Leistung."
+  },
+  "improvements_over_v1": [
+    "Rotoren: 90mm Radius statt 38mm — massives Drehmoment",
+    "Magnete auf R74 statt R27 — höhere Geschwindigkeit am Magnetkreis",
+    "Ovale Capsule-Spulen statt runde — 40×26mm statt Ø14mm",
+    "6mm Spulentaschen statt 3.5mm — doppelt so viel Kupfer",
+    "Leichtbau-Skelettierung: 5 große Löcher pro Rotor/Backplate",
+    "Stator 8mm dick statt 5mm — massiveres Substrat"
+  ]
+}

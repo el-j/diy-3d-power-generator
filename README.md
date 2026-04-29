@@ -6,7 +6,7 @@
 </p>
 
 <h1 align="center">🌬️ WindPower-3D</h1>
-<h3 align="center">Open-Source Helix Wind Generator — Fully 3D Printable</h3>
+<h3 align="center">Open-Source Savonius Helix Wind Generator — Fully 3D Printable</h3>
 
 <p align="center">
   <strong>Parametric • Modular • AI-Orchestrated Design Bureau</strong><br/>
@@ -18,15 +18,16 @@
 
 ## ⚡ Was ist WindPower-3D?
 
-Ein **vollständig 3D-druckbarer Helix Windgenerator** mit integriertem Axialfluss-Generator. Designed für den Bambu Lab P1S (256×256mm), aber kompatibel mit jedem FDM-Drucker.
+Ein **vollständig 3D-druckbarer Savonius-Helix Windgenerator** mit integriertem XXL Axialfluss-Generator. Designed für den Bambu Lab P1S (256×256mm), aber kompatibel mit jedem FDM-Drucker.
 
 ### 🌟 Features
 
 | Feature | Details |
 |---------|---------|
-| 🔄 **Modularer Turm** | Stapelbare Helix-Etagen — baue so hoch wie du willst |
-| ⚡ **Axialfluss-Generator** | Sandwich-Bauweise mit 12 Spulen und 10/20 Neodym-Magneten |
-| 🏗️ **Snap-In Basis-Station** | Kegelrollenlager + Einschub-System für den Generator |
+| 🔄 **Modularer Turm** | Stapelbare Helix-Etagen mit 12-Zahn Vielzahn-Kupplung |
+| ⚡ **XXL Generator** | 180mm Rotoren, 20-Pol, ovale Capsule-Spulen (40×26mm!) |
+| 🏗️ **XXL Basis-Station** | 220mm Ø, Stacking-Deckel, Wartungsklappe, wasserdichte Bodenwanne |
+| 🔧 **Profi-Werkzeuge** | Traversier-Wickelmaschine, Magnet-Puffer, Akkuschrauber-Aufsatz |
 | 📐 **Parametrisches Design** | Alle Maße in JSON — ändere eine Zahl, alles passt sich an |
 | 🤖 **AI Design Bureau** | 7 spezialisierte Agenten orchestrieren den Konstruktions-Workflow |
 | 📋 **Lebende BOM** | Stückliste aktualisiert sich automatisch bei Änderungen |
@@ -66,11 +67,16 @@ graph LR
 ### 🗼 Helix-Turm
 Modulares Stecksystem mit 12-Zahn Vielzahn-Kupplung. Jede Etage: 2 Helix-Flügel (90° Twist), 1 Skelett-Verbinder, 1 Achsen-Plug.
 
-### ⚡ Axialfluss-Generator
-Sandwich-Bauweise: 2 Magnet-Rotoren (10 oder 20 Pole) mit 12 Kupferspulen im Stator. Ausrichtungskerben und Polaritätsmarkierungen für fehlerfreie Montage.
+### ⚡ XXL Axialfluss-Generator *(NEU v2!)*
+Sandwich-Bauweise mit **180mm Rotoren** und **ovalen Capsule-Spulen** (40×26mm statt runde Ø14mm). 20 Neodym-Magnete auf R74mm Kreis für massives Drehmoment. Leichtbau-Skelettierung für weniger Filament und bessere Kühlung.
 
-### 🏗️ Basis-Station
-Gehäuse mit Kegelrollenlager (32005), Einschub-System für den Generator-Schlitten und Baumklemme.
+### 🏗️ XXL Basis-Station *(NEU v2!)*
+**220mm Ø Gehäuse** mit 50mm Kegelrollenlager (real gemessen!), Stacking-Deckel, 3× Wand-Flansche, wasserdichte Bodenwanne und Elektronik-Wartungsklappe mit Backpack-Gehäuse.
+
+### 🔧 Werkzeuge *(Erweitert v2!)*
+- **Easy-Tool**: Akkuschrauber-Aufsatz zum schnellen Spulenwickeln
+- **Komplex-Spooler**: Professionelle Traversier-Wickelmaschine (1:24 Zahnrad-Untersetzung, 4 Achsen, Skeleton-Basis)
+- **Magnet-Puffer**: Magnetischer Drahtspanner mit T-Nut-Schiene und Filz-Bremse
 
 ---
 
@@ -91,27 +97,32 @@ cd windpower-3d
 ### 4. Bauen
 → [`docs/build-guide/`](docs/build-guide/README.md) — Schritt-für-Schritt Anleitungen
 
-### 5. FreeCAD Scripts anpassen (optional)
-```bash
-# Parameter ändern
-edit shared/parameters.json
+### 5. FreeCAD Scripts laden (optional)
+```python
+# In FreeCAD Python Console einmal pasten:
+exec(open("windpower-3d/freecad_loader.py").read())
 
-# Script in FreeCAD ausführen
-freecad src/Helix_Leaf+Connector.py
+# Dann jedes Script laden:
+run("bigBasis/big_base_station")       # XXL Basis
+run("bigBasis/big_base_generator")      # XXL Generator
+run("Helix_Leaf+Connector")             # Turm
+run("tools/komplexSPooler/Traversier-Basis & Skeleton")  # Wickelmaschine
 ```
 
 ---
 
 ## 📋 Stückliste (Kurzfassung)
 
-| Kategorie | Menge (3 Etagen, 10-Pol) |
-|-----------|:------------------------:|
-| 🖨️ Druckteile | 25 Stück |
-| 🔩 Schrauben & Muttern | ~50 Stück |
-| 🧲 Neodym-Magnete (20×5×3mm) | 20 Stück |
-| ⚙️ Kegelrollenlager (32005) | 1 Stück |
+| Kategorie | Menge (XXL, 3 Etagen) |
+|-----------|:---------------------:|
+| 🖨️ Druckteile (Hauptanlage) | 29 Stück |
+| 🖨️ Druckteile (Werkzeuge) | 3–22 Stück |
+| 🔩 Einschmelzmuttern + Schrauben | ~52 Stück |
+| 🧲 Neodym-Magnete (20×5×3mm) | **40 Stück** |
+| ⚙️ Kegelrollenlager (29×50×15) | 1 Stück |
 | 📏 Vierkant-Achse (10×10mm) | 1 Stück |
-| 🔌 Kupferlackdraht (Ø0.5mm) | ~50m |
+| 🔌 Kupferlackdraht (Ø0.5mm) | ~100m |
+| 📦 Geschätztes Filament | ~1.5kg PETG |
 
 → [**Vollständige Stückliste**](docs/bom/master_bom.md)
 
@@ -153,22 +164,30 @@ windpower-3d/
 │   ├── identities/             #    7 Agenten-Identitäten
 │   ├── workflows/              #    Pipeline-Definitionen (JSON)
 │   └── state.json              #    Orchestrator-Status
-├── assemblies/                 # 📦 Baugruppen
+├── assemblies/                 # 📦 Baugruppen-Metadaten
 │   ├── tower/                  #    🗼 Helix-Turm
-│   ├── generator/              #    ⚡ Generator (10/20-Pol)
-│   ├── base-station/           #    🏗️ Basis-Station
-│   └── tools/                  #    🔧 Werkzeuge
+│   ├── xl-base-station/        #    🏗️ XXL Basis-Station (AKTIV)
+│   ├── xl-generator/           #    ⚡ XXL Generator (AKTIV)
+│   ├── base-station/           #    📦 Legacy Kleine Basis
+│   ├── generator/              #    📦 Legacy Generator
+│   └── tools/                  #    🔧 4× Werkzeug-Sets
 ├── shared/                     # 🔗 Geteilte Ressourcen
-│   ├── parameters.json         #    Zentrale Parameter-Registry
-│   ├── freecad_utils.py        #    FreeCAD Utility-Funktionen
+│   ├── parameters.json         #    Zentrale Parameter-Registry (v2)
+│   ├── freecad_utils.py        #    FreeCAD Utilities (inkl. Capsule!)
 │   ├── materials.json          #    Material-Definitionen
 │   └── fasteners.json          #    Verbindungselemente-Katalog
-├── docs/                       # 📚 Dokumentation
-│   ├── bom/                    #    📋 Stückliste
-│   ├── build-guide/            #    📖 Bauanleitungen (DE)
-│   └── ARCHITECTURE.md         #    🏗️ System-Architektur
-├── exports/                    # 📤 STL/3MF Exporte
 ├── src/                        # 💻 FreeCAD Scripts
+│   ├── bigBasis/               #    🏗️ XXL Basis + Generator
+│   ├── smalBasis/              #    📦 Legacy (kleine Variante)
+│   ├── tools/                  #    🔧 Werkzeuge
+│   │   ├── komplexSPooler/     #       Traversier-Wickelmaschine
+│   │   ├── firstSpooler/       #       Original-Wickler
+│   │   ├── magnetPuffer/       #       Drahtspanner
+│   │   └── easy_tool_*         #       Akkuschrauber-Aufsatz
+│   └── Helix_Leaf+Connector.py #    🗼 Turm-Flügel
+├── exports/                    # 📤 STL/3MF Exporte
+├── freecad_loader.py           # 🚀 FreeCAD Script-Loader
+├── docs/                       # 📚 Dokumentation
 └── README.md                   #    ← Du bist hier
 ```
 
@@ -192,7 +211,10 @@ Alle Maße sind zentral in [`shared/parameters.json`](shared/parameters.json) de
 [`shared/freecad_utils.py`](shared/freecad_utils.py) enthält alle gemeinsam genutzten Funktionen:
 - `make_square_prism()` — Vierkant-Achsloch
 - `make_vielzahn_prism()` — 12-Zahn Kupplung
-- `create_circular_array()` — Kreisförmige Muster
+- `make_capsule()` — Ovale Spulen-Form *(NEU v2)*
+- `make_centered_box()` — Zentrierter Quader *(NEU v2)*
+- `create_capsule_array()` — Kreisförmige Capsule-Muster *(NEU v2)*
+- `create_circular_array()` — Kreisförmige Zylinder-Muster
 - `load_parameters()` — Parameter aus JSON laden
 
 ---

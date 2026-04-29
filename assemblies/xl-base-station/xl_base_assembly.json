@@ -1,0 +1,47 @@
+{
+  "assembly_id": "xl-base-station",
+  "name": "XXL Basis-Station / XL Base Station",
+  "description": "Massive XXL-Basis mit 220mm Durchmesser, Stacking-Deckel mit 50mm Kegelrollenlager, Wand-Flansch, wasserdichter Bodenwanne und Elektronik-Wartungsklappe mit Backpack.",
+  "version": "2.0.0",
+  "status": "active",
+  "replaces": "base-station (smalBasis)",
+  "components": [
+    { "id": "XL-HOUS-01", "name": "XXL Basis-Gehäuse", "directory": "housing-xxl", "quantity": 1 },
+    { "id": "XL-DECK-01", "name": "Stacking Lager-Deckel", "directory": "stacking-cover", "quantity": 1 },
+    { "id": "XL-FLNSH-01", "name": "Wand-Flansch", "directory": "wall-bracket", "quantity": 3 },
+    { "id": "XL-SLED-01", "name": "Boden-Schlitten XXL", "directory": "floor-sled", "quantity": 1 },
+    { "id": "XL-ADAPT-01", "name": "Universal Lager-Adapter", "directory": "bearing-adapter", "quantity": 1 },
+    { "id": "XL-DISC-01", "name": "Start-Scheibe Flach", "directory": "start-disc", "quantity": 1 },
+    { "id": "XL-WANN-01", "name": "Boden-Wanne Wasserdicht", "directory": "waterproof-tray", "quantity": 1 },
+    { "id": "XL-KLAP-01", "name": "Elektronik Wartungs-Klappe", "directory": "maintenance-hatch", "quantity": 1 }
+  ],
+  "source_scripts": {
+    "station": "src/bigBasis/big_base_station.py",
+    "generator": "src/bigBasis/big_base_generator.py"
+  },
+  "key_parameters": {
+    "fuss_radius": 110.0,
+    "gehaeuse_h": 120.0,
+    "lager_innen_d": 29.0,
+    "lager_aussen_d": 50.0,
+    "lager_toleranz": 0.2,
+    "adapter_pressfit": 0.15,
+    "note": "Lager-Maße basieren auf REALER MESSUNG, nicht Datenblatt!"
+  },
+  "assembly_sequence": [
+    "1. XXL Gehäuse drucken (evtl. 2 Teile bei kleinerem Drucker)",
+    "2. Stacking-Deckel drucken",
+    "3. 3× Wand-Flansch drucken",
+    "4. Boden-Schlitten drucken",
+    "5. Universal Lager-Adapter drucken (Pressfit-Toleranz beachten!)",
+    "6. Bodenwanne drucken",
+    "7. Wartungsklappe drucken",
+    "8. Einschmelzmuttern einsetzen (Gehäuse: 6× oben, 6× unten, 4× seitlich für Wanne, 4× für Klappe)",
+    "9. Kegelrollenlager in Stacking-Deckel einpressen (50.2mm Tasche für 50mm Lager)",
+    "10. Lager-Adapter einsetzen (Pressfit +0.15mm)",
+    "11. Generator-Schlitten von vorne einschieben",
+    "12. Wand-Flansche montieren (3× um 120° versetzt)",
+    "13. Bodenwanne von unten verschrauben",
+    "14. Wartungsklappe einhängen"
+  ]
+}

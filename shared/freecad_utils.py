@@ -119,6 +119,38 @@ def make_vielzahn_prism(r_out, r_in, teeth, height, rotation_offset=15.0):
     return Part.Face(Part.Wire(Part.makePolygon(points))).extrude(App.Vector(0, 0, height))
 
 
+def make_capsule(length, width, height):
+    """
+    Create a centered capsule (stadium) shape — rectangle with semicircular ends.
+
+    Purpose: Oval coil pockets in XXL generator stator.
+    Usage: make_capsule(40.0, 26.0, 6.0)  →  40mm long, 26mm wide capsule
+    Feature: INFRA-002 (XL Generator Support)
+    """
+    r = width / 2.0
+    d = length - width
+    cx = d / 2.0
+    cyl1 = Part.makeCylinder(r, height).translate(App.Vector(cx, 0, 0))
+    cyl2 = Part.makeCylinder(r, height).translate(App.Vector(-cx, 0, 0))
+    box = Part.makeBox(d, width, height).translate(App.Vector(-cx, -r, 0))
+    return cyl1.fuse(cyl2).fuse(box)
+
+
+def make_centered_box(length, width, height, cx=0, cy=0, cz=None):
+    """
+    Create a box centered on a given point.
+
+    Purpose: Cleaner positioning for pillars, brackets, pockets.
+    Usage: make_centered_box(20, 12, 50, cx=0, cy=0, cz=25)
+    Feature: INFRA-002 (Tool Scripts Support)
+    """
+    if cz is None:
+        cz = height / 2.0
+    box = Part.makeBox(length, width, height)
+    box.translate(App.Vector(cx - length / 2.0, cy - width / 2.0, cz - height / 2.0))
+    return box
+
+
 # ==========================================
 # 🔄 ARRAY PATTERNS
 # ==========================================
@@ -159,6 +191,28 @@ def create_rectangular_array(radius, length, width, depth, count):
         box.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), angle_deg)
         box.translate(App.Vector(radius * math.cos(angle_rad), radius * math.sin(angle_rad), 0))
         items.append(box)
+    res = items[0]
+    for m in items[1:]:
+        res = res.fuse(m)
+    return res
+
+
+def create_capsule_array(radius, length, width, depth, count):
+    """
+    Create a fused circular array of capsule shapes (rotated to face center).
+
+    Purpose: Oval coil pockets in XXL generator stator.
+    Usage: create_capsule_array(74.0, 40.0, 26.0, 6.0, 12)
+    Feature: INFRA-002 (XL Generator Support)
+    """
+    items = []
+    for i in range(count):
+        angle_deg = i * (360.0 / count)
+        angle_rad = math.radians(angle_deg)
+        cap = make_capsule(length, width, depth)
+        cap.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), angle_deg)
+        cap.translate(App.Vector(radius * math.cos(angle_rad), radius * math.sin(angle_rad), 0))
+        items.append(cap)
     res = items[0]
     for m in items[1:]:
         res = res.fuse(m)

@@ -110,22 +110,25 @@ for i in range(4):
 
 
 # ==========================================
-# 3. TAUMELSCHEIBE V2 (Ultra-Kompakt, 13.5mm dick)
+# 3. TAUMEL-TROMMEL (Grün) - AUSSEN MONTIERT
 # ==========================================
-# Passt exakt zwischen die Lagerhülsen der Türme!
-swash = Part.makeCylinder(20.0, 13.5)
+COLOR_GUIDE = (0.2, 0.8, 0.2)
 
-# Schräger Schnitt (10 Grad für exakt 6mm Hub bei Radius 17mm)
-box_cut = Part.makeBox(60, 60, 30).translate(App.Vector(-30, -30, 0))
-box_cut.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 10.0)
-box_cut.translate(App.Vector(0,0,5.0)) # Schneidet tief genug für den Hub
-swash = swash.cut(box_cut)
+def make_wobble_drum():
+    # Massiver Zylinder mit schrägem Spalt (Nut)
+    drum = Part.makeCylinder(20.0, 20.0)
+    slot = Part.makeBox(50, 50, 2.5).translate(App.Vector(-25, -25, -1.25))
+    slot.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 10.0) # 10 Grad Neigung
+    slot.translate(App.Vector(0,0, 10.0))
+    
+    drum = drum.cut(slot)
+    drum = drum.cut(make_hex_prism(hex_loch_sw, 25).translate(App.Vector(0,0,-2)))
+    return drum.removeSplitter()
 
-hex_hole = make_hex_prism(hex_loch_sw, 20).translate(App.Vector(0,0,-2))
-swash = swash.cut(hex_hole).removeSplitter()
-swash.translate(App.Vector(80, 0, 0))
-show_obj(swash, "Taumelscheibe_V2_Kompakt")
-
+drum = make_wobble_drum()
+drum.rotate(App.Vector(0,0,0), App.Vector(1,0,0), -90)
+drum.translate(App.Vector(-135, 85, achse_z)) # Zentriert exakt auf Y=95!
+show_obj(drum, "Taumel_Trommel")
 
 # ==========================================
 # 4. KURBEL-ARM & GRIFF

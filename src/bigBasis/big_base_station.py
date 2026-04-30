@@ -10,21 +10,20 @@ doc = App.newDocument("Savonius_Base_Station_XXL")
 achse_kantenlaenge = 10.0 
 toleranz = 0.5 
 
-# KRITISCHE ÄNDERUNG AUFGRUND REALER MESSUNG!
-# Datenblatt: Lager 50mm außen. 29mm innen.
-# Wir konstruieren für die Realität!
 lager_innen_d = 29.0      
-lager_aussen_d = 50.0     # REAL-MESSUNG ÜBERNIMMT!
+lager_aussen_d = 50.0     
 lager_dicke = 15.0        
-lager_toleranz = 0.2      # Ergibt 50.2mm CAD-Loch für das 50.0mm Lager.
-adapter_pressfit = 0.15   # NEU: +0.15mm Übermaß für den "saftigen" Sitz im inneren Lagerring!
+lager_toleranz = 0.2      
+adapter_pressfit = 0.15   
 
-# MASSIVE GRÖSSEN!
+# ==========================================
+# 🔥 GEHÄUSE-HÖHE ULTRA-KOMPAKT!
+# Perfekt berechnet für das neue flache 30mm Aero-Sandwich!
+# ==========================================
+gehaeuse_h = 91.0         # Von 115mm auf 91mm geschrumpft!
 fuss_radius = 110.0       
-gehaeuse_h = 120.0        
 deckel_h = 18.0           
 
-# Turm & Adapter Daten
 blatt_radius = 66.0       
 dicke = 2.4               
 versatz = 12.0            
@@ -55,33 +54,42 @@ def show_obj(shape, name):
     return obj
 
 # ==========================================
-# BAUTEIL 1: DER XXL MASCHINEN-FUSS (Basis)
+# BAUTEIL 1: DER XXL MASCHINEN-FUSS 
 # ==========================================
 gehaeuse = Part.makeCylinder(fuss_radius, gehaeuse_h)
 
-r_o_cyl = Part.makeCylinder(92.0, 65.6).translate(App.Vector(0, 0, 54.4))
-r_o_box = Part.makeBox(184.0, 140.0, 65.6).translate(App.Vector(-92.0, -140.0, 54.4))
+# Achsen-Freilauf (Damit Clamps und Achse nicht reiben)
+clearance_hole = Part.makeCylinder(22.0, gehaeuse_h + 2).translate(App.Vector(0,0,-1))
+gehaeuse = gehaeuse.cut(clearance_hole)
+
+# OBERE KAMMER (Radius 102mm für 4mm sauberen Freiraum zum 98mm AeroFan!)
+r_o_cyl = Part.makeCylinder(102.0, 45.8).translate(App.Vector(0, 0, 45.2))
+r_o_box = Part.makeBox(204.0, 140.0, 45.8).translate(App.Vector(-102.0, -140.0, 45.2))
 gehaeuse = gehaeuse.cut(r_o_cyl).cut(r_o_box)
 
-s_cyl = Part.makeCylinder(100.0, 8.4).translate(App.Vector(0,0,46.0))
-s_box = Part.makeBox(200.0, 140.0, 8.4).translate(App.Vector(-100.0, -140.0, 46.0))
+# STATOR SCHLITZ (Zentriert exakt bei Z=41.0)
+s_cyl = Part.makeCylinder(102.0, 8.4).translate(App.Vector(0,0,36.8))
+s_box = Part.makeBox(204.0, 140.0, 8.4).translate(App.Vector(-102.0, -140.0, 36.8))
 gehaeuse = gehaeuse.cut(s_cyl).cut(s_box)
 
-r_u_cyl = Part.makeCylinder(92.0, 30.0).translate(App.Vector(0,0,16.0))
-r_u_box = Part.makeBox(184.0, 140.0, 30.0).translate(App.Vector(-92.0, -140.0, 16.0))
+# UNTERE KAMMER (Radius 102mm für perfekten Flow)
+r_u_cyl = Part.makeCylinder(102.0, 20.8).translate(App.Vector(0,0,16.0))
+r_u_box = Part.makeBox(204.0, 140.0, 20.8).translate(App.Vector(-102.0, -140.0, 16.0))
 gehaeuse = gehaeuse.cut(r_u_cyl).cut(r_u_box)
 
+# MASSIVER BODEN (Z=0 bis 16)
 b_cyl = Part.makeCylinder(100.0, 16.0).translate(App.Vector(0,0,0))
 b_box = Part.makeBox(200.0, 140.0, 16.0).translate(App.Vector(-100.0, -140.0, 0))
 gehaeuse = gehaeuse.cut(b_cyl).cut(b_box)
 
+# Seitliche Verstärkungspads (Angepasst auf 91mm Höhe)
 for angle in [0, 90, 180]:
-    pad = Part.makeBox(15.0, 40.0, 90.0).translate(App.Vector(102.0, -20.0, 25.0))
+    pad = Part.makeBox(15.0, 40.0, 75.0).translate(App.Vector(102.0, -20.0, 16.0))
     pad.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
     gehaeuse = gehaeuse.fuse(pad)
     
     for dy in [-12, 12]:
-        for dz in [40, 100]: 
+        for dz in [30, 75]: 
             loch = Part.makeCylinder(3.4 / 2.0, 20.0)
             loch.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
             loch.translate(App.Vector(95.0, dy, dz))
@@ -94,7 +102,7 @@ for angle in [0, 90, 180]:
             insert.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
             gehaeuse = gehaeuse.cut(insert)
 
-# 6. M3 Gewindeeinsätze für den Deckel (Oben bei Z=120, Radius=105)
+# M3 Gewindeeinsätze für den Deckel 
 for i in range(6):
     angle = math.radians(i * 60)
     x = 105.0 * math.cos(angle)
@@ -103,7 +111,7 @@ for i in range(6):
     freiraum = Part.makeCylinder(3.4 / 2.0, 10.0).translate(App.Vector(x, y, gehaeuse_h - 10.0))
     gehaeuse = gehaeuse.cut(insert).cut(freiraum)
 
-# 7. M3 Gewindeeinsätze für Stacking (Unten bei Z=0, Radius=105, 30° versetzt)
+# M3 Gewindeeinsätze für Stacking (Unten)
 for i in range(6):
     angle = math.radians(i * 60 + 30)
     x = 105.0 * math.cos(angle)
@@ -112,7 +120,7 @@ for i in range(6):
     freiraum = Part.makeCylinder(3.4 / 2.0, 10.0).translate(App.Vector(x, y, 0))
     gehaeuse = gehaeuse.cut(insert).cut(freiraum)
 
-# 8. M3 Gewindeeinsätze für die Wasserdichte Bodenwanne (seitlich unten)
+# M3 Gewindeeinsätze für die Wasserdichte Bodenwanne
 for i in range(4):
     angle_deg = i * 90 + 45
     insert = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t + 2.0)
@@ -121,8 +129,8 @@ for i in range(4):
     insert.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
     gehaeuse = gehaeuse.cut(insert)
 
-# 9. M3 Verschraubung für die Elektronik-Wartungsklappe (Vorne an den Wangen)
-for z_pos in [25.0, 105.0]:
+# M3 Verschraubung für die Elektronik-Wartungsklappe
+for z_pos in [25.0, 75.0]:
     for x_pos in [-96.0, 96.0]:
         notch = Part.makeBox(16.0, 30.0, 16.0).translate(App.Vector(x_pos - 8.0, -70.0, z_pos - 8.0))
         gehaeuse = gehaeuse.cut(notch)
@@ -142,7 +150,7 @@ show_obj(gehaeuse, "Basis_Gehaeuse_XXL")
 
 
 # ==========================================
-# BAUTEIL 2: DER NEUE FLACHE STACKING-DECKEL (50mm Lagerschale!)
+# BAUTEIL 2: DER FLACHE STACKING-DECKEL 
 # ==========================================
 deckel_base = Part.makeCylinder(fuss_radius + 3.0, deckel_h)
 
@@ -185,10 +193,10 @@ show_obj(deckel, "Stacking_Lager_Deckel_FLACH")
 
 
 # ==========================================
-# BAUTEIL 3: DER WAND-FLANSCH 
+# BAUTEIL 3: DER WAND-FLANSCH (Flacher für 91mm Base)
 # ==========================================
 bracket_w = 40.0
-bracket_h = 110.0 
+bracket_h = 86.0 
 bracket_d = 50.0
 wall_thick = 6.0
 
@@ -209,7 +217,7 @@ tri2 = Part.Face(Part.Wire(Part.makePolygon([p1_2, p2_2, p3_2, p1_2]))).extrude(
 bracket = bracket.fuse(tri1).fuse(tri2)
 
 for dy in [-12, 12]:
-    for dz in [15, 75]: 
+    for dz in [15, 71]: 
         loch = Part.makeCylinder(3.4 / 2.0, wall_thick + 2)
         loch.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
         loch.translate(App.Vector(-1.0, dy, dz))
@@ -259,48 +267,7 @@ show_obj(boden_schlitten, "Boden_Schlitten_XXL")
 
 
 # ==========================================
-# BAUTEIL 5: DER UNIVERSAL-LAGER-ADAPTER (Jetzt mit dynamischem Pressfit!)
-# ==========================================
-adapter_d = lager_innen_d + adapter_pressfit
-kragen_aussen_d = max(34.0, lager_innen_d + 8.0) # Der Kragen skaliert dynamisch mit!
-
-# Die konische Einführ-Fase (Die ersten 2mm sind abgeschrägt zum perfekten Einfädeln)
-einfuehr_fase = Part.makeCone((adapter_d - 1.5) / 2.0, adapter_d / 2.0, 2.0)
-haupt_schaft = Part.makeCylinder(adapter_d / 2.0, 13.0).translate(App.Vector(0,0, 2.0))
-adapter = einfuehr_fase.fuse(haupt_schaft)
-
-kragen_fase = Part.makeCone(adapter_d / 2.0, kragen_aussen_d / 2.0, 4.6).translate(App.Vector(0,0, 15.0))
-kragen_gerade = Part.makeCylinder(kragen_aussen_d / 2.0, 12.0).translate(App.Vector(0,0, 19.6))
-adapter = adapter.fuse(kragen_fase).fuse(kragen_gerade)
-
-hex_plug = make_hex_prism(hex_radius, 8.0).translate(App.Vector(0,0, 31.6))
-adapter = adapter.fuse(hex_plug)
-
-achse_cut = make_square_prism(achse_kantenlaenge + 0.5, 42.0).translate(App.Vector(0,0, -1.0))
-adapter = adapter.cut(achse_cut)
-
-z_loch = 19.6 + 6.0 
-for i in range(4):
-    angle = i * 90
-    m3_loch = Part.makeCylinder(3.4 / 2.0, 20.0)
-    m3_loch.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-    m3_loch.translate(App.Vector(0, 0, z_loch))
-    m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
-    
-    m3_insert = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t)
-    m3_insert.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 90)
-    m3_insert.translate(App.Vector((kragen_aussen_d / 2.0) - einschmelzmutter_t, 0, z_loch))
-    m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
-    
-    adapter = adapter.cut(m3_loch).cut(m3_insert)
-
-adapter = adapter.removeSplitter()
-adapter.translate(App.Vector(fuss_radius * 2.2, 0, 0)) 
-show_obj(adapter, "Universal_Lager_Adapter")
-
-
-# ==========================================
-# BAUTEIL 6: FLACHE START-SCHEIBE 
+# BAUTEIL 5: FLACHE START-SCHEIBE 
 # ==========================================
 kappen_radius_scheibe = blatt_radius - versatz + blatt_radius + 5.0 
 scheibe = Part.makeCylinder(kappen_radius_scheibe, kappen_dicke)
@@ -344,7 +311,7 @@ show_obj(scheibe, "Start_Scheibe_FLACH")
 
 
 # ==========================================
-# BAUTEIL 7: BODEN-WANNE WASSERDICHT (Völlig flach von unten!)
+# BAUTEIL 6: BODEN-WANNE WASSERDICHT 
 # ==========================================
 wanne_h_out = 28.0 
 wanne_base = Part.makeCylinder(fuss_radius + 3.0, wanne_h_out)
@@ -363,7 +330,6 @@ for i in range(4):
     loch.translate(App.Vector(fuss_radius - 2.0, 0, 20.0))
     loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
     
-    # GEFIXT: Der Senkkopf war verkehrt herum! Er wird nun nach außen hin breiter (6.4mm).
     senk = Part.makeCone(3.4/2.0, 6.4/2.0, 2.0)
     senk.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
     senk.translate(App.Vector(fuss_radius + 1.0, 0, 20.0))
@@ -377,10 +343,11 @@ show_obj(wanne, "Boden_Wanne_Wasserdicht")
 
 
 # ==========================================
-# BAUTEIL 8: ELEKTRONIK WARTUNGS-KLAPPE 
+# BAUTEIL 7: ELEKTRONIK WARTUNGS-KLAPPE 
 # ==========================================
-c_out = Part.makeCylinder(110.0, 103.0).translate(App.Vector(0, 0, 16.5))
-c_in = Part.makeCylinder(106.0, 103.0).translate(App.Vector(0, 0, 16.5))
+# Klappe schrumpft für das neue 91mm Gehäuse auf 75mm Höhe
+c_out = Part.makeCylinder(110.0, 75.0).translate(App.Vector(0, 0, 16.0))
+c_in = Part.makeCylinder(106.0, 75.0).translate(App.Vector(0, 0, 16.0))
 shield = c_out.cut(c_in)
 
 b1 = Part.makeBox(230.0, 230.0, 150.0).translate(App.Vector(-115.0, 0, 0))
@@ -388,7 +355,7 @@ b2 = Part.makeBox(110.0, 230.0, 150.0).translate(App.Vector(91.5, -115.0, 0))
 b3 = Part.makeBox(110.0, 230.0, 150.0).translate(App.Vector(-201.5, -115.0, 0))
 shield = shield.cut(b1).cut(b2).cut(b3)
 
-for z_pos in [25.0, 105.0]:
+for z_pos in [25.0, 75.0]:
     for x_pos in [-96.0, 96.0]:
         tab = Part.makeBox(16.0, 18.0, 16.0).translate(App.Vector(x_pos - 8.0, -58.0, z_pos - 8.0))
         
@@ -403,16 +370,16 @@ for z_pos in [25.0, 105.0]:
         tab = tab.cut(loch).cut(kopf)
         shield = shield.fuse(tab)
 
-bp_out = Part.makeBox(80.0, 70.0, 103.0).translate(App.Vector(-40.0, -170.0, 16.5))
-bp_in = Part.makeBox(72.0, 65.0, 99.0).translate(App.Vector(-36.0, -165.0, 18.5))
+bp_out = Part.makeBox(80.0, 70.0, 75.0).translate(App.Vector(-40.0, -170.0, 16.0))
+bp_in = Part.makeBox(72.0, 65.0, 71.0).translate(App.Vector(-36.0, -165.0, 18.0))
 backpack = bp_out.cut(bp_in)
 
-durchbruch = Part.makeBox(72.0, 30.0, 99.0).translate(App.Vector(-36.0, -120.0, 18.5))
+durchbruch = Part.makeBox(72.0, 30.0, 71.0).translate(App.Vector(-36.0, -120.0, 18.0))
 shield = shield.cut(durchbruch)
 klappe = shield.fuse(backpack)
 
 for dx in [-25.0, 25.0]:
-    for dz in [40.0, 95.0]:
+    for dz in [35.0, 65.0]:
         standoff = Part.makeCylinder(4.0, 5.0)
         standoff.rotate(App.Vector(0,0,0), App.Vector(1,0,0), -90)
         standoff.translate(App.Vector(dx, -165.0, dz))
@@ -422,7 +389,6 @@ for dx in [-25.0, 25.0]:
         loch.translate(App.Vector(dx, -166.0, dz))
         klappe = klappe.fuse(standoff).cut(loch)
 
-# Das Kabel verlässt das System jetzt sauber durch die Seite der Anlage!
 kabel_loch = Part.makeCylinder(4.0, 10.0).translate(App.Vector(0, -135.0, 10.0))
 klappe = klappe.cut(kabel_loch)
 

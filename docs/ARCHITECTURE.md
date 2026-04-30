@@ -73,4 +73,19 @@ shared/fasteners.json ───────────────┤
 | `docs/bom/` | Bill of Materials (master + per-assembly) |
 | `docs/build-guide/` | Step-by-step assembly instructions (DE) |
 | `exports/` | STL/3MF build outputs |
-| `src/` | Original FreeCAD scripts (legacy, being migrated) |
+| `src/` | FreeCAD Python scripts (bigBasis = active, smalBasis = legacy) |
+| `src/bigBasis/` | XXL Generator + XXL Base Station (v2.x, ACTIVE) |
+| `src/smalBasis/` | Small 10/20-pole generator + base station (LEGACY) |
+| `src/tools/` | Winding machines and manufacturing tools |
+| `src/tools/komplexSPooler/example.aufbau.py` | Virtual assembly (visual reference, not a printed part) |
+| `exports/generator/` | Latest XXL generator STLs |
+| `exports/xl_basis/` | Latest XXL base station STLs |
+
+## Active Assembly Versions (2026-04-30)
+
+| Assembly | Version | Source |
+|----------|---------|--------|
+| xl-generator | **2.1.0** | `src/bigBasis/big_base_generator.py` |
+| xl-base-station | 2.0.0 | `src/bigBasis/big_base_station.py` |
+| tools | **2.1.0** | `src/tools/komplexSPooler/` |
+| tower | 1.x | `src/Helix_Leaf+Connector.py` |

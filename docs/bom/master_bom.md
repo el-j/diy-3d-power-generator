@@ -1,8 +1,8 @@
 # 📋 Stückliste / Bill of Materials
 
 > **Projekt**: Savonius Helix Wind-Generator  
-> **Version**: 2.0.0  
-> **Stand**: 2026-04-29  
+> **Version**: 2.1.0  
+> **Stand**: 2026-04-30  
 > **Konfiguration**: XXL Basis + XXL Generator (20-Pol Capsule)
 
 ---
@@ -29,6 +29,11 @@
 | 7 | XLG-BP-02 | XXL Backplate Unten | PETG | 1 | 25% | 0.2mm |
 | 8 | XLG-STAT-01 | XXL Stator-Schlitten (Ø198mm) | PETG | 1 | 25% | 0.2mm |
 | 9 | XLG-STAT-02 | XXL Stator-Deckel | PETG | 1 | 20% | 0.2mm |
+| 10 | XLG-PLUG-01 | Magnet-Spacer Klötzchen | PETG | 20 | 100% | 0.2mm |
+| 11 | XLG-SPACER-01 | Abstands-Hülse Rotoren (Ø20×10mm) | PETG | 2 | 100% | 0.2mm |
+| 12 | XLG-SPACER-02 | Abstands-Hülse Lager (Ø28×7mm) | PETG | 1 | 100% | 0.2mm |
+
+> 💡 **v2.1.0**: Magnet-Spacer und Abstands-Hülsen sind jetzt separate Bauteile (zuvor in Backplate integriert). Stator-Deckel Mittelloch auf korrekten R=16mm gefixt.
 
 ### 🏗️ XXL Basis-Station Assembly
 
@@ -127,5 +132,6 @@
 
 | Version | Datum | Änderungen |
 |---------|-------|------------|
+| 2.1.0 | 2026-04-30 | XLG-PLUG-01, XLG-SPACER-01/02 als separate Teile; Stator-Deckel Lochfix; Stator-Schlitten verkürzt; traeger_verschraubung.py; Virtueller Aufbau |
 | 2.0.0 | 2026-04-29 | XXL Basis (Ø220mm), XXL Generator (Ø180mm Rotor, Capsule-Spulen), Komplex-Spooler, Magnet-Puffer |
 | 1.0.0 | 2026-04-28 | Erstversion mit Small-Basis und 10/20-Pol Generator |

@@ -3,11 +3,30 @@
     "status": "idle",
     "phase": null,
     "base_branch": "main",
-    "last_run": null
+    "last_run": "2026-04-30"
   },
+  "project_version": "2.1.0",
+  "active_assemblies": ["xl-generator", "xl-base-station", "tower", "tools"],
+  "legacy_assemblies": ["generator", "base-station"],
   "tasks": {},
   "queue": [],
   "active": [],
-  "history": [],
+  "history": [
+    {
+      "id": "sync-2026-04-30",
+      "description": "Comprehensive doc sync after v2.1.0 generator refactor (3 new parts, stator-deckel fix, stator-schlitten resize, Komplex-Spooler virtual assembly, traeger rename)",
+      "result": "done",
+      "timestamp": "2026-04-30",
+      "files_updated": [
+        "assemblies/xl-generator/xl_generator_assembly.json",
+        "assemblies/tools/tools_assembly.json",
+        "docs/bom/master_bom.json",
+        "docs/bom/master_bom.md",
+        "docs/build-guide/02_generator.md",
+        "shared/parameters.json",
+        "CLAUDE.md"
+      ]
+    }
+  ],
   "errors": []
 }

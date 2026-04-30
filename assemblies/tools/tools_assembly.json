@@ -2,7 +2,7 @@
   "assembly_id": "tools",
   "name": "Werkzeuge / Manufacturing Tools",
   "description": "Komplettsystem zum Spulenwickeln, Drahtspannen und Magnethandling. Von einfachen Akkuschrauber-Aufsätzen bis zur professionellen Traversier-Wickelmaschine.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "status": "active",
   "tool_sets": [
     {
@@ -44,8 +44,10 @@
         "src/tools/komplexSPooler/Traversier-Basis & Skeleton.py",
         "src/tools/komplexSPooler/achsen_zubehoer.py",
         "src/tools/komplexSPooler/easy_tool_big_spools_4kant.py",
-        "src/tools/komplexSPooler/traeger.py"
+        "src/tools/komplexSPooler/traeger_verschraubung.py",
+        "src/tools/komplexSPooler/example.aufbau.py"
       ],
+      "virtual_assembly": "src/tools/komplexSPooler/example.aufbau.py",
       "components": [
         { "id": "TOOL-KS-01", "name": "Maschinen-Basis Kompakt (Skeleton)", "quantity": 1 },
         { "id": "TOOL-KS-02", "name": "Steck-Türme (4 Achsen × 2)", "quantity": 8 },
@@ -56,7 +58,7 @@
         { "id": "TOOL-KS-07", "name": "Z6 Trommel-Zahnrad 60Z", "quantity": 1 },
         { "id": "TOOL-KS-08", "name": "Achsen-Zubehör", "quantity": 1 },
         { "id": "TOOL-KS-09", "name": "Spulen-Wickler 4-Kant", "quantity": 1 },
-        { "id": "TOOL-KS-10", "name": "Träger", "quantity": 1 }
+        { "id": "TOOL-KS-10", "name": "Träger-Verschraubung", "quantity": 1 }
       ],
       "gear_train": {
         "ratio": "1:24",

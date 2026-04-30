@@ -2,7 +2,7 @@
   "assembly_id": "xl-generator",
   "name": "XXL Axialfluss-Generator / XL Axial Flux Generator",
   "description": "Massiver 20-Pol Sandwich-Generator mit 180mm Rotoren, ovalen Gigant-Spulen (Capsule-Form) und Leichtbau-Skelettierung.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "status": "active",
   "replaces": "generator (smalBasis 10/20-pole)",
   "components": [
@@ -11,7 +11,10 @@
     { "id": "XLG-BP-01", "name": "XXL Backplate Oben", "directory": "backplate-top-xl", "quantity": 1 },
     { "id": "XLG-BP-02", "name": "XXL Backplate Unten", "directory": "backplate-bottom-xl", "quantity": 1 },
     { "id": "XLG-STAT-01", "name": "XXL Stator-Schlitten", "directory": "stator-sled-xl", "quantity": 1 },
-    { "id": "XLG-STAT-02", "name": "XXL Stator-Deckel", "directory": "stator-cover-xl", "quantity": 1 }
+    { "id": "XLG-STAT-02", "name": "XXL Stator-Deckel", "directory": "stator-cover-xl", "quantity": 1 },
+    { "id": "XLG-PLUG-01", "name": "Magnet-Spacer Klötzchen", "directory": "magnet-spacer", "quantity": 20, "note": "Einzelner Magnet-Abstandshalter (rotor_platte_h − magnet_h − 0.6). Vormals in Backplate integriert, jetzt separates Teil." },
+    { "id": "XLG-SPACER-01", "name": "Abstands-Hülse Rotoren", "directory": "spacer-rotors", "quantity": 2, "note": "10mm lang × Ø20mm (kragen_d). Hält axialen Abstand zwischen Rotor und Stator." },
+    { "id": "XLG-SPACER-02", "name": "Abstands-Hülse Lager", "directory": "spacer-bearing", "quantity": 1, "note": "7mm lang × Ø28mm. Sitzt auf der 29mm Basisstation-Zentrierung." }
   ],
   "source_scripts": {
     "generator": "src/bigBasis/big_base_generator.py"
@@ -26,14 +29,30 @@
     "spule_aussen_l": 40.0,
     "spule_aussen_w": 26.0,
     "spule_dicke": 6.0,
+    "stator_schlitten_footbox_y": 120.0,
+    "stator_schlitten_griff_y": 135.0,
+    "deckel_mittelloch_r": 16.0,
+    "spacer_innen_len": 10.0,
+    "spacer_innen_od": 20.0,
+    "spacer_unten_len": 7.0,
+    "spacer_unten_od": 28.0,
     "note": "Capsule-Spulen statt runde! Mehr Kupfer = mehr Leistung."
   },
-  "improvements_over_v1": [
-    "Rotoren: 90mm Radius statt 38mm — massives Drehmoment",
-    "Magnete auf R74 statt R27 — höhere Geschwindigkeit am Magnetkreis",
-    "Ovale Capsule-Spulen statt runde — 40×26mm statt Ø14mm",
-    "6mm Spulentaschen statt 3.5mm — doppelt so viel Kupfer",
-    "Leichtbau-Skelettierung: 5 große Löcher pro Rotor/Backplate",
-    "Stator 8mm dick statt 5mm — massiveres Substrat"
-  ]
+  "changelog": {
+    "2.1.0": [
+      "Magnet-Spacer Klötzchen als separates Teil (XLG-PLUG-01) — vormals in make_backplate() integriert",
+      "Neue Abstands-Hülsen: Rotoren (Ø20×10mm) und Lager (Ø28×7mm)",
+      "Stator-Deckel Mittelloch gefixt: Radius 9mm (18/2) → 16mm (passt jetzt zur 32mm Achsbohrung)",
+      "Stator-Schlitten Footbox verkürzt: 140mm → 120mm, Griff: 160mm → 135mm",
+      "Kabelkanal-Bohrungen neu positioniert: Y=-150 → Y=-127.5"
+    ],
+    "2.0.0": [
+      "Rotoren: 90mm Radius statt 38mm — massives Drehmoment",
+      "Magnete auf R74 statt R27 — höhere Geschwindigkeit am Magnetkreis",
+      "Ovale Capsule-Spulen statt runde — 40×26mm statt Ø14mm",
+      "6mm Spulentaschen statt 3.5mm — doppelt so viel Kupfer",
+      "Leichtbau-Skelettierung: 5 große Löcher pro Rotor/Backplate",
+      "Stator 8mm dick statt 5mm — massiveres Substrat"
+    ]
+  }
 }

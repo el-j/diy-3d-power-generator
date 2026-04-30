@@ -15,6 +15,7 @@
       ]
     },
     "generator": {
+      "_note": "LEGACY (smalBasis) — Ersetzt durch xl-generator",
       "printed_parts": [
         { "id": "GEN-ROT-01", "name": "Rotor Oben", "material": "PETG", "qty": 1 },
         { "id": "GEN-ROT-02", "name": "Rotor Unten", "material": "PETG", "qty": 1 },
@@ -27,6 +28,26 @@
         { "id": "F-M3-HI", "qty": 10 },
         { "id": "F-M3x16-SK", "qty": 10 },
         { "id": "MAG-20x5x3", "qty": 20 }
+      ]
+    },
+    "xl-generator": {
+      "_note": "AKTIV — XXL 20-Pol Generator (src/bigBasis/big_base_generator.py)",
+      "printed_parts": [
+        { "id": "XLG-ROT-01", "name": "XXL Rotor Oben", "material": "PETG", "qty": 1 },
+        { "id": "XLG-ROT-02", "name": "XXL Rotor Unten", "material": "PETG", "qty": 1 },
+        { "id": "XLG-BP-01", "name": "XXL Backplate Oben", "material": "PETG", "qty": 1 },
+        { "id": "XLG-BP-02", "name": "XXL Backplate Unten", "material": "PETG", "qty": 1 },
+        { "id": "XLG-STAT-01", "name": "XXL Stator-Schlitten", "material": "PETG", "qty": 1 },
+        { "id": "XLG-STAT-02", "name": "XXL Stator-Deckel", "material": "PETG", "qty": 1 },
+        { "id": "XLG-PLUG-01", "name": "Magnet-Spacer Klötzchen", "material": "PETG", "qty": 20 },
+        { "id": "XLG-SPACER-01", "name": "Abstands-Hülse Rotoren (Ø20×10mm)", "material": "PETG", "qty": 2 },
+        { "id": "XLG-SPACER-02", "name": "Abstands-Hülse Lager (Ø28×7mm)", "material": "PETG", "qty": 1 }
+      ],
+      "purchased_parts": [
+        { "id": "F-M3-HI", "qty": 10, "note": "Einschmelzmuttern für Rotor-Verschraubung" },
+        { "id": "F-M5x20-SK", "qty": 5, "note": "M5×20 Senkkopf für Rotor-Backplate" },
+        { "id": "F-M3x12-ZK", "qty": 4, "note": "Stator-Deckel Befestigung" },
+        { "id": "MAG-20x5x3", "qty": 20, "note": "Neodym N52, 20×5×3mm — pro Rotor 20 Stk" }
       ]
     },
     "base-station": {
@@ -45,8 +66,9 @@
     }
   },
   "totals": {
-    "unique_printed_parts": 13,
-    "unique_purchased_parts": 7,
-    "magnets": 20
+    "unique_printed_parts": 22,
+    "unique_purchased_parts": 10,
+    "magnets_per_xl_generator": 20,
+    "_note": "xl-generator counted separately from legacy generator"
   }
 }

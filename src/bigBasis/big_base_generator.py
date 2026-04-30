@@ -5,7 +5,7 @@ import math
 doc = App.newDocument("Savonius_Kraftpaket_Generator")
 
 # ==========================================
-# ⚙️ PARAMETER (XXL 20-Pol Sandwich Generator)
+# ⚙️ PARAMETER (Aero-Donut Generator)
 # ==========================================
 achse_kantenlaenge = 10.0 
 toleranz = 0.5 
@@ -25,14 +25,18 @@ spule_dicke = 6.0
 
 stator_radius = 99.0      
 stator_dicke = 8.0        
-rotor_radius = 90.0       
-rotor_platte_h = 6.0  
-backplate_h = 4.0
+
+# ==========================================
+# 🔥 NEUE OPTIMIERTE MAßE FÜR DEN AERO-DONUT
+# ==========================================
+rotor_radius = 98.0       # Rotor auf Außenmaß der Spulenkammern geweitet
+rotor_platte_h = 10.0     # Rotor und Lüfter sind jetzt zu EINEM 10mm Bauteil verschmolzen!
+backplate_h = 4.0         # Die Backplate ist jetzt nur noch ein flacher hohler Ring!
+
+rotor_schraub_r = 74.0    
 
 einschmelzmutter_d = 4.2 
 einschmelzmutter_t = 5.0       
-
-rotor_schraub_r = 50.0    
 
 lager_innen_d = 29.0      
 adapter_pressfit = 0.15
@@ -103,8 +107,6 @@ def show_obj(shape, name):
 # ==========================================
 # 🧱 DIE LEGO-BAUSTEINE (CLAMPS & SPACER)
 # ==========================================
-
-# DIE ULTIMATIVE MASTER-CLAMP (Das Herz des Rotors!)
 def make_universal_clamp(kragen_laenge, plug_laenge, with_m3=True):
     kragen = Part.makeCylinder(kragen_d / 2.0, kragen_laenge)
     clamp = kragen
@@ -135,10 +137,8 @@ def make_universal_clamp(kragen_laenge, plug_laenge, with_m3=True):
             
     return clamp.removeSplitter()
 
-# Der Stator-Spacer fädelt sich formschlüssig auf den MEGA-Plug auf!
 def make_vielzahn_spacer(length, outer_d, with_m3=True):
     cyl = Part.makeCylinder(outer_d / 2.0, length)
-    
     vz_cut = make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, length + 2.0)
     vz_cut.translate(App.Vector(0,0,-1.0))
     cyl = cyl.cut(vz_cut)
@@ -162,17 +162,79 @@ def make_vielzahn_spacer(length, outer_d, with_m3=True):
 
 
 # ==========================================
-# 🛸 GENERATOR BAUTEILE
+# 🛸 DIE NEUE AERO-DONUT ROTOR GENERATION
+# Mit massiven internen PLA-CF Verstrebungen!
 # ==========================================
-def make_rotor(is_top):
-    r = Part.makeCylinder(rotor_radius, rotor_platte_h)
+def make_aero_rotor(is_top):
+    fan_r = rotor_radius    # 98.0mm
+    fan_h = rotor_platte_h  # 10.0mm
+    hub_r = 16.0
+    blade_count = 11       
     
+    # 1. Nabe (Hub)
+    fan = Part.makeCylinder(hub_r, fan_h)
+    
+    # 2. Die 11 Sichel-Schaufeln (Auf 1.6mm verstärkt für perfekten 4-Wand-Druck!)
+    def make_blade_profile(radius, chord, thickness, pitch_angle, sweep_angle):
+        p1 = App.Vector(-thickness/2.0, -chord/2.0, 0)
+        p2 = App.Vector(thickness/2.0, -chord/2.0, 0)
+        p3 = App.Vector(thickness/2.0, chord/2.0, 0)
+        p4 = App.Vector(-thickness/2.0, chord/2.0, 0)
+        w = Part.Wire(Part.makePolygon([p1, p2, p3, p4, p1]))
+        w.rotate(App.Vector(0,0,0), App.Vector(1,0,0), pitch_angle)
+        w.translate(App.Vector(radius, 0, 0))
+        w.rotate(App.Vector(0,0,0), App.Vector(0,0,1), sweep_angle)
+        return w
+
+    profiles = [
+        make_blade_profile(hub_r - 0.5, 14.0, 1.6, 45, 0),      
+        make_blade_profile((hub_r + fan_r)/2.0, 19.0, 1.6, 30, 20), 
+        make_blade_profile(fan_r + 0.5, 25.0, 1.6, 20, 45)      
+    ]
+    
+    base_blade = Part.makeLoft(profiles, True)
+    base_blade.translate(App.Vector(0, 0, fan_h / 2.0))
+    
+    for i in range(blade_count):
+        angle_deg = i * (360.0 / blade_count)
+        b = base_blade.copy()
+        b.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
+        fan = fan.fuse(b)
+        
+    fan = fan.common(Part.makeCylinder(fan_r - 2.0, fan_h))
+    
+    # 2.5 VERSTREBUNG (Auf 3mm Höhe reduziert, um Luftstrom nicht zu blockieren!)
+    # Verbinden die Nabe radial direkt mit dem Magnet-Donut.
+    for i in range(5):
+        angle_deg = i * 72 + 9 
+        spoke = Part.makeBox(48.0, 3.0, 3.0)  # Nur noch 3mm hoch!
+        spoke.translate(App.Vector(14.0, -1.5, 0))
+        spoke.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
+        fan = fan.fuse(spoke)
+    
+    # 3. Outer Ring (Gibt den Flügeln Stabilität)
+    ring_out = Part.makeCylinder(fan_r, fan_h)
+    ring_in = Part.makeCylinder(fan_r - 2.0, fan_h)
+    fan = fan.fuse(ring_out.cut(ring_in))
+    
+    # 4. DER MAGNET-DONUT
+    donut = Part.makeCylinder(86.0, fan_h).cut(Part.makeCylinder(62.0, fan_h))
+    fan = fan.fuse(donut)
+    
+    # 5. Vielzahn in der Mitte (Hub)
+    vz_cut = make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, fan_h + 2.0)
+    vz_cut.translate(App.Vector(0,0,-1.0))
+    fan = fan.cut(vz_cut)
+    
+    # 6. Magnet Taschen in den massiven Donut schneiden
     mag_cut_l = magnet_l + 0.4
     mag_cut_w = magnet_w + 0.4
-    mags = create_rectangular_array(mag_kreis_r, mag_cut_l, mag_cut_w, rotor_platte_h, anzahl_magnete)
-    r = r.cut(mags)
+    mags = create_rectangular_array(mag_kreis_r, mag_cut_l, mag_cut_w, fan_h + 2.0, anzahl_magnete)
+    mags.translate(App.Vector(0, 0, -1.0))
+    fan = fan.cut(mags)
     
-    lip_z = 0 if is_top else rotor_platte_h - 0.6
+    # 7. Halte-Lippen an den Taschen
+    lip_z = 0 if is_top else fan_h - 0.6
     for i in range(anzahl_magnete):
         angle_deg = i * (360.0 / anzahl_magnete)
         angle_rad = math.radians(angle_deg)
@@ -185,64 +247,44 @@ def make_rotor(is_top):
         lip = lip_outer.cut(lip_inner)
         lip.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
         lip.translate(App.Vector(mag_kreis_r * math.cos(angle_rad), mag_kreis_r * math.sin(angle_rad), lip_z))
-        r = r.fuse(lip)
-        
-        if i % 2 == 0:
-            base_x = mag_kreis_r - (mag_cut_w / 2.0) - 1.0
-            p1 = App.Vector(base_x, 3.5, 0)
-            p2 = App.Vector(base_x, -3.5, 0)
-            p3 = App.Vector(base_x - 4.5, 0, 0) 
-            wire = Part.Wire(Part.makePolygon([p1, p2, p3, p1]))
-            tri = Part.Face(wire).extrude(App.Vector(0, 0, rotor_platte_h))
-            tri.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
-            r = r.cut(tri)
-        
-    vz_cut = make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, rotor_platte_h + 2.0)
-    vz_cut.translate(App.Vector(0, 0, -1.0))
-    r = r.cut(vz_cut)
+        fan = fan.fuse(lip)
     
+    # 8. M3 Verschraubungen 
+    for i in range(5):
+        angle = math.radians(i * 72 + 9) 
+        x = rotor_schraub_r * math.cos(angle)
+        y = rotor_schraub_r * math.sin(angle)
+        fan = fan.cut(Part.makeCylinder(3.4 / 2.0, fan_h + 2.0).translate(App.Vector(x, y, -1.0)))
+        taschen_z = fan_h - einschmelzmutter_t if is_top else 0
+        fan = fan.cut(Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t).translate(App.Vector(x, y, taschen_z)))
+
+    cut_top = Part.makeBox(250, 250, 20).translate(App.Vector(-125, -125, fan_h))
+    cut_bot = Part.makeBox(250, 250, 20).translate(App.Vector(-125, -125, -20))
+    fan = fan.cut(cut_top).cut(cut_bot)
+    
+    return fan.removeSplitter()
+
+
+# ==========================================
+# 🛸 DER MINIMALISTISCHE BACKPLATE RING
+# Hohler, komplett flacher Deckel-Ring zur Fixierung!
+# ==========================================
+def make_aero_backplate(is_top):
+    # Dünner Ring (Radius 62 bis 86, exakt passend zum Magnet-Donut!)
+    # Komplett FLACH - die Füllklötzchen werden separat gedruckt!
+    p = Part.makeCylinder(86.0, backplate_h).cut(Part.makeCylinder(62.0, backplate_h))
+    
+    # M3 Löcher mit Senkung
     for i in range(5):
         angle = math.radians(i * 72 + 9)
         x = rotor_schraub_r * math.cos(angle)
         y = rotor_schraub_r * math.sin(angle)
-        r = r.cut(Part.makeCylinder(3.4 / 2.0, rotor_platte_h).translate(App.Vector(x, y, 0)))
-        taschen_z = rotor_platte_h - einschmelzmutter_t if is_top else 0
-        r = r.cut(Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t).translate(App.Vector(x, y, taschen_z)))
-
-    for i in range(5):
-        angle = math.radians(i * 72 + 45)
-        x = 42.0 * math.cos(angle)
-        y = 42.0 * math.sin(angle)
-        loch = Part.makeCylinder(16.0, rotor_platte_h).translate(App.Vector(x, y, 0))
-        r = r.cut(loch)
-
-    return r.removeSplitter()
-
-def make_backplate(is_top):
-    p = Part.makeCylinder(rotor_radius, backplate_h)
-    
-    vz_cut = make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, backplate_h + 2.0)
-    vz_cut.translate(App.Vector(0, 0, -1.0))
-    p = p.cut(vz_cut)
-    
-    plug_h = rotor_platte_h - magnet_h - 0.6 
-    
-    for i in range(5):
-        angle = math.radians(i * 72 + 9)
-        x = rotor_schraub_r * math.cos(angle)
-        y = rotor_schraub_r * math.sin(angle)
-        p = p.cut(Part.makeCylinder(3.4 / 2.0, backplate_h + plug_h + 10.0).translate(App.Vector(x, y, -5)))
+        p = p.cut(Part.makeCylinder(3.4 / 2.0, backplate_h + 10.0).translate(App.Vector(x, y, -5)))
         senk_z = backplate_h - 1.5 if is_top else 0
         p = p.cut(Part.makeCylinder(6.0 / 2.0, 1.5).translate(App.Vector(x, y, senk_z)))
-        
-    for i in range(5):
-        angle = math.radians(i * 72 + 45)
-        x = 42.0 * math.cos(angle)
-        y = 42.0 * math.sin(angle)
-        loch = Part.makeCylinder(16.0, 30.0).translate(App.Vector(x, y, -5))
-        p = p.cut(loch)
 
     return p.removeSplitter()
+
 
 def make_stator_schlitten():
     schlitten_b = Part.makeCylinder(stator_radius, stator_dicke)
@@ -320,116 +362,74 @@ def make_lager_reduzierung():
     
     return fase.fuse(schaft).fuse(kragen).cut(vz_cut).removeSplitter()
 
-def make_cooling_fan():
-    fan_r = 85.0           
-    fan_h = 10.0           
-    hub_r = 16.0           
-    blade_count = 11       
+def make_spacer(length, outer_d, with_m3=True):
+    cyl = Part.makeCylinder(outer_d / 2.0, length)
+    hole = make_square_prism(achse_kantenlaenge + toleranz, length + 2.0).translate(App.Vector(0,0,-1.0))
+    cyl = cyl.cut(hole)
     
-    fan = Part.makeCylinder(hub_r, fan_h)
-    
-    def make_blade_profile(radius, chord, thickness, pitch_angle, sweep_angle):
-        p1 = App.Vector(-thickness/2.0, -chord/2.0, 0)
-        p2 = App.Vector(thickness/2.0, -chord/2.0, 0)
-        p3 = App.Vector(thickness/2.0, chord/2.0, 0)
-        p4 = App.Vector(-thickness/2.0, chord/2.0, 0)
-        w = Part.Wire(Part.makePolygon([p1, p2, p3, p4, p1]))
-        w.rotate(App.Vector(0,0,0), App.Vector(1,0,0), pitch_angle)
-        w.translate(App.Vector(radius, 0, 0))
-        w.rotate(App.Vector(0,0,0), App.Vector(0,0,1), sweep_angle)
-        return w
-
-    profiles = [
-        make_blade_profile(hub_r - 0.5, 14.0, 1.2, 45, 0),      
-        make_blade_profile((hub_r + fan_r)/2.0, 19.0, 1.2, 30, 20), 
-        make_blade_profile(fan_r + 0.5, 25.0, 1.2, 20, 45)      
-    ]
-    
-    base_blade = Part.makeLoft(profiles, True)
-    base_blade.translate(App.Vector(0, 0, fan_h / 2.0))
-    
-    for i in range(blade_count):
-        angle_deg = i * (360.0 / blade_count)
-        b = base_blade.copy()
-        b.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
-        fan = fan.fuse(b)
-        
-    fan = fan.common(Part.makeCylinder(fan_r - 2.0, fan_h))
-    
-    ring_out = Part.makeCylinder(fan_r, fan_h)
-    ring_in = Part.makeCylinder(fan_r - 2.0, fan_h)
-    fan = fan.fuse(ring_out.cut(ring_in))
-    
-    vz_cut = make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, fan_h + 2.0)
-    vz_cut.translate(App.Vector(0,0,-1.0))
-    fan = fan.cut(vz_cut)
-    
-    cut_top = Part.makeBox(200, 200, 20).translate(App.Vector(-100, -100, fan_h))
-    cut_bot = Part.makeBox(200, 200, 20).translate(App.Vector(-100, -100, -20))
-    fan = fan.cut(cut_top).cut(cut_bot)
-    
-    return fan.removeSplitter()
+    if with_m3 and length >= 6.0:
+        for i in range(4):
+            angle = i * 90
+            m3_loch = Part.makeCylinder(3.4 / 2.0, 20.0)
+            m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+            m3_loch.translate(App.Vector(0, 0, length / 2.0))
+            m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
+            
+            m3_insert = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t)
+            m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+            m3_insert.translate(App.Vector((outer_d / 2.0) - einschmelzmutter_t, 0, length / 2.0))
+            m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
+            
+            cyl = cyl.cut(m3_loch).cut(m3_insert)
+            
+    return cyl.removeSplitter()
 
 
 # --- BAUTEILE GENERIEREN ---
-r_o = make_rotor(True); r_u = make_rotor(False)
-b_o = make_backplate(True); b_u = make_backplate(False)
+r_o = make_aero_rotor(True); r_u = make_aero_rotor(False)
+b_o = make_aero_backplate(True); b_u = make_aero_backplate(False)
+
 s_schlitten = make_stator_schlitten(); s_d = make_deckel()
 m_plug = make_magnet_plug()
 
 reduzierung_unten = make_lager_reduzierung()
 reduzierung_oben = make_lager_reduzierung()
-luefter_unten = make_cooling_fan()
-luefter_oben = make_cooling_fan()
 
 # ==========================================
-# DAS MASTER-SETUP (Die Geniale 50mm Klemme)
+# DAS MASTER-SETUP (Der ultra-kompakte 30mm Core!)
 # ==========================================
-
-# 1. Die Klemme für die untere Lagerreduzierung
-# HINWEIS: Hier ist der Kragen bei Z=0 und der Plug zeigt nach +Z!
 clamp_lager_unten = make_universal_clamp(kragen_laenge=8.0, plug_laenge=20.0, with_m3=True)
 
-# 2. DIE MEGA-CLAMP ("Das Herz")
-# 10(Fan) + 4(Backplate) + 6(Rotor) + 10(Spacer) + 6(Rotor) + 4(Backplate) + 10(Fan) = EXAKT 50.0mm!
-clamp_rotor_mega = make_universal_clamp(kragen_laenge=8.0, plug_laenge=50.0, with_m3=True)
+# MEGA-CLAMP auf geniale 30mm geschrumpft!
+clamp_rotor_mega = make_universal_clamp(kragen_laenge=8.0, plug_laenge=30.0, with_m3=True)
 
-# 3. Der Stator-Mittel-Spacer (10mm Kragen, Vielzahn-Loch zum Auffädeln!)
 stator_spacer = make_vielzahn_spacer(length=10.0, outer_d=kragen_d, with_m3=True)
 
-# 4. Die Klemme für die obere Lagerreduzierung ("Just in Case")
+top_spacer = make_spacer(length=28.0, outer_d=kragen_d, with_m3=True)
 clamp_lager_oben = make_universal_clamp(kragen_laenge=8.0, plug_laenge=20.0, with_m3=True)
 
 
-# --- EXPLOSIONS-ANSICHT ANORDNEN (Visualisierung des Stacks) ---
+# --- EXPLOSIONS-ANSICHT ANORDNEN ---
+reduzierung_unten.translate(App.Vector(0, 0, -80))
+clamp_lager_unten.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 180) 
+clamp_lager_unten.translate(App.Vector(0, 0, -60))
 
-# --- UNTERE LAGER-BAUGRUPPE ---
-clamp_lager_unten.translate(App.Vector(0, 0, -80)) # Verschraubung ist ganz unten! Plug zeigt nach oben.
-# Die Reduzierung muss mit dem Kragen nach oben zeigen, damit der Schaft unten ins Kugellager des Gehäuses geht.
-reduzierung_unten.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 180) # Flip: Schaft zeigt jetzt nach unten!
-reduzierung_unten.translate(App.Vector(0, 0, -55)) # Reduzierung sitzt auf dem Plug der Klemme
+clamp_rotor_mega.translate(App.Vector(0, 0, -40))  
+b_u.translate(App.Vector(0, 0, -20)) 
+r_u.translate(App.Vector(0, 0, -10))
 
-# --- DAS MEGA-SANDWICH ---
-clamp_rotor_mega.translate(App.Vector(0, 0, -35))  # Verschraubung unten. 50mm Plug zeigt gerade nach OBEN.
-luefter_unten.translate(App.Vector(0, 0, -15))
-b_u.translate(App.Vector(0, 0, 0))
-r_u.translate(App.Vector(0, 0, 10))
+stator_spacer.translate(App.Vector(0, 0, 5))
+s_schlitten.translate(App.Vector(0, 0, 20))
+s_d.translate(App.Vector(0, 0, 30))
 
-# Der Spacer in der Mitte (sitzt auf dem Mega-Plug)
-stator_spacer.translate(App.Vector(0, 0, 25))
-s_schlitten.translate(App.Vector(0, 0, 38))
-s_d.translate(App.Vector(0, 0, 48))
+r_o.translate(App.Vector(0, 0, 45))
+b_o.translate(App.Vector(0, 0, 60))
 
-# Obere Generator-Hälfte (sitzt auf dem Mega-Plug)
-r_o.translate(App.Vector(0, 0, 60))
-b_o.translate(App.Vector(0, 0, 70))
-luefter_oben.translate(App.Vector(0, 0, 80))
+top_spacer.translate(App.Vector(0, 0, 80))
 
-# --- OBERE LAGER-BAUGRUPPE ---
-clamp_lager_oben.translate(App.Vector(0, 0, 100)) # Verschraubung unten. Plug zeigt nach oben.
-# Die Reduzierung steckt oben im Kugellager des Basis-Deckels.
-# Schaft muss nach oben in den Deckel zeigen. Der Kragen schlägt von unten an den Deckel an.
-reduzierung_oben.translate(App.Vector(0, 0, 125)) 
+clamp_lager_oben.translate(App.Vector(0, 0, 100))
+reduzierung_oben.rotate(App.Vector(0,0,0), App.Vector(1,0,0), 180) 
+reduzierung_oben.translate(App.Vector(0, 0, 120))
 
 m_plug.translate(App.Vector(120, 0, 0))
 
@@ -437,24 +437,22 @@ m_plug.translate(App.Vector(120, 0, 0))
 show_obj(clamp_lager_unten, "01_Clamp_Lager_Unten")
 show_obj(reduzierung_unten, "02_Lager_Reduzierung_Unten")
 
-show_obj(clamp_rotor_mega, "03_Clamp_Rotor_Stack_Mega")
+show_obj(clamp_rotor_mega, "03_Clamp_Rotor_Stack_Mega_30mm")
 
-show_obj(luefter_unten, "04_Kuehl_Luefter_Unten")
-show_obj(b_u, "05_Backplate_Unten_XXL")
-show_obj(r_u, "06_Rotor_Unten_XXL")
+show_obj(b_u, "04_Backplate_Ring_FLACH_Unten")
+show_obj(r_u, "05_Rotor_PURE_FAN_Unten") 
 
-show_obj(stator_spacer, "07_Stator_Abstands_Spacer_10mm")
-show_obj(s_schlitten, "08_Stator_Schlitten_XXL")
-show_obj(s_d, "09_Stator_Deckel_XXL")
+show_obj(stator_spacer, "06_Stator_Abstands_Spacer_10mm")
+show_obj(s_schlitten, "07_Stator_Schlitten_XXL")
+show_obj(s_d, "08_Stator_Deckel_XXL")
 
-show_obj(r_o, "10_Rotor_Oben_XXL")
-show_obj(b_o, "11_Backplate_Oben_XXL")
-show_obj(luefter_oben, "12_Kuehl_Luefter_Oben")
+show_obj(r_o, "09_Rotor_PURE_FAN_Oben")  
+show_obj(b_o, "10_Backplate_Ring_FLACH_Oben")
 
-show_obj(clamp_lager_oben, "13_Clamp_Lager_Oben")
-show_obj(reduzierung_oben, "14_Lager_Reduzierung_Oben")
-
-show_obj(m_plug, "15_Magnet_Spacer_Kloetzchen")
+show_obj(top_spacer, "11_Top_Abstands_Spacer_28mm")
+show_obj(clamp_lager_oben, "12_Clamp_Lager_Oben")
+show_obj(reduzierung_oben, "13_Lager_Reduzierung_Oben")
+show_obj(m_plug, "14_Magnet_Spacer_Kloetzchen")
 
 doc.recompute()
 if App.GuiUp:

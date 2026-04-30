@@ -123,7 +123,7 @@ def make_rotor(is_top):
         
     r = r.cut(make_square_prism(achse_kantenlaenge + toleranz, rotor_platte_h))
     
-    # 5 Verschraubungslöcher! (Exakt 9 Grad Offset zwischen den 20 Magneten)
+    # 5 Verschraubungslöcher!
     for i in range(5):
         angle = math.radians(i * 72 + 9)
         x = rotor_schraub_r * math.cos(angle)
@@ -132,8 +132,7 @@ def make_rotor(is_top):
         taschen_z = rotor_platte_h - einschmelzmutter_t if is_top else 0
         r = r.cut(Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t).translate(App.Vector(x, y, taschen_z)))
 
-    # NEU: Leichtbau-Skelettierung (5 Große Löcher zur Gewichtsreduktion & Kühlung)
-    # Perfekt versetzt zu den Schraubenlöchern (45 Grad Offset)
+    # Leichtbau-Skelettierung
     for i in range(5):
         angle = math.radians(i * 72 + 45)
         x = 42.0 * math.cos(angle)
@@ -141,13 +140,11 @@ def make_rotor(is_top):
         loch = Part.makeCylinder(16.0, rotor_platte_h).translate(App.Vector(x, y, 0))
         r = r.cut(loch)
 
-    # Große Ausrichtungs-Kerbe (bei 45 Grad - trifft genau in ein Leichtbau-Loch, was gut aussieht)
     notch_angle = math.radians(45)
     align_notch = Part.makeCylinder(4.0, rotor_platte_h)
     align_notch.translate(App.Vector(rotor_radius * math.cos(notch_angle), rotor_radius * math.sin(notch_angle), 0))
     r = r.cut(align_notch)
 
-    # Oben/Unten Indikator (Punkte an der Seite bei 117 Grad)
     marker_cyl = Part.makeCylinder(1.5, 5.0)
     marker_cyl.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
     marker_cyl.translate(App.Vector(rotor_radius - 2.0, 0, rotor_platte_h / 2.0))
@@ -173,10 +170,6 @@ def make_backplate(is_top):
     p = p.fuse(k).cut(make_square_prism(achse_kantenlaenge+toleranz, 30.0).translate(App.Vector(0,0,-5)))
     
     plug_h = rotor_platte_h - magnet_h - 0.6 
-    plugs = create_rectangular_array(mag_kreis_r, magnet_l + 0.1, magnet_w + 0.1, plug_h, anzahl_magnete)
-    plug_z = -plug_h if is_top else backplate_h
-    plugs.translate(App.Vector(0, 0, plug_z))
-    p = p.fuse(plugs)
     
     for i in range(5):
         angle = math.radians(i * 72 + 9)
@@ -186,7 +179,6 @@ def make_backplate(is_top):
         senk_z = backplate_h - 1.5 if is_top else 0
         p = p.cut(Part.makeCylinder(6.0 / 2.0, 1.5).translate(App.Vector(x, y, senk_z)))
         
-    # NEU: Exakt dieselben Leichtbau-Löcher wie im Rotor
     for i in range(5):
         angle = math.radians(i * 72 + 45)
         x = 42.0 * math.cos(angle)
@@ -196,50 +188,43 @@ def make_backplate(is_top):
 
     return p.removeSplitter()
 
-# 3. XXL STATOR SCHLITTEN (Mit ovalen Taschen & Leichtbau!)
+# 3. XXL STATOR SCHLITTEN
 def make_stator_schlitten():
     schlitten_b = Part.makeCylinder(stator_radius, stator_dicke)
-    schlitten_f = Part.makeBox(stator_radius*2, 140.0, stator_dicke).translate(App.Vector(-stator_radius, -140.0, 0))
+    schlitten_f = Part.makeBox(stator_radius*2, 120.0, stator_dicke).translate(App.Vector(-stator_radius, -120.0, 0))
     s = schlitten_b.fuse(schlitten_f)
-    griff = Part.makeBox(50.0, 20.0, stator_dicke).translate(App.Vector(-25.0, -160.0, 0))
+    griff = Part.makeBox(50.0, 15.0, stator_dicke).translate(App.Vector(-25.0, -135.0, 0))
     s = s.fuse(griff)
     
-    # Zentrale Aussparung für die Achse
+    # Zentrale Aussparung (Radius 16.0 = 32mm Durchmesser)
     s = s.cut(Part.makeCylinder(16.0, stator_dicke))
     
-    # NEU: Leichtbau-Löcher im ungenutzten Zentrum (Bilden stabile "Speichen")
     for i in range(6):
         angle = math.radians(i * 60)
         x = 35.0 * math.cos(angle)
         y = 35.0 * math.sin(angle)
         s = s.cut(Part.makeCylinder(12.0, stator_dicke).translate(App.Vector(x, y, 0)))
 
-    # Die Ovalen Spulentaschen (Capsules)
     for i in range(anzahl_spulen):
         angle_deg = i * (360.0 / anzahl_spulen)
         angle_rad = math.radians(angle_deg)
-        
         pocket = make_capsule(spule_aussen_l + 0.4, spule_aussen_w + 0.4, stator_dicke - 1.5)
         pocket.translate(App.Vector(0,0, 1.5))
-        
         thru_hole = make_capsule(spule_aussen_l - 1.5, spule_aussen_w - 1.5, stator_dicke)
-        
         spulen_loch = pocket.fuse(thru_hole)
         spulen_loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle_deg)
         spulen_loch.translate(App.Vector(mag_kreis_r * math.cos(angle_rad), mag_kreis_r * math.sin(angle_rad), 0))
         s = s.cut(spulen_loch)
     
-    # Ring-Kanal (Angepasst auf die neuen ovalen Spulen)
     ring_kanal = Part.makeCylinder(88.0, 3.5).cut(Part.makeCylinder(82.0, 3.5))
     ring_kanal.translate(App.Vector(0, 0, stator_dicke - 3.5))
     s = s.cut(ring_kanal)
     
-    kanal = Part.makeBox(12.0, 120.0, 3.5).translate(App.Vector(-6.0, -140.0, stator_dicke - 3.5))
+    kanal = Part.makeBox(12.0, 115.0, 3.5).translate(App.Vector(-6.0, -135.0, stator_dicke - 3.5))
     s = s.cut(kanal)
-    s = s.cut(Part.makeCylinder(1.5, stator_dicke).translate(App.Vector(-15, -150, 0)))
-    s = s.cut(Part.makeCylinder(1.5, stator_dicke).translate(App.Vector(15, -150, 0)))
+    s = s.cut(Part.makeCylinder(1.5, stator_dicke).translate(App.Vector(-15, -127.5, 0)))
+    s = s.cut(Part.makeCylinder(1.5, stator_dicke).translate(App.Vector(15, -127.5, 0)))
     
-    # Schrauben für den Deckel (Sicher zwischen den Spulen platziert)
     for i in range(4):
         angle = math.radians(i * 90 + 45)
         x = 94.0 * math.cos(angle)
@@ -250,16 +235,15 @@ def make_stator_schlitten():
 
 # 4. DECKEL (STATOR-HALTERUNG)
 def make_deckel():
-    d = Part.makeCylinder(stator_radius, 1.2).cut(Part.makeCylinder(18.0/2.0, 1.2))
+    # GEFIXT: Das Mittelloch hat jetzt exakt den gleichen Radius (16.0) wie der Stator!
+    d = Part.makeCylinder(stator_radius, 1.2).cut(Part.makeCylinder(16.0, 1.2))
     
-    # NEU: Belüftungs- und Leichtbaulöcher (Wie im Schlitten)
     for i in range(6):
         angle = math.radians(i * 60)
         x = 35.0 * math.cos(angle)
         y = 35.0 * math.sin(angle)
         d = d.cut(Part.makeCylinder(12.0, 1.2).translate(App.Vector(x, y, 0)))
 
-    # Deckel-Ausschnitte halten die ovale Spule von oben fest
     ch = create_capsule_array(mag_kreis_r, spule_aussen_l - 1.0, spule_aussen_w - 1.0, 1.2, anzahl_spulen)
     d = d.cut(ch)
 
@@ -271,17 +255,50 @@ def make_deckel():
         
     return d
 
+# 5. EINZELNER MAGNET-SPACER
+def make_magnet_plug():
+    plug_h = rotor_platte_h - magnet_h - 0.6 
+    plug = Part.makeBox(magnet_l + 0.1, magnet_w + 0.1, plug_h)
+    plug.translate(App.Vector(-(magnet_l + 0.1)/2.0, -(magnet_w + 0.1)/2.0, 0))
+    return plug
+
+# ==========================================
+# 6. ABSTANDS-HÜLSEN (Gefixt & Verstärkt!)
+# ==========================================
+def make_spacer(length, outer_d):
+    cyl = Part.makeCylinder(outer_d / 2.0, length)
+    hole = make_square_prism(achse_kantenlaenge + toleranz, length)
+    return cyl.cut(hole).removeSplitter()
+
+# GEFIXT: Die Hülse nutzt jetzt das Außenmaß kragen_d (20.0mm). 
+# Sie hat nun massive dicke Wände, läuft frei im 32mm Loch des Stators mit und wird
+# von der inneren Vierkant-Achse definitiv nicht mehr aufgeschnitten!
+spacer_innen = make_spacer(10.0, kragen_d)
+
+# GEFIXT: Die untere Zentrier-Hülse sitzt jetzt mit 28.0mm perfekt stabil
+# auf der neuen, großen 29mm Basisstation-Zentrierung auf.
+spacer_unten = make_spacer(7.0, 28.0)
+
+
 r_o = make_rotor(True); r_u = make_rotor(False)
 b_o = make_backplate(True); b_u = make_backplate(False)
 s_schlitten = make_stator_schlitten(); s_d = make_deckel()
+m_plug = make_magnet_plug()
 
 r_o.translate(App.Vector(0,0,30)); b_o.translate(App.Vector(0,0,45))
 s_d.translate(App.Vector(0,0,15))
 r_u.translate(App.Vector(0,0,-20)); b_u.translate(App.Vector(0,0,-40))
+m_plug.translate(App.Vector(120, 0, 0))
+
+spacer_innen.translate(App.Vector(130, 30, 0))
+spacer_unten.translate(App.Vector(130, -30, 0))
 
 show_obj(r_o, "Rotor_Oben_XXL"); show_obj(r_u, "Rotor_Unten_XXL")
 show_obj(b_o, "Backplate_Oben_XXL"); show_obj(b_u, "Backplate_Unten_XXL")
 show_obj(s_schlitten, "Stator_Schlitten_XXL"); show_obj(s_d, "Stator_Deckel_XXL")
+show_obj(m_plug, "Magnet_Spacer_Kloetzchen")
+show_obj(spacer_innen, "Abstands_Huelse_Rotoren")
+show_obj(spacer_unten, "Abstands_Huelse_Lager")
 
 doc.recompute()
 if App.GuiUp:

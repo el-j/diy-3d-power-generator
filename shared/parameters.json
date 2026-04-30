@@ -81,6 +81,18 @@
     "fuss_radius":         { "value": 60.0,  "unit": "mm",  "desc": "Basis-Gehäuse Radius" }
   },
 
+  "winding_machine": {
+    "_note": "Komplex-Spooler Traversier-Wickelmaschine (src/tools/komplexSPooler/)",
+    "achse_z":          { "value": 75.0,  "unit": "mm",    "desc": "Achsen-Höhe (Mitte der Lagerbohrung über Basis)" },
+    "hex_loch_sw":      { "value": 8.4,   "unit": "mm",    "desc": "Hex-Loch SW (Zahnräder + Trommel, +0.4mm Spiel)" },
+    "hex_achse_sw":     { "value": 8.0,   "unit": "mm",    "desc": "Hex-Achse SW (reales Maß der Hex-Achse)" },
+    "quad_spindel_sw":  { "value": 6.0,   "unit": "mm",    "desc": "Vierkant-Spindel SW (Spulenachse hinterer Abschnitt)" },
+    "lager_loch_d":     { "value": 12.0,  "unit": "mm",    "desc": "Lagerbohrung Ø in den Türmen" },
+    "gear_ratio":       { "value": "1:24","unit": "-",     "desc": "Gesamtübersetzung: Kurbel(40Z)→Spule(10Z)×Zwischen(40Z→10Z)×Trommel(60Z)" },
+    "turm_l":           { "value": 16.0,  "unit": "mm",    "desc": "Turm-Querschnitt Länge" },
+    "turm_w":           { "value": 12.0,  "unit": "mm",    "desc": "Turm-Querschnitt Breite" }
+  },
+
   "print_constraints": {
     "printer":             "Bambu Lab P1S",
     "max_x":               256.0,

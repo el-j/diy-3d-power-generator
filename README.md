@@ -6,7 +6,7 @@
 </p>
 
 <h1 align="center">🌬️ WindPower-3D</h1>
-<h3 align="center">Open-Source Savonius Helix Wind Generator — Fully 3D Printable</h3>
+<h3 align="center">Open-Source Helix Helix Wind Generator — Fully 3D Printable</h3>
 
 <p align="center">
   <strong>Parametric • Modular • AI-Orchestrated Design Bureau</strong><br/>
@@ -18,7 +18,7 @@
 
 ## ⚡ Was ist WindPower-3D?
 
-Ein **vollständig 3D-druckbarer Savonius-Helix Windgenerator** mit integriertem XXL Axialfluss-Generator. Designed für den Bambu Lab P1S (256×256mm), aber kompatibel mit jedem FDM-Drucker.
+Ein **vollständig 3D-druckbarer Helix-Helix Windgenerator** mit integriertem XXL Axialfluss-Generator. Designed für den Bambu Lab P1S (256×256mm), aber kompatibel mit jedem FDM-Drucker.
 
 ### 🌟 Features
 

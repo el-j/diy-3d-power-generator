@@ -1,6 +1,6 @@
 # WindPower-3D — Agent Handbook
 
-> Savonius Helix Wind-Generator: Parametric 3D-printed axial-flux generator + tower.
+> Helix Helix Wind-Generator: Parametric 3D-printed axial-flux generator + tower.
 > All geometry is FreeCAD Python (Part workbench). Outputs: STL + 3MF for Bambu P1S.
 
 ---

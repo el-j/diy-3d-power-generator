@@ -1,6 +1,6 @@
 # 📋 Stückliste / Bill of Materials
 
-> **Projekt**: Savonius Helix Wind-Generator  
+> **Projekt**: Helix Helix Wind-Generator  
 > **Version**: 2.1.0  
 > **Stand**: 2026-04-30  
 > **Konfiguration**: XXL Basis + XXL Generator (20-Pol Capsule)

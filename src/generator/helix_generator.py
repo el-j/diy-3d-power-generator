@@ -280,11 +280,35 @@ def make_aero_backplate(is_top):
     return p.removeSplitter()
 
 # --- HILFSKOMPONENTEN ---
-def make_universal_clamp(kl, pl):
-    c = Part.makeCylinder(kragen_d / 2.0, kl)
-    if pl > 0: c = c.fuse(make_vielzahn_prism(vielzahn_r_out, vielzahn_r_in, vielzahn_zaehne, pl).translate(App.Vector(0,0,kl)))
-    c = c.cut(make_square_prism(achse_kantenlaenge + toleranz, kl + pl + 2.0).translate(App.Vector(0,0,-1.0)))
-    return c.removeSplitter()
+def make_universal_clamp(kragen_laenge, plug_laenge, with_m3=True):
+    kragen = Part.makeCylinder(kragen_d / 2.0, kragen_laenge)
+    clamp = kragen
+    
+    if plug_laenge > 0:
+        plug = make_vielzahn_prism(vielzahn_r_out, vielzahn_r_in, vielzahn_zaehne, plug_laenge)
+        plug.translate(App.Vector(0, 0, kragen_laenge))
+        clamp = clamp.fuse(plug)
+    
+    hole = make_square_prism(achse_kantenlaenge + toleranz, kragen_laenge + plug_laenge + 2.0)
+    hole.translate(App.Vector(0, 0, -1.0))
+    clamp = clamp.cut(hole)
+    
+    if with_m3 and kragen_laenge >= 6.0:
+        for i in range(4):
+            angle = i * 90
+            m3_loch = Part.makeCylinder(3.4 / 2.0, 20.0)
+            m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+            m3_loch.translate(App.Vector(0, 0, kragen_laenge / 2.0))
+            m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
+            
+            m3_insert = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t)
+            m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
+            m3_insert.translate(App.Vector((kragen_d / 2.0) - einschmelzmutter_t, 0, kragen_laenge / 2.0))
+            m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
+            
+            clamp = clamp.cut(m3_loch).cut(m3_insert)
+            
+    return clamp.removeSplitter()
 
 def make_vielzahn_spacer(l, od):
     return Part.makeCylinder(od / 2.0, l).cut(make_vielzahn_prism(vielzahn_r_out + 0.2, vielzahn_r_in + 0.2, vielzahn_zaehne, l + 2.0).translate(App.Vector(0,0,-1.0))).removeSplitter()
@@ -312,8 +336,9 @@ def make_lager_reduzierung():
 r_u = make_aero_rotor(False); r_o = make_aero_rotor(True)
 b_u = make_aero_backplate(False); b_o = make_aero_backplate(True)
 stator = make_stator_schlitten(); deckel = make_stator_deckel()
-clamp_mega = make_universal_clamp(8.0, 30.0)
+clamp_mega = make_universal_clamp(8.0, 30.0, True)
 st_spacer = make_vielzahn_spacer(10.0, kragen_d)
+# st_spacer_small = make_vielzahn_spacer(1.0, kragen_d)
 reduzierung_unten = make_lager_reduzierung()
 reduzierung_oben = make_lager_reduzierung()
 m_plug = make_magnet_plug()
@@ -322,8 +347,8 @@ m_plug = make_magnet_plug()
 # ==========================================
 # DAS MASTER-SETUP (Der ultra-kompakte 30mm Core!)
 # ==========================================
-clamp_lager_unten = make_universal_clamp(kragen_laenge=8.0, plug_laenge=20.0, with_m3=True)
-clamp_lager_oben = make_universal_clamp(kragen_laenge=8.0, plug_laenge=20.0, with_m3=True)
+clamp_lager_unten = make_universal_clamp(8.0, 20.0, True)
+clamp_lager_oben = make_universal_clamp(8.0, 20.0, True)
 
 # --- EXPLOSIONS-ANSICHT ANORDNEN ---
 reduzierung_unten.translate(App.Vector(0, 0, -80))
@@ -334,6 +359,7 @@ clamp_mega.translate(App.Vector(0, 0, -50))
 b_u.translate(App.Vector(0, 0, -30))
 r_u.translate(App.Vector(0, 0, -20))
 st_spacer.translate(App.Vector(0, 0, -5))
+# st_spacer_small.translate(App.Vector(0, 0, 5))
 stator.translate(App.Vector(0, 0, 10))
 deckel.translate(App.Vector(0, 0, 25)) 
 r_o.translate(App.Vector(0, 0, 35))
@@ -359,9 +385,10 @@ show_obj(deckel, "08_Stator_Donut_Deckel_INSET")
 show_obj(r_o, "09_Rotor_AeroFan_TANK_FINAL_Oben")
 show_obj(b_o, "10_Backplate_Ring_FLACH_Oben")
 show_obj(st_spacer, "11_Stator_Abstands_Spacer_10mm")
+# show_obj(st_spacer_small, "12_Stator_Abstands_Spacer_1mm")
 
-show_obj(clamp_lager_oben, "12_Clamp_Lager_Oben")
-show_obj(reduzierung_oben, "13_Lager_Reduzierung_Oben")
-show_obj(m_plug, "14_Magnet_Spacer_Kloetzchen")
+show_obj(clamp_lager_oben, "13_Clamp_Lager_Oben")
+show_obj(reduzierung_oben, "14_Lager_Reduzierung_Oben")
+show_obj(m_plug, "15_Magnet_Spacer_Kloetzchen")
 
 doc.recompute()

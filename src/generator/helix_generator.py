@@ -2,7 +2,7 @@ import FreeCAD as App
 import Part
 import math
 
-doc = App.newDocument("Savonius_Kraftpaket_Generator")
+doc = App.newDocument("Helix_Kraftpaket_Generator")
 
 # ==========================================
 # ⚙️ PARAMETER (Aero-Donut Generator)

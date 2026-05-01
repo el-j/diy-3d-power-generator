@@ -14,6 +14,8 @@ versatz = 12.0
 
 # VIERKANT-ACHSE
 achse_kantenlaenge = 10.0 
+# HEXAGON-LOCH in der Startscheibe (für die 6x M3 Madenschrauben, die die Scheibe auf der Achse fixieren)
+hex_radius = 10.5        
 
 # HELIX
 twist_winkel = 90.0       
@@ -170,6 +172,63 @@ for i in range(4):
 plug = plug.removeSplitter()
 plug.translate(App.Vector(gesamt_radius * 2.2, 60.0, 0)) 
 show_obj(plug, "Zwischen_Vielzahn_Plug")
+
+
+
+
+def make_hex_prism(radius, height):
+    points = []
+    for j in range(7):
+        angle = math.radians(60 * j + 30) 
+        points.append(App.Vector(radius * math.cos(angle), radius * math.sin(angle), 0))
+    polygon = Part.makePolygon(points)
+    face = Part.Face(Part.Wire(polygon))
+    return face.extrude(App.Vector(0, 0, height))
+
+
+# ==========================================
+# BAUTEIL 6: FLACHE START-SCHEIBE 
+# ==========================================
+kappen_radius_scheibe = blatt_radius - versatz + blatt_radius + 5.0 
+scheibe = Part.makeCylinder(kappen_radius_scheibe, kappen_dicke)
+
+hex_cut = make_hex_prism(hex_radius + 0.2, kappen_dicke)
+scheibe = scheibe.cut(hex_cut)
+
+for i in range(6):
+    angle = math.radians(i * 60)
+    x = 75.0 * math.cos(angle)
+    y = 75.0 * math.sin(angle)
+    loch = Part.makeCylinder(36.0, 6.0).translate(App.Vector(x, y, 0))
+    scheibe = scheibe.cut(loch)
+
+cx_scheibe = blatt_radius - versatz
+po_s = App.Vector(-versatz, 0, 0)
+po_m = App.Vector(cx_scheibe, blatt_radius, 0)
+po_e = App.Vector(cx_scheibe + blatt_radius, 0, 0)
+pi_s = App.Vector(-versatz + dicke + toleranz, 0, 0)
+pi_m = App.Vector(cx_scheibe, blatt_radius - dicke - toleranz, 0)
+pi_e = App.Vector(cx_scheibe + blatt_radius - dicke - toleranz, 0, 0)
+
+blade_wire = Part.Wire([
+    Part.Arc(po_s, po_m, po_e).toShape(), 
+    Part.makeLine(po_e, pi_e), 
+    Part.Arc(pi_e, pi_m, pi_s).toShape(), 
+    Part.makeLine(pi_s, po_s)
+])
+
+blade_cut = Part.Face(blade_wire).extrude(App.Vector(0,0,5.0))
+blade_cut.translate(App.Vector(0,0, kappen_dicke - 5.0))
+
+scheibe = scheibe.cut(blade_cut)
+blade_cut2 = blade_cut.copy()
+blade_cut2.rotate(App.Vector(0,0,0), App.Vector(0,0,1), 180)
+scheibe = scheibe.cut(blade_cut2)
+
+scheibe = scheibe.removeSplitter()
+scheibe.translate(App.Vector(0, 0, 0)) 
+show_obj(scheibe, "Start_Scheibe_FLACH")
+
 
 doc.recompute()
 if App.GuiUp:

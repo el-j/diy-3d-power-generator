@@ -1,7 +1,7 @@
 {
   "$schema": "windpower-3d-params-v1",
   "version": "2.0.0",
-  "description": "Zentrale Parameter-Registry für alle Bauteile des Savonius Helix Wind-Generators",
+  "description": "Zentrale Parameter-Registry für alle Bauteile des Helix Helix Wind-Generators",
 
   "global": {
     "achse_kantenlaenge":  { "value": 10.0, "unit": "mm", "desc": "Vierkant-Achse Kantenlänge" },

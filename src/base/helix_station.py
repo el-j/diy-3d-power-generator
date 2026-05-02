@@ -289,27 +289,27 @@ show_obj(bracket, "Wand_Flansch")
 
 
 # ==========================================
-# BAUTEIL 6: TEST LAGERSCHALE (Kompakt)
+# BAUTEIL 6: ERSATZ LAGERSCHALE (3D-Druck Dummy)
 # ==========================================
-def make_test_lagerschale():
-    schale = Part.makeCylinder(40.0, deckel_h)
-    lager_tasche = Part.makeCylinder((lager_aussen_d + lager_toleranz) / 2.0, lager_dicke).translate(App.Vector(0, 0, deckel_h - lager_dicke))
-    schale = schale.cut(lager_tasche)
-    schulter = Part.makeCylinder(38.0 / 2.0, deckel_h + 2.0).translate(App.Vector(0, 0, -1.0))
-    schale = schale.cut(schulter)
-
-    for i in range(4):
-        angle = math.radians(i * 90 + 45)
-        x = 32.0 * math.cos(angle)
-        y = 32.0 * math.sin(angle)
-        loch = Part.makeCylinder(3.4 / 2.0, deckel_h + 2.0).translate(App.Vector(x, y, -1.0))
-        schale = schale.cut(loch)
+# Da dir die äußere Metallschale (Cup) fehlt, drucken wir sie einfach!
+# Außen exakt 50mm für deine Deckel-Aufnahme, innen konisch für die Kegelrollen.
+def make_ersatz_lagerschale():
+    schale_h = 12.0 # Typische Höhe der Schale bei diesen Lagern
+    schale = Part.makeCylinder(lager_aussen_d / 2.0, schale_h)
+    
+    # Konischer Innenschnitt für die schrägen Kegelrollen
+    # Unten enger (R=19.5), oben weiter (R=23.0) -> Passt sich den Rollen an
+    r_unten = (lager_aussen_d / 2.0) - 5.5 
+    r_oben = (lager_aussen_d / 2.0) - 2.0  
+    innen_kegel = Part.makeCone(r_unten, r_oben, schale_h)
+    
+    schale = schale.cut(innen_kegel)
 
     return schale.removeSplitter()
 
-test_schale = make_test_lagerschale()
-test_schale.translate(App.Vector(150, -100, 0))
-show_obj(test_schale, "Test_Lagerschale_Kompakt")
+ersatz_schale = make_ersatz_lagerschale()
+ersatz_schale.translate(App.Vector(150, -100, 0))
+show_obj(ersatz_schale, "Ersatz_Lagerschale_32005")
 
 doc.recompute()
 if App.GuiUp:

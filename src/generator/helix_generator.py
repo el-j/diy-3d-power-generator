@@ -29,7 +29,7 @@ stator_dicke = 9.0
 # ==========================================
 # 🔥 OPTIMIERTE MAßE FÜR 0.6mm NOZZLE & PLA-CF
 # ==========================================
-rotor_radius = 98.0       
+rotor_radius = 92.0       
 rotor_platte_h = 10.0     
 backplate_h = 4.0         
 rotor_schraub_r = 74.0    

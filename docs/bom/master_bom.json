@@ -1,74 +1,91 @@
 {
-  "version": "1.0.0",
-  "generated": "2026-04-28",
-  "variant": "10-pole",
+  "version": "3.0.0",
+  "generated": "2026-05-02",
   "assemblies": {
+
     "tower": {
+      "_note": "Helix-Turm — src/leaf/helix_leaf+connector.py",
       "printed_parts": [
-        { "id": "TWR-LEAF-01", "name": "Helix-Flügel", "material": "PETG", "qty_per_stage": 2 },
-        { "id": "TWR-CONN-01", "name": "Mittelverbinder", "material": "PETG", "qty_per_stage": 1 },
-        { "id": "TWR-PLUG-01", "name": "Vielzahn-Plug", "material": "PETG", "qty_per_stage": 1 }
-      ],
-      "purchased_parts": [
-        { "id": "F-M3-HI", "qty_per_stage": 4 },
-        { "id": "F-M3x8-MDS", "qty_per_stage": 4 }
+        { "id": "TWR-LEAF-01", "name": "Helix-Flügel",                 "stl": "Coreless_Helix_Fluegel",           "material": "PETG", "qty_per_stage": 2 },
+        { "id": "TWR-CONN-01", "name": "Mittelverbinder Skelett",        "stl": "Mittel_Verbinder_Skelett_FLACH",   "material": "PETG", "qty_per_stage": 1 },
+        { "id": "TWR-PLUG-01", "name": "Vielzahn-Plug",                 "stl": "Zwischen_Vielzahn_Plug",           "material": "PETG", "qty_per_stage": 1 },
+        { "id": "TWR-DISC-01", "name": "Start-Scheibe Flach",           "stl": "Start_Scheibe_FLACH",              "material": "PETG", "qty": 1 }
       ]
     },
-    "generator": {
-      "_note": "LEGACY (smalBasis) — Ersetzt durch xl-generator",
-      "printed_parts": [
-        { "id": "GEN-ROT-01", "name": "Rotor Oben", "material": "PETG", "qty": 1 },
-        { "id": "GEN-ROT-02", "name": "Rotor Unten", "material": "PETG", "qty": 1 },
-        { "id": "GEN-BP-01", "name": "Backplate Oben", "material": "PETG", "qty": 1 },
-        { "id": "GEN-BP-02", "name": "Backplate Unten", "material": "PETG", "qty": 1 },
-        { "id": "GEN-STAT-01", "name": "Stator-Schlitten", "material": "PETG", "qty": 1 },
-        { "id": "GEN-STAT-02", "name": "Stator-Deckel", "material": "PETG", "qty": 1 }
-      ],
-      "purchased_parts": [
-        { "id": "F-M3-HI", "qty": 10 },
-        { "id": "F-M3x16-SK", "qty": 10 },
-        { "id": "MAG-20x5x3", "qty": 20 }
-      ]
-    },
+
     "xl-generator": {
-      "_note": "AKTIV — XXL 20-Pol Generator (src/bigBasis/big_base_generator.py)",
+      "_note": "Aero-Fan Generator 20-Pol — src/generator/helix_generator.py",
       "printed_parts": [
-        { "id": "XLG-ROT-01", "name": "XXL Rotor Oben", "material": "PETG", "qty": 1 },
-        { "id": "XLG-ROT-02", "name": "XXL Rotor Unten", "material": "PETG", "qty": 1 },
-        { "id": "XLG-BP-01", "name": "XXL Backplate Oben", "material": "PETG", "qty": 1 },
-        { "id": "XLG-BP-02", "name": "XXL Backplate Unten", "material": "PETG", "qty": 1 },
-        { "id": "XLG-STAT-01", "name": "XXL Stator-Schlitten", "material": "PETG", "qty": 1 },
-        { "id": "XLG-STAT-02", "name": "XXL Stator-Deckel", "material": "PETG", "qty": 1 },
-        { "id": "XLG-PLUG-01", "name": "Magnet-Spacer Klötzchen", "material": "PETG", "qty": 20 },
-        { "id": "XLG-SPACER-01", "name": "Abstands-Hülse Rotoren (Ø20×10mm)", "material": "PETG", "qty": 2 },
-        { "id": "XLG-SPACER-02", "name": "Abstands-Hülse Lager (Ø28×7mm)", "material": "PETG", "qty": 1 }
+        { "id": "XLG-ROT-01",    "name": "Rotor Oben (Aero-Fan)",         "stl": "09_Rotor_AeroFan_TANK_FINAL_Oben",     "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-ROT-02",    "name": "Rotor Unten (Aero-Fan)",        "stl": "05_Rotor_AeroFan_TANK_FINAL_Unten",   "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-BP-01",     "name": "Backplate Ring Oben",           "stl": "10_Backplate_Ring_FLACH_Oben",        "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-BP-02",     "name": "Backplate Ring Unten",          "stl": "04_Backplate_Ring_FLACH_Unten",       "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-STAT-01",   "name": "Stator-Schlitten XXL",          "stl": "07_Stator_Schlitten_XXL",             "material": "PETG",   "qty": 1 },
+        { "id": "XLG-STAT-02",   "name": "Stator Donut-Deckel",           "stl": "08_Stator_Donut_Deckel_INSET",        "material": "PETG",   "qty": 1 },
+        { "id": "XLG-CLAMP-01",  "name": "Clamp Rotor-Stack (30mm Plug)", "stl": "03_Clamp_Rotor_Stack_Mega_30mm",      "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-CLAMP-02",  "name": "Clamp Lager Unten (20mm Plug)","stl": "01_Clamp_Lager_Unten",               "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-CLAMP-03",  "name": "Clamp Lager Oben (20mm Plug)", "stl": "13_Clamp_Lager_Oben",                "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-REDUZ-01",  "name": "Lager-Reduzierung Unten",       "stl": "02_Lager_Reduzierung_Unten",          "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-REDUZ-02",  "name": "Lager-Reduzierung Oben",        "stl": "14_Lager_Reduzierung_Oben",           "material": "PLA-CF", "qty": 1 },
+        { "id": "XLG-SPACER-01", "name": "Stator-Abstands-Spacer 10mm",   "stl": "11_Stator_Abstands_Spacer_10mm",      "material": "PETG",   "qty": 1 },
+        { "id": "XLG-PLUG-01",   "name": "Magnet-Spacer Klötzchen",       "stl": "15_Magnet_Spacer_Kloetzchen",         "material": "PETG",   "qty": 20 }
       ],
       "purchased_parts": [
-        { "id": "F-M3-HI", "qty": 10, "note": "Einschmelzmuttern für Rotor-Verschraubung" },
-        { "id": "F-M5x20-SK", "qty": 5, "note": "M5×20 Senkkopf für Rotor-Backplate" },
-        { "id": "F-M3x12-ZK", "qty": 4, "note": "Stator-Deckel Befestigung" },
-        { "id": "MAG-20x5x3", "qty": 20, "note": "Neodym N52, 20×5×3mm — pro Rotor 20 Stk" }
+        { "id": "MAG-20x5x3", "name": "Neodym-Magnet 20×5×3mm N52",    "qty": 20 },
+        { "id": "F-M3-HI",    "name": "M3 Einschmelzmutter Ø4.2×5mm",   "qty": 12, "note": "3 Clamps × 4" },
+        { "id": "F-M5x20-SK", "name": "M5×20 Senkkopfschraube",          "qty": 5,  "note": "Rotor-Backplate" },
+        { "id": "F-M3x8-ZK",  "name": "M3×8 Zylinderkopfschraube",       "qty": 4,  "note": "Stator-Deckel" }
       ]
     },
-    "base-station": {
+
+    "xl-base-station": {
+      "_note": "XXL Basis-Station 68mm — src/base/helix_station.py",
       "printed_parts": [
-        { "id": "BASE-HOUS-01", "name": "Basis-Gehäuse", "material": "PETG", "qty": 1 },
-        { "id": "BASE-SLED-01", "name": "Schiebe-Schlitten", "material": "PETG", "qty": 1 },
-        { "id": "BASE-DISC-01", "name": "Start-Scheibe", "material": "PETG", "qty": 1 },
-        { "id": "BASE-HEX-01", "name": "Hex-Adapter", "material": "PETG", "qty": 1 }
+        { "id": "XL-HOUS-01",  "name": "Basis-Gehäuse XXL",             "stl": "Basis_Gehaeuse_XXL",               "material": "PETG", "qty": 1 },
+        { "id": "XL-DECK-01",  "name": "Stacking Lager-Deckel",         "stl": "Stacking_Lager_Deckel_FLACH",      "material": "PETG", "qty": 1 },
+        { "id": "XL-FLNSH-01", "name": "Wand-Flansch",                  "stl": "Wand_Flansch",                     "material": "PETG", "qty": 3 },
+        { "id": "XL-KLAP-01",  "name": "Elektronik Wartungs-Klappe",    "stl": "Elektronik_Wartungs_Klappe",       "material": "PETG", "qty": 1 },
+        { "id": "XL-BODEN-01", "name": "Wartungsklappen-Boden",         "stl": "Wartungsklappen_Boden",            "material": "PETG", "qty": 1 }
       ],
       "purchased_parts": [
-        { "id": "F-M3-HI", "qty": 4 },
-        { "id": "F-M3x8-MDS", "qty": 4 },
-        { "id": "B-32005", "qty": 1 },
-        { "id": "A-SQ10", "qty": 1 }
+        { "id": "B-29x50x15",  "name": "Kegelrollenlager 29×50×15mm",   "qty": 1 },
+        { "id": "F-M3-HI",     "name": "M3 Einschmelzmutter Ø4.2×5mm",  "qty": 24, "note": "Flansch-Pads + Deckel-Verschraubung" },
+        { "id": "F-M3x16-SK",  "name": "M3×16 Senkkopfschraube",         "qty": 6,  "note": "Wand-Flansch Befestigung" },
+        { "id": "F-M6x30-SK",  "name": "M6×30 Senkkopfschraube",         "qty": 6,  "note": "Wandmontage Flansch" }
+      ]
+    },
+
+    "tools": {
+      "_note": "Wickelwerkzeuge — src/tools/",
+      "easy_tool": [
+        { "id": "TOOL-EASY-01", "name": "Winder Basis Bit",   "material": "PLA/PETG", "qty": 1 },
+        { "id": "TOOL-EASY-02", "name": "Winder Deckel Kern", "material": "PLA/PETG", "qty": 1 }
+      ],
+      "komplex_spooler": [
+        { "id": "TOOL-KS-01", "name": "Maschinen-Basis Kompakt (Skeleton)", "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-02", "name": "Steck-Türme (4 Achsen × 2)",        "material": "PETG", "qty": 8 },
+        { "id": "TOOL-KS-03", "name": "Z1 Kurbel-Zahnrad 40Z",             "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-04", "name": "Z2/Z3 Spulen-Zahnräder 10Z",        "material": "PETG", "qty": 2 },
+        { "id": "TOOL-KS-05", "name": "Z4 Zwischen-Zahnrad 40Z",           "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-06", "name": "Z5 Zwischen-Zahnrad 10Z",           "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-07", "name": "Z6 Trommel-Zahnrad 60Z",            "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-08", "name": "Achsen-Zubehör",                    "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-09", "name": "Spulen-Wickler 4-Kant",             "material": "PETG", "qty": 1 },
+        { "id": "TOOL-KS-10", "name": "Träger-Verschraubung",              "material": "PETG", "qty": 1 }
+      ],
+      "magnet_buffer": [
+        { "id": "TOOL-MB-01", "name": "Basis mit Bremse",          "material": "PETG", "qty": 1 },
+        { "id": "TOOL-MB-02", "name": "Endblock (Magnet-Halter)",  "material": "PETG", "qty": 1 },
+        { "id": "TOOL-MB-03", "name": "Magnet-Schlitten (Pilz)",   "material": "PETG", "qty": 1 }
       ]
     }
   },
+
   "totals": {
-    "unique_printed_parts": 22,
-    "unique_purchased_parts": 10,
-    "magnets_per_xl_generator": 20,
-    "_note": "xl-generator counted separately from legacy generator"
+    "printed_generator": 13,
+    "printed_base_station": 5,
+    "printed_tower_per_stage": 3,
+    "magnets_per_generator": 20,
+    "note": "Clamps + Reducers empfohlen in PLA-CF für maximale Festigkeit"
   }
 }

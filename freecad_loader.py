@@ -6,24 +6,22 @@ After that, use run("scriptname") to load any script.
 
 Usage in FreeCAD Python Console:
     exec(open("/Users/rex-fab-alt/Documents/code/playground/windpower-3d/freecad_loader.py").read())
-    
-    # XL Basis (Hauptsystem):
-    run("bigBasis/big_base_station")
-    run("bigBasis/big_base_generator")
-    
-    # Turm:
-    run("Helix_Leaf+Connector")
-    
+
+    # Generator (Aero-Fan, 20-Pol):
+    run("generator/helix_generator")
+
+    # XXL Basis-Station (68mm Gehäuse):
+    run("base/helix_station")
+
+    # Turm (Helix-Blatt + Verbinder):
+    run("leaf/helix_leaf+connector")
+
     # Werkzeuge:
     run("tools/komplexSPooler/Traversier-Basis & Skeleton")
+    run("tools/komplexSPooler/example.aufbau")
     run("tools/ magnetPuffer/magnetBuffer")
     run("tools/easy_tool_big_spools-accuschrauber")
     run("tools/firstSpooler/wickler_basis+wheels")
-    
-    # Legacy (kleine Basis):
-    run("smalBasis/Helix_Magnet_Basis_Station")
-    run("smalBasis/Helix_Generator_eckige-magnete-10er_rotor")
-    run("smalBasis/Helix_Generator_eckige-magnete-20er_rotor")
 """
 import sys
 import os
@@ -79,34 +77,34 @@ def list_scripts():
     src_dir = os.path.join(PROJECT_ROOT, "src")
     
     categories = {
-        "bigBasis": "🏗️  XXL Basis & Generator (HAUPTSYSTEM)",
-        "smalBasis": "📦  Legacy Kleine Basis",
-        "tools": "🔧  Werkzeuge",
-        "": "🗼  Turm"
+        "generator": "⚡  Generator (Aero-Fan, 20-Pol)",
+        "base":      "🏗️  XXL Basis-Station (68mm)",
+        "leaf":      "🗼  Turm (Helix-Blatt + Verbinder)",
+        "tools":     "🔧  Werkzeuge",
     }
-    
+
     scripts_by_cat = {}
     for root, dirs, files in os.walk(src_dir):
         for f in sorted(files):
             if f.endswith(".py"):
                 rel = os.path.relpath(os.path.join(root, f), src_dir)
                 name = rel.replace(".py", "")
-                
-                cat = ""
-                for prefix in ["bigBasis", "smalBasis", "tools"]:
+
+                cat = "other"
+                for prefix in ["generator", "base", "leaf", "tools"]:
                     if name.startswith(prefix):
                         cat = prefix
                         break
-                
+
                 if cat not in scripts_by_cat:
                     scripts_by_cat[cat] = []
                 scripts_by_cat[cat].append(name)
-    
+
     print("📁 Verfügbare Scripts:")
     print()
-    for cat_key in ["bigBasis", "", "tools", "smalBasis"]:
+    for cat_key in ["generator", "base", "leaf", "tools", "other"]:
         if cat_key in scripts_by_cat:
-            label = categories.get(cat_key, cat_key)
+            label = categories.get(cat_key, f"📂  {cat_key}")
             print(f"  {label}")
             for name in scripts_by_cat[cat_key]:
                 print(f'    run("{name}")')

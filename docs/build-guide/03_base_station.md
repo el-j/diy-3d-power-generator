@@ -1,95 +1,112 @@
-# 🏗️ Bauanleitung: XXL Basis-Station
+# 🏗️ Bauanleitung: XXL Basis-Station v3.0 (68mm)
 
-> Die XXL Basis-Station ist das Herzstück der Anlage. 220mm Durchmesser, 50mm Kegelrollenlager, wasserdichte Bodenwanne und Elektronik-Wartungsklappe.
-
----
-
-## Benötigte Teile
-
-### Druckteile (8 Stück)
-- [ ] 1× XXL Basis-Gehäuse (XL-HOUS-01)
-- [ ] 1× Stacking Lager-Deckel (XL-DECK-01)
-- [ ] 3× Wand-Flansch (XL-FLNSH-01)
-- [ ] 1× Boden-Schlitten XXL (XL-SLED-01)
-- [ ] 1× Universal Lager-Adapter (XL-ADAPT-01)
-- [ ] 1× Start-Scheibe Flach (XL-DISC-01)
-- [ ] 1× Boden-Wanne Wasserdicht (XL-WANN-01)
-- [ ] 1× Elektronik Wartungs-Klappe (XL-KLAP-01)
-
-### Kaufteile
-- [ ] 1× Kegelrollenlager 29×50×15mm
-- [ ] ~30× M3 Einschmelzmuttern
-- [ ] 12× M3×16 Senkkopfschrauben (Deckel + Wanne)
-- [ ] 8× M3×12 Zylinderkopfschrauben (Wand-Flansche)
-- [ ] 4× M3×8 Madenschrauben (Lager-Adapter)
+> Extrem flache 68mm Basis, Ø220mm. U-Form-Öffnung für Stator-Einschub, Führungslippe am Stacking-Deckel, abnehmbare Wartungsklappe mit PCB-Standoffs.
+> Quelle: `src/base/helix_station.py`
 
 ---
 
-## Schritt 1: XXL Gehäuse drucken
+## Benötigte Druckteile
 
-### Druckeinstellungen
-| Parameter | Wert |
-|-----------|------|
-| Material | PETG |
-| Schichthöhe | 0.2mm |
-| Füllung | 25% |
-| Wände | 4 |
-| Stützstruktur | ❌ Nein |
+| ID | STL-Datei (exports/xl_basis/) | Menge | Infill |
+|----|-------------------------------|:-----:|:------:|
+| XL-HOUS-01  | Basis_Gehaeuse_XXL              | 1 | 25% |
+| XL-DECK-01  | Stacking_Lager_Deckel_FLACH     | 1 | 40% |
+| XL-FLNSH-01 | Wand_Flansch                    | 3 | 50% |
+| XL-KLAP-01  | Elektronik_Wartungs_Klappe      | 1 | 20% |
+| XL-BODEN-01 | Wartungsklappen_Boden           | 1 | 30% |
 
-> 💡 **TIPP**: Das Gehäuse ist 220mm im Durchmesser und 120mm hoch. Es passt auf ein Bambu P1S Druckbett, aber GERADE SO. Stelle sicher, dass es zentriert ist!
+## Benötigte Kaufteile
 
----
-
-## Schritt 2: Stacking Lager-Deckel
-
-Dieser Deckel sitzt oben auf dem Gehäuse und enthält die Lagertasche.
-
-1. **Drucken**: Flach drucken, 40% Infill
-2. **Lager einpressen**: Kegelrollenlager in die 50.2mm Tasche einpressen
-   > ⚠️ Die Tasche ist +0.2mm größer als das Lager. Das Lager muss stramm sitzen — ggf. mit einer Schraubzwinge einpressen!
-3. **Deckelschrauben**: 6× M3×16 Senkkopfschrauben durch die Löcher auf R=105mm
+- [ ] 1× Kegelrollenlager **29×50×15mm** (REAL GEMESSEN — kein Datenblatt!)
+- [ ] 24× M3 Einschmelzmutter Ø4.2×5mm
+- [ ] 6× M3×16 Senkkopfschraube (Wand-Flansch → Gehäuse)
+- [ ] 6× M6×30 Senkkopfschraube (Flansch → Wand)
+- [ ] 4× M3×12 Zylinderkopfschraube (Klappen-Boden)
 
 ---
 
-## Schritt 3: Universal Lager-Adapter
+## Schritt 1: Einschmelzmuttern ins Gehäuse
 
-Der Adapter sitzt im inneren Lagerring und verbindet die Achse mit dem Turm.
+Das Gehäuse hat drei Flansch-Pads (rechts, links, hinten) und Deckel-Bohrungen.
 
-1. **Drucken**: 80% Infill! Dieser Teil braucht maximale Festigkeit
-2. **Konische Einführ-Fase**: Die ersten 2mm sind abgeschrägt — das erleichtert das Einfädeln in den Lagerring
-3. **Pressfit**: Der Adapter ist +0.15mm übermaßig für einen "saftigen" Sitz
-4. **Einschmelzmuttern**: 4× M3 Muttern in den Kragen einsetzen
-5. **Hex-Plug**: Ragt oben heraus und nimmt die Start-Scheibe auf
+### Flansch-Pads (je 4× pro Pad = 12×)
+- 4× an jedem der 3 Pads bei Z=15mm und Z=53mm
+- Einschmelzen von der geraden Außenfläche (bei X=±121.5mm bzw. Y=121.5mm)
 
----
+### Deckel-Verschraubung (R=104mm, 15° versetzt, 12 Bohrungen)
+- **Gerade Positionen** (i=0,2,4…): Insert sitzt bei Z=63–68mm (oben), gehört zum Gehäuse → **6× einschmelzen**
+- **Ungerade Positionen** (i=1,3,5…): Insert sitzt bei Z=0–5mm (unten), gehört zum Gehäuse → **6× einschmelzen**
 
-## Schritt 4: Wand-Flansche montieren
-
-Die 3 Flansche werden bei 0°, 90° und 180° am Gehäuse verschraubt.
-
-1. **Drucken**: 50% Infill, keine Stützstruktur
-2. **Einschmelzmuttern**: Je 4× Muttern in die Pads einsetzen
-3. **Verschrauben**: Je 4× M3×12 durch die Senkkopf-Löcher
+> 💡 Insgesamt ~24 Einschmelzmuttern im Gehäuse. Lötkolben 250°C, langsam und gerade eindrücken.
 
 ---
 
-## Schritt 5: Bodenwanne (Wasserdicht)
+## Schritt 2: Kegelrollenlager einpressen
 
-1. Von unten auf das Gehäuse setzen (die Lippe greift um den Rand)
-2. 4× M3 Senkkopfschrauben bei 45°, 135°, 225°, 315° 
-3. Achsen-Freiraum (Ø12mm) im Zentrum für die Vierkant-Achse
+1. **Stacking-Deckel** (XL-DECK-01) flach auf Tisch legen — Lagertasche zeigt nach oben
+2. Lagertasche ist **50.2mm** (= Lager 50mm + 0.2mm Toleranz)
+3. Lager mit gleichmäßigem Druck einpressen — ggf. mit einer Schraubzwinge oder Presse
+4. Lager muss **bündig** mit der oberen Fläche sitzen
+
+> ⚠️ Nie auf den Innenring hämmern — nur auf den Außenring drücken!
 
 ---
 
-## Schritt 6: Wartungsklappe montieren
+## Schritt 3: Stator-Schlitten einfahren
 
-1. Klappe von vorne (Y-Seite) einhängen
-2. 4× M3 Schrauben durch die Tabs
-3. **Backpack-Gehäuse**: Elektronik (Gleichrichter, Laderegler) hier unterbringen
-4. Kabel durch das Ø8mm Loch nach außen führen
+Das Gehäuse hat eine **U-Form-Öffnung** (213mm breit) und einen **Stator-Schlitz** bei Z=25.8–34.2mm.
+
+1. Stator-Schlitten (XLG-STAT-01) von vorne durch die Öffnung einschieben
+2. In den Schlitz einfädeln — der Stator läuft auf R=99mm, der Schlitz ist 99.5mm Radius
+3. Stator schiebt sich bis zur Mitte und rastet in der richtigen Position
+
+> 💡 Der Stator-Schlitz ist 8.4mm hoch (Stator 9mm − 0.6mm Spiel). Er sitzt bündig bei Ø198mm.
+
+---
+
+## Schritt 4: Stacking-Deckel aufsetzen
+
+1. Stacking-Deckel von oben auf das Gehäuse aufsetzen
+2. Die **Führungslippe** (R96–110mm, 4mm hoch) zentriert den Deckel automatisch am Gehäuse-Innenrand
+3. Der **Führungsring** (R85–95.5mm, 6mm tief) greift in den Stator-Radius ein
+4. 12× M3×16 Senkkopfschrauben durch die Deckel-Bohrungen (R=104mm) in die Einschmelzmuttern des Gehäuses
+
+---
+
+## Schritt 5: Wand-Flansche montieren
+
+Die Flansche (XL-FLNSH-01) verbinden die Basis mit der Wand/Träger.
+
+1. 3× Wand-Flansch auf die 3 Pads aufsetzen (rechts, links, hinten)
+2. Je 4× M3×16 Senkkopf durch den senkrechten Flansch-Steg in die Pad-Einschmelzmuttern
+3. Je 2× M6×30 durch die waagerechten Löcher in die Wand/Träger
+
+> 💡 Die Dreiecks-Rippen am Flansch tragen Last — Montage ohne diese Seite führt zu Bruch!
+
+---
+
+## Schritt 6: Elektronik-Wartungsklappe
+
+Die Klappe schließt die U-Form-Öffnung vorne und enthält die Elektronik.
+
+1. **PCB-Standoffs**: 4× innen an der Rückwand (±25mm, Z=20mm + 50mm)
+2. Gleichrichter, Laderegler und Anschlussklemmen auf den Standoffs befestigen
+3. Kabel durch die **Kabeldurchführung** (Ø10mm, Z=10mm) führen
+4. Klappe in die Öffnung einschieben und mit 1× M3×16 pro Seite (Z=34mm) verriegeln
+5. **Klappen-Boden** (XL-BODEN-01) von unten aufsetzen und mit 4× M3×12 an den Tabs verschrauben
+
+---
+
+## Schritt 7: Generator einsetzen
+
+1. Lager-Reduzierung Unten (XLG-REDUZ-01) in den Innenring des Kegelrollenlagers einpressen
+   - Schaft Ø29.15mm (= Lager-Innen 29mm + 0.15mm Pressfit)
+   - Fase ermöglicht leichtes Einfädeln
+2. Vielzahn-Achse von oben einführen, alle Generator-Komponenten von oben aufstecken
+3. Von unten: Clamp Lager Unten aufschrauben (fixiert Position)
 
 ---
 
 ## ✅ Fertig!
 
-**Weiter mit**: [🔧 Endmontage](04_final_assembly.md)
+**Weiter mit**: [🔩 Endmontage](04_final_assembly.md)

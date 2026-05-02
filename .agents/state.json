@@ -3,29 +3,38 @@
     "status": "idle",
     "phase": null,
     "base_branch": "main",
-    "last_run": "2026-04-30"
+    "last_run": "2026-05-02"
   },
-  "project_version": "2.1.0",
+  "project_version": "3.0.0",
   "active_assemblies": ["xl-generator", "xl-base-station", "tower", "tools"],
-  "legacy_assemblies": ["generator", "base-station"],
+  "legacy_assemblies": [],
   "tasks": {},
   "queue": [],
   "active": [],
   "history": [
     {
-      "id": "sync-2026-04-30",
-      "description": "Comprehensive doc sync after v2.1.0 generator refactor (3 new parts, stator-deckel fix, stator-schlitten resize, Komplex-Spooler virtual assembly, traeger rename)",
+      "id": "sync-2026-05-02",
+      "description": "v3.0.0 — Komplette Neukonstruktion: Aero-Fan Rotor, Clamp-System, Lager-Reduzierung, 68mm Basis, neue src/-Struktur (generator/, base/, leaf/), Legacy-Skripte entfernt",
       "result": "done",
-      "timestamp": "2026-04-30",
+      "timestamp": "2026-05-02",
       "files_updated": [
+        "freecad_loader.py",
+        "shared/parameters.json",
         "assemblies/xl-generator/xl_generator_assembly.json",
-        "assemblies/tools/tools_assembly.json",
+        "assemblies/xl-base-station/xl_base_assembly.json",
+        "assemblies/tower/tower_assembly.json",
         "docs/bom/master_bom.json",
         "docs/bom/master_bom.md",
         "docs/build-guide/02_generator.md",
-        "shared/parameters.json",
+        "docs/build-guide/03_base_station.md",
         "CLAUDE.md"
       ]
+    },
+    {
+      "id": "sync-2026-04-30",
+      "description": "v2.1.0 doc sync — Stator-Deckel Lochfix, neue Spacer-Teile, Komplex-Spooler virtual assembly, traeger rename",
+      "result": "done",
+      "timestamp": "2026-04-30"
     }
   ],
   "errors": []

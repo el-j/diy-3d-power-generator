@@ -1,58 +1,125 @@
 {
   "assembly_id": "xl-generator",
-  "name": "XXL Axialfluss-Generator / XL Axial Flux Generator",
-  "description": "Massiver 20-Pol Sandwich-Generator mit 180mm Rotoren, ovalen Gigant-Spulen (Capsule-Form) und Leichtbau-Skelettierung.",
-  "version": "2.1.0",
+  "name": "Helix Aero-Fan Generator (20-Pol)",
+  "description": "20-Pol Sandwich-Generator mit Aero-Fan Rotoren (Ø184mm), 12 Capsule-Spulen, Vielzahn-Clamp-System und Lager-Reduzierung. Optimiert für 0.6mm Nozzle + PLA-CF.",
+  "version": "3.0.0",
   "status": "active",
-  "replaces": "generator (smalBasis 10/20-pole)",
-  "components": [
-    { "id": "XLG-ROT-01", "name": "XXL Rotor Oben", "directory": "rotor-top-xl", "quantity": 1 },
-    { "id": "XLG-ROT-02", "name": "XXL Rotor Unten", "directory": "rotor-bottom-xl", "quantity": 1 },
-    { "id": "XLG-BP-01", "name": "XXL Backplate Oben", "directory": "backplate-top-xl", "quantity": 1 },
-    { "id": "XLG-BP-02", "name": "XXL Backplate Unten", "directory": "backplate-bottom-xl", "quantity": 1 },
-    { "id": "XLG-STAT-01", "name": "XXL Stator-Schlitten", "directory": "stator-sled-xl", "quantity": 1 },
-    { "id": "XLG-STAT-02", "name": "XXL Stator-Deckel", "directory": "stator-cover-xl", "quantity": 1 },
-    { "id": "XLG-PLUG-01", "name": "Magnet-Spacer Klötzchen", "directory": "magnet-spacer", "quantity": 20, "note": "Einzelner Magnet-Abstandshalter (rotor_platte_h − magnet_h − 0.6). Vormals in Backplate integriert, jetzt separates Teil." },
-    { "id": "XLG-SPACER-01", "name": "Abstands-Hülse Rotoren", "directory": "spacer-rotors", "quantity": 2, "note": "10mm lang × Ø20mm (kragen_d). Hält axialen Abstand zwischen Rotor und Stator." },
-    { "id": "XLG-SPACER-02", "name": "Abstands-Hülse Lager", "directory": "spacer-bearing", "quantity": 1, "note": "7mm lang × Ø28mm. Sitzt auf der 29mm Basisstation-Zentrierung." }
-  ],
   "source_scripts": {
-    "generator": "src/bigBasis/big_base_generator.py"
+    "generator": "src/generator/helix_generator.py"
   },
+  "printed_parts": [
+    {
+      "id": "XLG-ROT-01", "stl": "09_Rotor_AeroFan_TANK_FINAL_Oben",
+      "name": "Rotor Oben (Aero-Fan)", "quantity": 1,
+      "note": "11 Fanblätter, Outer-Ring, Donut-Ring, 20 Magnettaschen R74, 5 Verschraubungen R74"
+    },
+    {
+      "id": "XLG-ROT-02", "stl": "05_Rotor_AeroFan_TANK_FINAL_Unten",
+      "name": "Rotor Unten (Aero-Fan)", "quantity": 1,
+      "note": "Spiegelbild von ROT-01, Lippen-Ausrichtung anders"
+    },
+    {
+      "id": "XLG-BP-01", "stl": "10_Backplate_Ring_FLACH_Oben",
+      "name": "Backplate Ring Oben", "quantity": 1,
+      "note": "Donut R62–86mm, 15 Material-Einspar-Taschen, 5 Verschraubungen"
+    },
+    {
+      "id": "XLG-BP-02", "stl": "04_Backplate_Ring_FLACH_Unten",
+      "name": "Backplate Ring Unten", "quantity": 1,
+      "note": "Identisch zu BP-01"
+    },
+    {
+      "id": "XLG-STAT-01", "stl": "07_Stator_Schlitten_XXL",
+      "name": "Stator-Schlitten XXL", "quantity": 1,
+      "note": "12 Capsule-Taschen R74, Materialeinsparung zwischen Spulen, Ringkanal Z=6.5, 4× Verschraubung R91"
+    },
+    {
+      "id": "XLG-STAT-02", "stl": "08_Stator_Donut_Deckel_INSET",
+      "name": "Stator Donut-Deckel", "quantity": 1,
+      "note": "Donut R50.5–95.5mm, 1.5mm dünn, bündig mit Stator, 12 Capsule-Cuts"
+    },
+    {
+      "id": "XLG-CLAMP-01", "stl": "03_Clamp_Rotor_Stack_Mega_30mm",
+      "name": "Universal-Clamp Rotor-Stack (30mm Plug)", "quantity": 1,
+      "note": "8mm Kragen Ø20 + 30mm Vielzahn-Plug, 4× M3 Einschmelzmutter radial"
+    },
+    {
+      "id": "XLG-CLAMP-02", "stl": "01_Clamp_Lager_Unten",
+      "name": "Universal-Clamp Lager Unten (20mm Plug)", "quantity": 1,
+      "note": "8mm Kragen + 20mm Vielzahn-Plug"
+    },
+    {
+      "id": "XLG-CLAMP-03", "stl": "13_Clamp_Lager_Oben",
+      "name": "Universal-Clamp Lager Oben (20mm Plug)", "quantity": 1,
+      "note": "Identisch zu CLAMP-02, 180° gespiegelt montiert"
+    },
+    {
+      "id": "XLG-REDUZ-01", "stl": "02_Lager_Reduzierung_Unten",
+      "name": "Lager-Reduzierung Unten", "quantity": 1,
+      "note": "Fase + Schaft Ø29.15mm Pressfit, Kragen Ø34mm, Vielzahn-Loch"
+    },
+    {
+      "id": "XLG-REDUZ-02", "stl": "14_Lager_Reduzierung_Oben",
+      "name": "Lager-Reduzierung Oben", "quantity": 1,
+      "note": "Identisch zu REDUZ-01, 180° gespiegelt"
+    },
+    {
+      "id": "XLG-SPACER-01", "stl": "11_Stator_Abstands_Spacer_10mm",
+      "name": "Stator-Abstands-Spacer (Vielzahn, 10mm)", "quantity": 1,
+      "note": "Ø20mm × 10mm, Vielzahn-Loch — axialer Abstand Rotor/Stator"
+    },
+    {
+      "id": "XLG-PLUG-01", "stl": "15_Magnet_Spacer_Kloetzchen",
+      "name": "Magnet-Spacer Klötzchen", "quantity": 20,
+      "note": "20.1 × 5.1 × (rotor_platte_h − magnet_h − 0.6) = 6.4mm hoch"
+    }
+  ],
   "key_parameters": {
-    "rotor_radius": 90.0,
+    "rotor_radius": 92.0,
+    "rotor_platte_h": 10.0,
+    "rotor_hub_r": 16.5,
+    "blade_count": 11,
     "mag_kreis_r": 74.0,
+    "rotor_schraub_r": 74.0,
     "anzahl_magnete": 20,
     "stator_radius": 99.0,
-    "stator_dicke": 8.0,
-    "spule_type": "oval/capsule",
-    "spule_aussen_l": 40.0,
-    "spule_aussen_w": 26.0,
-    "spule_dicke": 6.0,
-    "stator_schlitten_footbox_y": 120.0,
-    "stator_schlitten_griff_y": 135.0,
-    "deckel_mittelloch_r": 16.0,
-    "spacer_innen_len": 10.0,
-    "spacer_innen_od": 20.0,
-    "spacer_unten_len": 7.0,
-    "spacer_unten_od": 28.0,
-    "note": "Capsule-Spulen statt runde! Mehr Kupfer = mehr Leistung."
+    "stator_dicke": 9.0,
+    "stator_slot_z": 25.8,
+    "anzahl_spulen": 12,
+    "spule_aussen": "40×26mm",
+    "spule_innen": "22×8mm",
+    "vielzahn": "12-Zahn R9.0/R7.8 (unified)",
+    "kragen_d": 20.0,
+    "lager_innen_d": 29.0,
+    "adapter_pressfit": 0.15
   },
+  "assembly_sequence": [
+    "1. Einschmelzmuttern in Clamp-Kragen einschmelzen (4× pro Clamp)",
+    "2. Magnete in Rotor-Taschen einsetzen (20×, alternierend N/S)",
+    "3. Magnet-Spacer (20×) über Magnete setzen",
+    "4. Backplate-Ringe auf Rotoren verschrauben (5× M5×20)",
+    "5. 12 Capsule-Spulen wickeln und in Stator-Schlitten einsetzen",
+    "6. 3-Phasen Stern-Schaltung verdrahten (Phasen A/B/C je 4 Spulen)",
+    "7. Stator-Deckel aufsetzen und verschrauben (4× M3×8)",
+    "8. Auf Achse aufbauen: Lager-Reduzierung U → Clamp U → Stack-Mega-Clamp → Rotor U → Spacer → Stator → Rotor O → Clamp O → Lager-Reduzierung O"
+  ],
   "changelog": {
+    "3.0.0": [
+      "Komplette Rotor-Neukonstruktion: Aero-Fan Design (11 Fanblätter, Hub, Outer-Ring, Donut)",
+      "rotor_radius: 90 → 92mm, rotor_platte_h: 6 → 10mm",
+      "stator_dicke: 8 → 9mm",
+      "rotor_schraub_r: 50 → 74mm (jetzt auf Magnetkreis)",
+      "Neues Clamp-System: make_universal_clamp() mit radialem M3 — ersetzt einfache Spacer",
+      "Neue Lager-Reduzierung: make_lager_reduzierung() mit Fase + Pressfit-Schaft",
+      "Vielzahn-Spacer statt quadratischer Abstands-Hülse",
+      "Stator: Materialeinsparung zwischen Spulen, flacherer Ringkanal, Lid-Pocket",
+      "Quelle verschoben: src/bigBasis/ → src/generator/"
+    ],
     "2.1.0": [
-      "Magnet-Spacer Klötzchen als separates Teil (XLG-PLUG-01) — vormals in make_backplate() integriert",
-      "Neue Abstands-Hülsen: Rotoren (Ø20×10mm) und Lager (Ø28×7mm)",
-      "Stator-Deckel Mittelloch gefixt: Radius 9mm (18/2) → 16mm (passt jetzt zur 32mm Achsbohrung)",
-      "Stator-Schlitten Footbox verkürzt: 140mm → 120mm, Griff: 160mm → 135mm",
-      "Kabelkanal-Bohrungen neu positioniert: Y=-150 → Y=-127.5"
+      "Magnet-Spacer als separates Teil, Abstands-Hülsen, Stator-Deckel Loch-Fix"
     ],
     "2.0.0": [
-      "Rotoren: 90mm Radius statt 38mm — massives Drehmoment",
-      "Magnete auf R74 statt R27 — höhere Geschwindigkeit am Magnetkreis",
-      "Ovale Capsule-Spulen statt runde — 40×26mm statt Ø14mm",
-      "6mm Spulentaschen statt 3.5mm — doppelt so viel Kupfer",
-      "Leichtbau-Skelettierung: 5 große Löcher pro Rotor/Backplate",
-      "Stator 8mm dick statt 5mm — massiveres Substrat"
+      "XXL Generator mit Capsule-Spulen, Rotoren Ø180mm"
     ]
   }
 }

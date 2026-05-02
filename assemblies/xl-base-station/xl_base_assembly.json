@@ -1,47 +1,81 @@
 {
   "assembly_id": "xl-base-station",
-  "name": "XXL Basis-Station / XL Base Station",
-  "description": "Massive XXL-Basis mit 220mm Durchmesser, Stacking-Deckel mit 50mm Kegelrollenlager, Wand-Flansch, wasserdichter Bodenwanne und Elektronik-Wartungsklappe mit Backpack.",
-  "version": "2.0.0",
+  "name": "Helix XXL Basis-Station (68mm)",
+  "description": "Extrem flache 68mm Basis mit 220mm Ø, U-Form-Öffnung für Stator-Einschub, Stacking-Deckel mit Führungslippe, Wartungsklappe mit PCB-Standoffs und abnehmbarem Boden.",
+  "version": "3.0.0",
   "status": "active",
-  "replaces": "base-station (smalBasis)",
-  "components": [
-    { "id": "XL-HOUS-01", "name": "XXL Basis-Gehäuse", "directory": "housing-xxl", "quantity": 1 },
-    { "id": "XL-DECK-01", "name": "Stacking Lager-Deckel", "directory": "stacking-cover", "quantity": 1 },
-    { "id": "XL-FLNSH-01", "name": "Wand-Flansch", "directory": "wall-bracket", "quantity": 3 },
-    { "id": "XL-SLED-01", "name": "Boden-Schlitten XXL", "directory": "floor-sled", "quantity": 1 },
-    { "id": "XL-ADAPT-01", "name": "Universal Lager-Adapter", "directory": "bearing-adapter", "quantity": 1 },
-    { "id": "XL-DISC-01", "name": "Start-Scheibe Flach", "directory": "start-disc", "quantity": 1 },
-    { "id": "XL-WANN-01", "name": "Boden-Wanne Wasserdicht", "directory": "waterproof-tray", "quantity": 1 },
-    { "id": "XL-KLAP-01", "name": "Elektronik Wartungs-Klappe", "directory": "maintenance-hatch", "quantity": 1 }
-  ],
   "source_scripts": {
-    "station": "src/bigBasis/big_base_station.py",
-    "generator": "src/bigBasis/big_base_generator.py"
+    "station": "src/base/helix_station.py"
   },
+  "printed_parts": [
+    {
+      "id": "XL-HOUS-01", "stl": "Basis_Gehaeuse_XXL",
+      "name": "Basis-Gehäuse XXL", "quantity": 1,
+      "note": "U-Form: 213mm Öffnung vorne, Stator-Schlitz Z=25.8–34.2, 3 Flansch-Pads bei ±121.5mm, Deckel-Verschraubungen R=104mm"
+    },
+    {
+      "id": "XL-DECK-01", "stl": "Stacking_Lager_Deckel_FLACH",
+      "name": "Stacking Lager-Deckel (flach)", "quantity": 1,
+      "note": "Führungs-Ring unten (R85–95.5mm), Lippe (R96–110mm), Lagertasche Ø50.2mm, 12 Verschraubungen R104"
+    },
+    {
+      "id": "XL-FLNSH-01", "stl": "Wand_Flansch",
+      "name": "Wand-Flansch (L-Profil + Dreiecksrippe)", "quantity": 3,
+      "note": "40×50×68mm, Dreiecks-Verstrebung, 4× M3 Senkkopf zur Basis, 2× M6 Wandbefestigung"
+    },
+    {
+      "id": "XL-KLAP-01", "stl": "Elektronik_Wartungs_Klappe",
+      "name": "Elektronik Wartungs-Klappe", "quantity": 1,
+      "note": "6mm Wände + 6mm Dach, PCB-Standoffs 4× innen, Kabeldurchführung Ø10mm, 1× Verriegelungsschraube"
+    },
+    {
+      "id": "XL-BODEN-01", "stl": "Wartungsklappen_Boden",
+      "name": "Wartungsklappen-Boden", "quantity": 1,
+      "note": "6mm Platte, verschraubt mit 4 Tabs der Klappe"
+    },
+    {
+      "id": "XL-TEST-01", "stl": "Test_Lagerschale_Kompakt",
+      "name": "Test-Lagerschale (Kompakt, Ø80mm)", "quantity": 1,
+      "note": "Nur zum Testen des Lagersitzes — kein Produktionsteil"
+    }
+  ],
   "key_parameters": {
     "fuss_radius": 110.0,
-    "gehaeuse_h": 120.0,
+    "gehaeuse_h": 68.0,
+    "inner_chamber_r": 96.0,
+    "front_opening_w": 213.0,
+    "stator_slot_z": 25.8,
+    "stator_slot_h": 8.4,
     "lager_innen_d": 29.0,
     "lager_aussen_d": 50.0,
     "lager_toleranz": 0.2,
-    "adapter_pressfit": 0.15,
-    "note": "Lager-Maße basieren auf REALER MESSUNG, nicht Datenblatt!"
+    "deckel_h": 18.0,
+    "note": "Lager-Maße REAL GEMESSEN. Gehäuse 68mm (war 120mm) — passt jetzt kompakter!"
   },
   "assembly_sequence": [
-    "1. XXL Gehäuse drucken (evtl. 2 Teile bei kleinerem Drucker)",
-    "2. Stacking-Deckel drucken",
+    "1. Gehäuse drucken (passt auf Bambu P1S, kein Split nötig — 68mm Höhe)",
+    "2. Stacking-Deckel drucken (Führungslippe nach unten)",
     "3. 3× Wand-Flansch drucken",
-    "4. Boden-Schlitten drucken",
-    "5. Universal Lager-Adapter drucken (Pressfit-Toleranz beachten!)",
-    "6. Bodenwanne drucken",
-    "7. Wartungsklappe drucken",
-    "8. Einschmelzmuttern einsetzen (Gehäuse: 6× oben, 6× unten, 4× seitlich für Wanne, 4× für Klappe)",
-    "9. Kegelrollenlager in Stacking-Deckel einpressen (50.2mm Tasche für 50mm Lager)",
-    "10. Lager-Adapter einsetzen (Pressfit +0.15mm)",
-    "11. Generator-Schlitten von vorne einschieben",
-    "12. Wand-Flansche montieren (3× um 120° versetzt)",
-    "13. Bodenwanne von unten verschrauben",
-    "14. Wartungsklappe einhängen"
-  ]
+    "4. Wartungsklappe + Klappen-Boden drucken",
+    "5. Einschmelzmuttern in Gehäuse einschmelzen (Flansch-Pads + Deckel-Bohrungen)",
+    "6. Kegelrollenlager in Stacking-Deckel einpressen (50.2mm Tasche)",
+    "7. Stator-Schlitten von vorne durch U-Öffnung in Schlitz einschieben (Z=25.8)",
+    "8. Stacking-Deckel von oben aufsetzen, Führungslippe zentriert Gehäuse",
+    "9. Wand-Flansche montieren (3×, gleichmäßig verteilt)",
+    "10. Elektronik einbauen, Klappe einhängen und Boden verschrauben"
+  ],
+  "changelog": {
+    "3.0.0": [
+      "gehaeuse_h: 120 → 68mm — extrem flache Bauweise",
+      "Gehäuse: U-Form-Öffnung 213mm für Stator-Einschub von vorne",
+      "Stacking-Deckel: Führungslippe + Führungsring für Selbstzentrierung",
+      "Wartungsklappe: PCB-Standoffs, Kabeldurchführung, abnehmbar",
+      "Neues Teil XL-BODEN-01: Wartungsklappen-Boden",
+      "Entfernt: Boden-Schlitten (XL-SLED-01), Universal Lager-Adapter (XL-ADAPT-01), Boden-Wanne (XL-WANN-01), Start-Scheibe (XL-DISC-01)",
+      "Quelle verschoben: src/bigBasis/ → src/base/"
+    ],
+    "2.0.0": [
+      "XXL Gehäuse 220mm Ø, 120mm Höhe, Wartungsklappe, Bodenwanne"
+    ]
+  }
 }

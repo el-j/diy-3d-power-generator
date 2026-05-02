@@ -17,10 +17,12 @@ windpower-3d/
 │   ├── materials.json      ← Material specs (PETG, PLA)
 │   └── fasteners.json      ← Screw/nut catalog
 ├── src/                    ← FreeCAD Python scripts (component generators)
-│   ├── bigBasis/           ← ACTIVE: XXL generator + base station (≥v2.0)
-│   │   ├── big_base_generator.py   ← XXL 20-pole generator (9 parts)
-│   │   └── big_base_station.py     ← XXL base station (Ø220mm)
-│   ├── smalBasis/          ← LEGACY: Small 10/20-pole generator
+│   ├── generator/          ← ACTIVE: Aero-Fan Generator (v3.0)
+│   │   └── helix_generator.py      ← 20-pole Aero-Fan generator (13 parts)
+│   ├── base/               ← ACTIVE: XXL Base Station 68mm (v3.0)
+│   │   └── helix_station.py        ← XXL base station (Ø220mm, 68mm Höhe)
+│   ├── leaf/               ← ACTIVE: Tower blades + connector
+│   │   └── helix_leaf+connector.py ← Helix blade, connector, plug, start disc
 │   └── tools/              ← Manufacturing tools (winding machines)
 │       ├── easy_tool_big_spools-accuschrauber.py
 │       ├── firstSpooler/   ← Simple hand-crank spooler
@@ -69,14 +71,12 @@ windpower-3d/
 
 | Assembly | Status | Source Script | Key Part IDs |
 |----------|--------|---------------|--------------|
-| XXL Generator | **ACTIVE v2.1** | `src/bigBasis/big_base_generator.py` | XLG-ROT-01/02, XLG-BP-01/02, XLG-STAT-01/02, XLG-PLUG-01, XLG-SPACER-01/02 |
-| XXL Base Station | **ACTIVE v2.0** | `src/bigBasis/big_base_station.py` | XL-HOUS-01, XL-DECK-01, XL-FLNSH-01×3, XL-ADAPT-01, XL-DISC-01, XL-WANN-01, XL-KLAP-01 |
-| Tower (Helix) | **ACTIVE** | `src/Helix_Leaf+Connector.py` | TWR-LEAF-01, TWR-CONN-01, TWR-PLUG-01 |
+| Aero-Fan Generator | **ACTIVE v3.0** | `src/generator/helix_generator.py` | XLG-ROT-01/02, XLG-BP-01/02, XLG-STAT-01/02, XLG-CLAMP-01..03, XLG-REDUZ-01/02, XLG-SPACER-01, XLG-PLUG-01 |
+| XXL Base Station | **ACTIVE v3.0** | `src/base/helix_station.py` | XL-HOUS-01, XL-DECK-01, XL-FLNSH-01×3, XL-KLAP-01, XL-BODEN-01 |
+| Tower (Helix) | **ACTIVE** | `src/leaf/helix_leaf+connector.py` | TWR-LEAF-01, TWR-CONN-01, TWR-PLUG-01, TWR-DISC-01 |
 | Komplex-Spooler | **ACTIVE v2.1** | `src/tools/komplexSPooler/` | TOOL-KS-01..10 |
 | Easy-Tool | **ACTIVE** | `src/tools/easy_tool_big_spools-accuschrauber.py` | TOOL-EASY-01/02 |
-| Magnet-Puffer | **ACTIVE** | `src/tools/magnetPuffer/magnetBuffer.py` | TOOL-MB-01/02/03 |
-| Small Generator | LEGACY | `src/smalBasis/` | GEN-* (do not extend) |
-| Small Base Station | LEGACY | `src/smalBasis/Helix_Magnet_Basis_Station.py` | BASE-* (do not extend) |
+| Magnet-Puffer | **ACTIVE** | `src/tools/ magnetPuffer/magnetBuffer.py` | TOOL-MB-01/02/03 |
 
 ---
 
@@ -84,15 +84,20 @@ windpower-3d/
 
 | Parameter | Value | Where |
 |-----------|-------|-------|
-| Vierkant-Achse | 10×10mm | `shared/parameters.json → global.achse_kantenlaenge` |
-| XXL Rotor Radius | Ø180mm (R=90) | `xl_generator.rotor_radius` |
-| Magnet-Kreis Radius | R=74mm | `xl_generator.mag_kreis_r` |
+| Vierkant-Achse | 10×10mm | `global.achse_kantenlaenge` |
+| Vielzahn | 12-Zahn, R9.0/R7.8 (UNIFIED!) | `global.vielzahn_*` — same for tower + generator |
+| Aero-Fan Rotor Radius | Ø184mm (R=92) | `xl_generator.rotor_radius` |
+| Rotor-Platte Höhe | 10mm | `xl_generator.rotor_platte_h` |
+| Magnet-Kreis Radius | R=74mm = Schrauben-Radius | `xl_generator.mag_kreis_r` |
 | Magnete pro Rotor | 20× (20×5×3mm N52) | `xl_generator.anzahl_magnete` |
-| Capsule-Spulen | 12× (40×26mm outside, 22×8mm inside) | `xl_generator.spule_*` |
+| Capsule-Spulen | 12× (40×26mm außen, 22×8mm innen) | `xl_generator.spule_*` |
 | Stator Radius | R=99mm | `xl_generator.stator_radius` |
-| Stator-Deckel Mittelloch | R=16mm (Ø32mm) ← FIXED v2.1 | `big_base_generator.py:make_deckel()` |
+| Stator Dicke | 9mm | `xl_generator.stator_dicke` |
+| Stator-Schlitz Z-Position | Z=25.8mm | `xl_generator.stator_slot_z` |
 | XXL Basis Radius | R=110mm (Ø220mm) | `xl_base_station.fuss_radius` |
-| Kegelrollenlager | 29×50×15mm (REAL MEASURED) | `xl_base_station.lager_*` |
+| XXL Basis Höhe | **68mm** (war 120mm!) | `xl_base_station.gehaeuse_h` |
+| Innenkammer Radius | R=96mm (2mm Luft zum Rotor) | `xl_base_station.inner_chamber_r` |
+| Kegelrollenlager | 29×50×15mm (REAL GEMESSEN) | `xl_base_station.lager_*` |
 | Printer bed | 256×256×256mm | `print_constraints` |
 
 ---
@@ -108,7 +113,7 @@ import math
 
 # Bootstrap shared utils (two options):
 # Option A — exec loader in FreeCAD console first:
-#   exec(open("/path/to/windpower-3d/freecad_loader.py").read()); run("bigBasis/big_base_generator")
+#   exec(open("/path/to/windpower-3d/freecad_loader.py").read()); run("generator/helix_generator")
 # Option B — direct import:
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -175,17 +180,19 @@ if App.GuiUp:
 
 1. **Never hardcode dimensions** — always reference `shared/parameters.json` via `load_parameters()`
 2. **Square-axis holes**: always use `make_square_prism(achse_kantenlaenge + toleranz, h)` (10.5mm, not 10mm)
-3. **Capsule shapes**: always use `make_capsule()` from freecad_utils — do not reimplement
-4. **Export naming**: FreeCAD exports use the object name as filename prefix: `DocName-ObjName.stl`
-5. **After any geometry fix**: bump the assembly JSON version (patch = 2.1.0 → 2.1.1)
-6. **Stator-Deckel**: Mittelloch MUST be R=16mm (Ø32mm) — older R=9mm versions will not fit on axis
+3. **Vielzahn is UNIFIED**: `zaehne=12, r_out=9.0, r_in=7.8` — same across tower, generator, tools. Never diverge.
+4. **Capsule shapes**: always use `make_capsule()` from freecad_utils — do not reimplement inline
+5. **Export naming**: FreeCAD exports use the object name as filename prefix: `DocName-ObjName.stl`
+6. **After any geometry fix**: bump the assembly JSON version (patch = 3.0.0 → 3.0.1)
+7. **Stator slot**: Gehäuse-Schlitz bei Z=25.8, Höhe 8.4mm → Stator-Dicke 9mm minus 0.6mm Spiel
+8. **Rotor clears inner chamber**: Rotor R=92mm, Innenkammer R=96mm → 4mm Luft. Niemals Rotor größer als R=95 machen.
 
 ---
 
 ## Known Issues / Watch Out
 
-- `exports/flügel/` accidentally contains a base station STL (misplaced during export) — not a tower blade
-- `exports/xl_basis/generator/` contains older backplate versions (without `Abstands_Huelse_Lager.stl`) — use `exports/generator/` for latest
-- The `traeger.py` file was renamed to `traeger_verschraubung.py` — update any references
-- `src/tools/komplexSPooler/example.aufbau.py` is a **virtual assembly** (visual reference only, not a print-ready part)
-- `src/tools/ magnetPuffer/magnetBuffer.py` — note the space in the directory name `magnetPuffer` (typo in filesystem, do not rename without updating all references)
+- `exports/flügel/` enthält eine Start-Scheibe-STL, **nicht** ein Flügel — Fehlbenennung des Ordners
+- `exports/xl_basis/generator/` enthält **ältere** Backplate-Versionen — neueste STLs liegen in `exports/generator/`
+- `src/tools/komplexSPooler/example.aufbau.py` ist ein **virtueller Aufbau** (nur visuelle Referenz, kein Druckteil)
+- `src/tools/ magnetPuffer/magnetBuffer.py` — Leerzeichen im Verzeichnisnamen `magnetPuffer` (Filesystem-Typo, nicht umbenennen ohne alle Referenzen zu aktualisieren)
+- `exports/basis/` enthält **Legacy**-STLs der alten kleinen Basis (Savonius_Base_Station3/4) — nicht mehr aktiv

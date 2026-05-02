@@ -26,8 +26,8 @@
     }
   ],
   "source_scripts": {
-    "original": "src/Helix_Leaf+Connector.py",
-    "note": "Original script generates all tower components in one file"
+    "tower": "src/leaf/helix_leaf+connector.py",
+    "note": "Generiert alle Turm-Teile: Coreless_Helix_Fluegel, Mittel_Verbinder_Skelett_FLACH, Zwischen_Vielzahn_Plug, Start_Scheibe_FLACH"
   },
   "assembly_sequence": [
     "1. Flügel drucken (2 Stück pro Etage, spiegelbildlich)",

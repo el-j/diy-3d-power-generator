@@ -2,7 +2,7 @@
   "assembly_id": "xl-generator",
   "name": "Helix Aero-Fan Generator (20-Pol)",
   "description": "20-Pol Sandwich-Generator mit Aero-Fan Rotoren (Ø184mm), 12 Capsule-Spulen, Vielzahn-Clamp-System und Lager-Reduzierung. Optimiert für 0.6mm Nozzle + PLA-CF.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "status": "active",
   "source_scripts": {
     "generator": "src/generator/helix_generator.py"
@@ -92,6 +92,11 @@
     "kragen_d": 20.0,
     "lager_innen_d": 29.0,
     "adapter_pressfit": 0.15
+  },
+  "changelog_patch": {
+    "3.0.1": [
+      "Schrauben-Winkel: +9° → +10° in make_aero_rotor + make_aero_backplate — verhindert Überschneidung mit Magnettaschen-Kante"
+    ]
   },
   "assembly_sequence": [
     "1. Einschmelzmuttern in Clamp-Kragen einschmelzen (4× pro Clamp)",

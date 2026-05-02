@@ -45,7 +45,7 @@
     "stator_radius":       { "value": 99.0,  "unit": "mm",  "desc": "Stator-Radius (passt in R=96 Innenkammer)" },
     "stator_dicke":        { "value": 9.0,   "unit": "mm",  "desc": "Stator-Schlitten Dicke" },
     "stator_slot_z":       { "value": 25.8,  "unit": "mm",  "desc": "Z-Position Stator-Schlitz im Gehäuse" },
-    "stator_slot_h":       { "value": 8.4,   "unit": "mm",  "desc": "Höhe Stator-Schlitz (stator_dicke + 0.4 Spiel)" },
+    "stator_slot_h":       { "value": 9.5,   "unit": "mm",  "desc": "Höhe Stator-Schlitz (stator_dicke 9.0 + 0.5mm Gleitspiel)" },
     "anzahl_spulen":       { "value": 12,    "unit": "count", "desc": "Anzahl Capsule-Spulen" },
     "spule_innen_l":       { "value": 22.0,  "unit": "mm",  "desc": "Capsule-Spule Innen-Länge (Wickelkern)" },
     "spule_innen_w":       { "value": 8.0,   "unit": "mm",  "desc": "Capsule-Spule Innen-Breite (Wickelkern)" },
@@ -69,7 +69,7 @@
     "lager_toleranz":      { "value": 0.2,   "unit": "mm",  "desc": "Lagersitz-Toleranz (50.2mm Tasche)" },
     "adapter_pressfit":    { "value": 0.15,  "unit": "mm",  "desc": "Pressfit-Übermaß Lagersitz" },
     "stator_slot_z":       { "value": 25.8,  "unit": "mm",  "desc": "Z-Unterkante des Stator-Schlitzes" },
-    "stator_slot_h":       { "value": 8.4,   "unit": "mm",  "desc": "Stator-Schlitz Höhe" }
+    "stator_slot_h":       { "value": 9.5,   "unit": "mm",  "desc": "Stator-Schlitz Höhe (stator_dicke 9.0 + 0.5mm Gleitspiel)" }
   },
 
   "winding_machine": {

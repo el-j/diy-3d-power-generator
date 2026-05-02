@@ -2,7 +2,7 @@
   "assembly_id": "tower",
   "name": "Helix-Turm / Helix Tower",
   "description": "Modularer Helix-Windturm mit Stecksystem. Jede Etage besteht aus 2 Helix-Flügeln, einem Mittelverbinder und einem Vielzahn-Plug.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "components": [
     {
       "id": "TWR-LEAF-01",
@@ -28,6 +28,12 @@
   "source_scripts": {
     "tower": "src/leaf/helix_leaf+connector.py",
     "note": "Generiert alle Turm-Teile: Coreless_Helix_Fluegel, Mittel_Verbinder_Skelett_FLACH, Zwischen_Vielzahn_Plug, Start_Scheibe_FLACH"
+  },
+  "changelog": {
+    "1.0.1": [
+      "cutter_wire extra_radius: toleranz/2 → toleranz (0.25 → 0.5mm) — doppelte Einführ-Toleranz verhindert Klemmen beim Einstecken der Flügelspitze",
+      "Heat-set Insert im Plug korrekt dokumentiert (flush mit Kragen-Außenfläche = korrekte Montage)"
+    ]
   },
   "assembly_sequence": [
     "1. Flügel drucken (2 Stück pro Etage, spiegelbildlich)",

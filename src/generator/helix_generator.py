@@ -145,13 +145,10 @@ def make_aero_rotor(is_top):
     mags = create_rectangular_array(mag_kreis_r, magnet_l + 0.4, magnet_w + 0.4, fan_h + 2.0, anzahl_magnete).translate(App.Vector(0, 0, -1.0))
     fan = fan.cut(vz_cut).cut(mags)
     
-    # 🔥 NEU: KORRIGIERTE MATERIAL-EINSPARUNG (Exakt 15 Taschen)
+    # Material-Einsparung (15 Taschen — 5 übersprungen, eine pro Schraube)
+    # Schrauben bei 10°, 82°, 154°, 226°, 298°.
+    # Pocket-Zentren bei i*18+9°: i=0→9°, i=4→81°, i=8→153°, i=12→225°, i=16→297° — nächste Nachbarn zu den Schrauben → überspringen.
     for i in range(anzahl_magnete):
-        # Die Schrauben sitzen bei i=0, 4, 8, 12, 16. (Da 360/20 = 18 Grad. 18*0=0, 18*4=72. Das passt nicht zu den 9 Grad der Schrauben.)
-        # Schrauben sitzen exakt bei 9, 81, 153, 225, 297 Grad.
-        # Magnet-Zwischenräume (Zentrum des Zwischenraums) liegen bei: 9, 27, 45, 63, 81, 99... Grad.
-        # Das bedeutet, die Schrauben (9, 81, 153...) liegen GENAU auf den Zwischenräumen i=0, 4, 8, 12, 16!
-        # Wenn i = 0, 4, 8, 12, 16 -> DIESE AUSLASSEN!
         if i % 4 == 0:
             continue
             
@@ -172,9 +169,9 @@ def make_aero_rotor(is_top):
         lip.translate(App.Vector(mag_kreis_r * math.cos(angle), mag_kreis_r * math.sin(angle), lip_z))
         fan = fan.fuse(lip)
     
-    # Verschraubungen (Sitzen exakt in den unbeschnittenen Segmenten!)
+    # Verschraubungen bei 10°, 82°, 154°, 226°, 298° — mittig zwischen Magneten, 1° extra Abstand zu Magnettaschen-Kante
     for i in range(5):
-        angle = math.radians(i * 72 + 9)
+        angle = math.radians(i * 72 + 10)
         x, y = rotor_schraub_r * math.cos(angle), rotor_schraub_r * math.sin(angle)
         fan = fan.cut(Part.makeCylinder(3.4 / 2.0, 15.0).translate(App.Vector(x, y, -1.0)))
         tz = fan_h - einschmelzmutter_t if is_top else 0
@@ -270,9 +267,9 @@ def make_aero_backplate(is_top):
         pocket.translate(App.Vector(mag_kreis_r * math.cos(angle_rad), mag_kreis_r * math.sin(angle_rad), 0))
         p = p.cut(pocket)
     
-    # Verschraubungen
+    # Verschraubungen bei 10°, 82°, 154°, 226°, 298° — synchron zu make_aero_rotor
     for i in range(5):
-        angle = math.radians(i * 72 + 9)
+        angle = math.radians(i * 72 + 10)
         x, y = rotor_schraub_r * math.cos(angle), rotor_schraub_r * math.sin(angle)
         p = p.cut(Part.makeCylinder(3.4 / 2.0, 15.0).translate(App.Vector(x, y, -5)))
         sz = backplate_h - 1.5 if is_top else 0

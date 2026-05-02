@@ -2,7 +2,7 @@
   "assembly_id": "xl-base-station",
   "name": "Helix XXL Basis-Station (68mm)",
   "description": "Extrem flache 68mm Basis mit 220mm Ø, U-Form-Öffnung für Stator-Einschub, Stacking-Deckel mit Führungslippe, Wartungsklappe mit PCB-Standoffs und abnehmbarem Boden.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "status": "active",
   "source_scripts": {
     "station": "src/base/helix_station.py"
@@ -65,6 +65,9 @@
     "10. Elektronik einbauen, Klappe einhängen und Boden verschrauben"
   ],
   "changelog": {
+    "3.0.1": [
+      "Stator-Schlitz Höhe: 8.4 → 9.5mm (stator_dicke 9mm + 0.5mm Gleitspiel) — Stator konnte physisch nicht eingeschoben werden"
+    ],
     "3.0.0": [
       "gehaeuse_h: 120 → 68mm — extrem flache Bauweise",
       "Gehäuse: U-Form-Öffnung 213mm für Stator-Einschub von vorne",

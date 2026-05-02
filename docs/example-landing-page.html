@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helix Wind Generator | Interactive Playground</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg:       #0a0f1e;
+      --color-surface:  rgba(18, 25, 46, 0.75);
+      --color-accent:   #00e5ff;
+      --color-energy:   #ff6b35;
+      --color-text:     #e8f0fe;
+      --color-muted:    #8899aa;
+      --font-display:   'Space Grotesk', sans-serif;
+      --font-body:      'Inter', sans-serif;
+      --font-mono:      'JetBrains Mono', monospace;
+      --radius-card:    12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      overflow: hidden; /* App-like feel */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+    }
+
+    /* UI Overlay */
+    #ui-layer {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      padding: 2rem;
+    }
+
+    /* Left Header */
+    .header-panel {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff, var(--color-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--color-muted);
+      max-width: 300px;
+      line-height: 1.5;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      pointer-events: auto;
+      background: var(--color-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: var(--radius-card);
+      padding: 1.5rem;
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .panel-header {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 1rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .val-display { color: var(--color-accent); font-family: var(--font-mono); }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px; width: 16px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      cursor: pointer;
+      margin-top: -6px;
+      box-shadow: 0 0 10px var(--color-accent);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 4px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .toggle-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--color-text);
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-family: var(--font-display);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-btn:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--color-accent); }
+    .toggle-btn.active { background: var(--color-accent); color: var(--color-bg); font-weight: 700; box-shadow: 0 0 15px rgba(0,229,255,0.4); }
+
+    /* Energy Display */
+    .energy-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 107, 53, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .energy-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--color-energy);
+      box-shadow: 0 0 10px var(--color-energy);
+    }
+
+    .energy-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+    }
+
+    .energy-val {
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      color: var(--color-energy);
+      font-weight: 700;
+    }
+    .energy-val.large { font-size: 1.5rem; }
+
+    select.ui-select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      color: var(--color-text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-family: var(--font-body);
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+    }
+    select.ui-select option {
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+
+    /* Part Card (Tooltip) */
+    #part-card {
+      position: absolute;
+      background: var(--color-surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--color-accent);
+      border-radius: 8px;
+      padding: 1rem;
+      width: 260px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+    .part-title { font-family: var(--font-display); color: var(--color-accent); font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .part-desc { font-size: 0.8rem; color: var(--color-muted); font-family: var(--font-mono); line-height: 1.4; }
+
+    /* Loading Overlay */
+    #loader {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--color-bg); z-index: 999;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      transition: opacity 0.5s;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(0,229,255,0.2);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      #ui-layer { flex-direction: column; padding: 1rem; overflow-y: auto; pointer-events: auto; }
+      .header-panel { pointer-events: none; }
+      .control-panel { width: 100%; margin-top: auto; flex-shrink: 0; }
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <div style="font-family: var(--font-mono); color: var(--color-accent);">ASSEMBLING TURBINE...</div>
+  </div>
+
+  <div id="canvas-container"></div>
+
+  <div id="ui-layer">
+    <div class="header-panel">
+      <h1>Helix Wind<br>Generator</h1>
+      <p class="subtitle">Interactive open-source axial-flux wind generator. Adjust conditions, explore components, and simulate energy output.</p>
+      <button id="btn-explode" class="toggle-btn" style="width: fit-content; pointer-events: auto; margin-top: 1rem;">
+        🔍 Explore Parts (Exploded View)
+      </button>
+    </div>
+
+    <div class="control-panel">
+      <div class="panel-header">⚙️ Tower Configuration</div>
+      
+      <div class="control-group">
+        <div class="control-header">
+          <span>Rotor Principle</span>
+        </div>
+        <select id="select-rotor" class="ui-select">
+          <option value="savonius-helix">Savonius (Helical) - Drag Based</option>
+          <option value="savonius-straight">Savonius (Straight) - Drag Based</option>
+          <option value="lenz2">Lenz2 (Hybrid) - Lift & Drag Based</option>
+          <option value="darrieus-h">Darrieus (H-Rotor) - Lift Based</option>
+          <option value="gorlov">Gorlov (Helical) - Max Lift Based</option>
+        </select>
+      </div>
+
+      <div class="control-group" style="margin-top: 0.5rem;">
+        <div class="control-header">
+          <span>Stages</span>
+          <span class="val-display" id="val-stages">3</span>
+        </div>
+        <input type="range" id="slider-stages" min="1" max="8" value="3" step="1">
+        <div style="font-size: 0.75rem; color: var(--color-muted); text-align: right;">Tower Height: <span id="val-height">720</span> mm</div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-header">
+          <span>Generators</span>
+          <span class="val-display" id="val-gens">1</span>
+        </div>
+        <input type="range" id="slider-gens" min="1" max="4" value="1" step="1">
+      </div>
+
+      <div class="control-group">
+        <div class="control-header">
+          <span>Rotor Radius</span>
+          <span class="val-display" id="val-radius">66 mm</span>
+        </div>
+        <input type="range" id="slider-radius" min="40" max="150" value="66" step="2">
+      </div>
+
+      <div class="control-group" style="margin-top: 0.5rem;">
+        <div class="control-header">
+          <span>Wind Speed</span>
+          <span class="val-display" id="val-wind">6.0 m/s</span>
+        </div>
+        <input type="range" id="slider-wind" min="0" max="15" value="6" step="0.5">
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <button class="toggle-btn preset-btn" data-wind="4" style="flex:1; font-size:0.75rem;">Urban (4)</button>
+          <button class="toggle-btn preset-btn active" data-wind="6" style="flex:1; font-size:0.75rem;">Suburban (6)</button>
+          <button class="toggle-btn preset-btn" data-wind="9" style="flex:1; font-size:0.75rem;">Rural (9)</button>
+        </div>
+      </div>
+
+      <div class="energy-card">
+        <div style="font-family: var(--font-display); font-size: 0.9rem; margin-bottom: 0.25rem;">⚡ Estimated Power</div>
+        <div class="energy-row">
+          <span>Current Output:</span>
+          <span class="energy-val large" id="val-power-w">-- W</span>
+        </div>
+        <div class="energy-row">
+          <span>Aerodynamic Eff (Cp):</span>
+          <span class="energy-val" id="val-cp" style="font-size: 0.9rem;">20%</span>
+        </div>
+        <div class="energy-row">
+          <span>Rotor Speed:</span>
+          <span class="energy-val" id="val-rpm" style="color: var(--color-accent);">-- RPM</span>
+        </div>
+        <div class="energy-row">
+          <span>Annual Yield:</span>
+          <span class="energy-val" id="val-power-kwh">-- kWh/yr</span>
+        </div>
+        <div class="energy-row" style="margin-top: 0.5rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.5rem;">
+          <span>Charges approx:</span>
+          <span class="energy-val" id="val-phones" style="color: var(--color-text);">2.5 phones/day</span>
+        </div>
+      </div>
+      <div style="font-size: 0.65rem; color: rgba(255,255,255,0.4); text-align: center;">
+        *Estimates based on aerodynamic profile, η=72% generator efficiency.
+      </div>
+    </div>
+  </div>
+
+  <div id="part-card">
+    <div class="part-title" id="pc-title">XLG-ROT-01</div>
+    <div class="part-desc" id="pc-desc">
+      Material: PETG<br>
+      Role: Captures wind energy
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
+
+    // --- STATE ---
+    const state = {
+      rotorType: 'savonius-helix',
+      stages: 3,
+      generators: 1,
+      radius: 66,
+      windSpeed: 6.0,
+      targetRPM: 0,
+      currentRPM: 0,
+      exploded: false,
+      parts: [] 
+    };
+
+    // Physics parameters for different rotor types
+    const ROTOR_TYPES = {
+      'savonius-helix': { cp: 0.18, tsr: 1.2, name: 'Helical Savonius' },
+      'savonius-straight': { cp: 0.14, tsr: 1.0, name: 'Straight Savonius' },
+      'lenz2': { cp: 0.22, tsr: 1.5, name: 'Lenz2 Hybrid' },
+      'darrieus-h': { cp: 0.28, tsr: 3.5, name: 'H-Rotor Darrieus' },
+      'gorlov': { cp: 0.32, tsr: 2.2, name: 'Gorlov Helical' }
+    };
+
+    // Constants for scaling (1 unit = 10mm)
+    const STAGE_HEIGHT = 24.0;
+    const HUB_RADIUS = 1.2;
+
+    // --- SCENE SETUP ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a1628, 0.003);
+    scene.background = new THREE.Color(0x0a1628);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(60, 40, 80);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1; 
+    controls.minDistance = 20;
+    controls.maxDistance = 200;
+    controls.target.set(0, 30, 0);
+
+    // --- POST PROCESSING ---
+    const composer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    composer.addPass(renderPass);
+
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
+    bloomPass.threshold = 0.8;
+    bloomPass.strength = 0.6; 
+    bloomPass.radius = 0.5;
+    composer.addPass(bloomPass);
+
+    const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+    outlinePass.edgeStrength = 4.0;
+    outlinePass.edgeGlow = 1.0;
+    outlinePass.edgeThickness = 2.0;
+    outlinePass.pulsePeriod = 0;
+    outlinePass.visibleEdgeColor.set('#00e5ff');
+    outlinePass.hiddenEdgeColor.set('#005566');
+    composer.addPass(outlinePass);
+
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfffaed, 2.0);
+    dirLight.position.set(50, 100, 30);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 100;
+    dirLight.shadow.camera.bottom = -100;
+    dirLight.shadow.camera.left = -100;
+    dirLight.shadow.camera.right = 100;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    scene.add(dirLight);
+
+    const fillLight = new THREE.DirectionalLight(0x4a8ab5, 1.0);
+    fillLight.position.set(-50, 20, -50);
+    scene.add(fillLight);
+
+    // --- MATERIALS (PBR) ---
+    const matPETGTeal = new THREE.MeshPhysicalMaterial({
+      color: 0x00e5ff,
+      metalness: 0.1,
+      roughness: 0.3,
+      transmission: 0.6,
+      thickness: 1.0,
+      ior: 1.5,
+      transparent: true,
+      opacity: 0.9,
+      side: THREE.DoubleSide
+    });
+
+    const matCarbon = new THREE.MeshStandardMaterial({
+      color: 0x222222,
+      roughness: 0.7,
+      metalness: 0.3
+    });
+
+    const matStatorWhite = new THREE.MeshStandardMaterial({
+      color: 0xe0e0e0,
+      roughness: 0.6,
+      metalness: 0.1
+    });
+
+    const matBaseGrey = new THREE.MeshStandardMaterial({
+      color: 0x1a1c23,
+      roughness: 0.8,
+      metalness: 0.2
+    });
+
+    const matCopper = new THREE.MeshStandardMaterial({
+      color: 0xff6b35,
+      roughness: 0.3,
+      metalness: 0.8,
+      emissive: 0xff6b35,
+      emissiveIntensity: 0.0 // Adjusted by RPM
+    });
+
+    // --- PROCEDURAL GEOMETRY BUILDER ---
+    
+    // Custom twist modifier to create helical geometries
+    function twistGeometry(geometry, totalAngle) {
+      const pos = geometry.attributes.position;
+      const vec = new THREE.Vector3();
+      geometry.computeBoundingBox();
+      const minY = geometry.boundingBox.min.y;
+      const maxY = geometry.boundingBox.max.y;
+      const height = maxY - minY;
+
+      for (let i = 0; i < pos.count; i++) {
+        vec.fromBufferAttribute(pos, i);
+        const ratio = (vec.y - minY) / height;
+        const angle = ratio * totalAngle;
+        const x = vec.x * Math.cos(angle) - vec.z * Math.sin(angle);
+        const z = vec.x * Math.sin(angle) + vec.z * Math.cos(angle);
+        pos.setXYZ(i, x, vec.y, z);
+      }
+      geometry.computeVertexNormals();
+    }
+
+    const towerGroup = new THREE.Group();
+    scene.add(towerGroup);
+    let rotorMeshGroup; // The part that actually spins
+
+    function buildTurbine() {
+      // Clear existing
+      while(towerGroup.children.length > 0){ 
+          towerGroup.remove(towerGroup.children[0]); 
+      }
+      state.parts = [];
+      rotorMeshGroup = new THREE.Group();
+
+      let currentY = 0;
+      const bladeRadius = state.radius / 10.0;
+      
+      // 1. BASE STATION
+      const baseHeight = 15;
+      const baseGeo = new THREE.CylinderGeometry(8, 10, baseHeight, 32);
+      const baseMesh = new THREE.Mesh(baseGeo, matBaseGrey);
+      baseMesh.position.y = baseHeight / 2;
+      baseMesh.castShadow = true;
+      baseMesh.receiveShadow = true;
+      baseMesh.userData = { 
+        name: "Base Station Housing", 
+        desc: "Material: Dark Grey PETG\nHouses the power electronics, rectifier, and grid-tie interface.",
+        assembledY: baseMesh.position.y,
+        explodedY: -10
+      };
+      state.parts.push(baseMesh);
+      towerGroup.add(baseMesh);
+      currentY += baseHeight;
+
+      // 2. AXIAL FLUX GENERATORS
+      const genHeight = 6;
+      for (let g = 0; g < state.generators; g++) {
+        const genCenterY = currentY + genHeight/2;
+        
+        // Lower Stator (Static) -> Add to towerGroup
+        const statorGeo = new THREE.CylinderGeometry(9, 9, 2, 32);
+        const stator = new THREE.Mesh(statorGeo, matStatorWhite);
+        stator.position.y = genCenterY - 2;
+        stator.userData = { name: `Stator (Gen ${g+1})`, desc: "Material: White PETG\nHolds 9 copper wire coils. Static.", assembledY: stator.position.y, explodedY: stator.position.y - 15 - (g*5) };
+        towerGroup.add(stator);
+        state.parts.push(stator);
+
+        // Copper coils (Visual) -> Add to towerGroup
+        const coilGeo = new THREE.TorusGeometry(6, 1.5, 16, 32);
+        const coils = new THREE.Mesh(coilGeo, matCopper);
+        coils.rotation.x = Math.PI / 2;
+        coils.position.y = genCenterY - 2;
+        coils.userData = { name: `Copper Coils (Gen ${g+1})`, desc: "Material: Enamelled Copper Wire\n3-phase configuration.", assembledY: coils.position.y, explodedY: coils.position.y - 15 - (g*5) };
+        towerGroup.add(coils);
+        state.parts.push(coils);
+
+        // Upper Rotor (Spins) -> Add to rotorMeshGroup
+        const rotorGeo = new THREE.CylinderGeometry(9, 9, 2, 32);
+        const rotorDisk = new THREE.Mesh(rotorGeo, matCarbon);
+        rotorDisk.position.y = genCenterY + 2;
+        rotorDisk.userData = { name: `Rotor Disk (Gen ${g+1})`, desc: "Material: PLA-CF\nHolds 12 neodymium magnets.", assembledY: rotorDisk.position.y, explodedY: rotorDisk.position.y - 5 + (g*5) };
+        
+        // Add a small shaft section
+        const shaftGeo = new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, genHeight, 16);
+        const shaft = new THREE.Mesh(shaftGeo, matCarbon);
+        shaft.position.y = genCenterY;
+        
+        rotorMeshGroup.add(rotorDisk);
+        rotorMeshGroup.add(shaft);
+        state.parts.push(rotorDisk);
+
+        currentY += genHeight;
+      }
+
+      // 3. ROTOR STAGES (Spins)
+      const stageGroup = new THREE.Group();
+      stageGroup.position.y = currentY;
+
+      // Base geometries based on type
+      let bladeGeo;
+      if (state.rotorType === 'savonius-helix' || state.rotorType === 'savonius-straight') {
+        bladeGeo = new THREE.CylinderGeometry(bladeRadius, bladeRadius, STAGE_HEIGHT, 16, 16, true, 0, Math.PI * 0.85);
+        if (state.rotorType === 'savonius-helix') twistGeometry(bladeGeo, Math.PI * 0.6); // 108 degree twist
+      } 
+      else if (state.rotorType === 'darrieus-h') {
+        // Airfoil approximation for lift-based
+        bladeGeo = new THREE.CylinderGeometry(HUB_RADIUS * 2.5, HUB_RADIUS * 0.5, STAGE_HEIGHT, 16);
+        bladeGeo.scale(0.2, 1, 1); 
+      }
+      else if (state.rotorType === 'gorlov') {
+        // Helical Airfoil
+        bladeGeo = new THREE.CylinderGeometry(HUB_RADIUS * 2.5, HUB_RADIUS * 0.5, STAGE_HEIGHT, 16, 16);
+        bladeGeo.scale(0.2, 1, 1);
+        bladeGeo.translate(bladeRadius, 0, 0); // Translate out before twisting to create helix
+        twistGeometry(bladeGeo, Math.PI * 0.6); 
+      }
+      else if (state.rotorType === 'lenz2') {
+        // Teardrop/Cup Hybrid shape
+        bladeGeo = new THREE.CylinderGeometry(bladeRadius * 0.35, bladeRadius * 0.35, STAGE_HEIGHT, 16, 1, false, 0, Math.PI * 1.2);
+      }
+
+      // Structural layout rules
+      const useDisks = ['savonius-helix', 'savonius-straight', 'gorlov', 'lenz2'].includes(state.rotorType);
+      const useShaft = ['darrieus-h', 'gorlov', 'lenz2'].includes(state.rotorType);
+      const useStruts = ['darrieus-h'].includes(state.rotorType);
+
+      for (let s = 0; s < state.stages; s++) {
+        const stageCenterY = s * STAGE_HEIGHT + (STAGE_HEIGHT / 2);
+        
+        // Central Shaft
+        if (useShaft) {
+          const shaftGeo = new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, STAGE_HEIGHT, 16);
+          const stageShaft = new THREE.Mesh(shaftGeo, matCarbon);
+          stageShaft.position.y = stageCenterY;
+          stageShaft.userData = { name: `Center Shaft (Stage ${s+1})`, desc: "Material: Carbon Fiber Tube\nCentral axis supporting the structure.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) };
+          stageGroup.add(stageShaft);
+          state.parts.push(stageShaft);
+        }
+
+        // Connector Disks
+        if (useDisks) {
+          const connGeo = new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32);
+          const connector = new THREE.Mesh(connGeo, matCarbon);
+          connector.position.y = stageCenterY - STAGE_HEIGHT/2;
+          connector.userData = { name: `Connector Ring (Stage ${s+1})`, desc: "Material: PLA-CF\nInterlocking ring joining vertical stages and maintaining blade rigidity.", assembledY: connector.position.y, explodedY: connector.position.y + (s*15) };
+          stageGroup.add(connector);
+          state.parts.push(connector);
+        }
+
+        // Blades
+        for(let b = 0; b < 3; b++) {
+             const angle = (b * (Math.PI * 2 / 3));
+             const bx = Math.cos(angle) * bladeRadius;
+             const bz = Math.sin(angle) * bladeRadius;
+
+             const blade = new THREE.Mesh(bladeGeo, matPETGTeal);
+             blade.castShadow = true;
+             blade.receiveShadow = true;
+
+             if (state.rotorType.startsWith('savonius')) {
+                 blade.position.y = stageCenterY;
+                 blade.rotation.y = angle + (state.rotorType === 'savonius-helix' ? s * Math.PI * 0.6 : 0);
+                 blade.userData = { name: `Savonius Blade`, desc: "Drag-based profile. High starting torque, limited top speed.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) + 5 };
+             } 
+             else if (state.rotorType === 'gorlov') {
+                 // Geometry is already offset from center, so we place at origin and rotate the whole spiral
+                 blade.position.set(0, stageCenterY, 0);
+                 blade.rotation.y = angle + (s * Math.PI * 0.6); 
+                 blade.userData = { name: `Gorlov Helical Airfoil`, desc: "Lift-based helical profile. Smooth rotation and highest efficiency.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) + 5 };
+             } 
+             else if (state.rotorType === 'lenz2') {
+                 blade.position.set(bx * 0.8, stageCenterY, bz * 0.8);
+                 blade.rotation.y = -angle + Math.PI * 0.75; // Angle cup inward
+                 blade.userData = { name: `Lenz2 Blade`, desc: "Hybrid lift/drag profile. Great starting torque and good efficiency.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) + 5 };
+             } 
+             else if (state.rotorType === 'darrieus-h') {
+                 blade.position.set(bx, stageCenterY, bz);
+                 blade.rotation.y = -angle; // Face tangent
+                 blade.userData = { name: `Darrieus Airfoil`, desc: "Lift-based airfoil. Generates forward lift, cutting through wind.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) + 5 };
+             }
+
+             stageGroup.add(blade);
+             state.parts.push(blade);
+
+             // Horizontal Struts
+             if (useStruts) {
+                 const strutGeo = new THREE.CylinderGeometry(0.4, 0.4, bladeRadius, 8);
+                 strutGeo.rotateZ(Math.PI/2);
+                 
+                 const strut1 = new THREE.Mesh(strutGeo, matCarbon);
+                 strut1.position.set(bx/2, stageCenterY + STAGE_HEIGHT/2 - 2, bz/2);
+                 strut1.rotation.y = -angle;
+                 strut1.userData = { name: `Strut`, desc: "Material: PLA-CF", assembledY: strut1.position.y, explodedY: strut1.position.y + (s*15) + 5 };
+                 stageGroup.add(strut1);
+                 state.parts.push(strut1);
+
+                 const strut2 = new THREE.Mesh(strutGeo, matCarbon);
+                 strut2.position.set(bx/2, stageCenterY - STAGE_HEIGHT/2 + 2, bz/2);
+                 strut2.rotation.y = -angle;
+                 strut2.userData = { name: `Strut`, desc: "Material: PLA-CF", assembledY: strut2.position.y, explodedY: strut2.position.y + (s*15) + 5 };
+                 stageGroup.add(strut2);
+                 state.parts.push(strut2);
+             }
+        }
+      }
+      
+      // Top Cap
+      const topCapY = state.stages * STAGE_HEIGHT;
+      const capGeo = new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32);
+      const topCap = new THREE.Mesh(capGeo, matCarbon);
+      topCap.position.y = topCapY;
+      topCap.userData = { name: "Top Cap & Bearing", desc: "Material: PLA-CF\nSeals the tower and holds the upper 608ZZ bearing.", assembledY: topCap.position.y, explodedY: topCap.position.y + (state.stages*15) + 10 };
+      stageGroup.add(topCap);
+      state.parts.push(topCap);
+
+      rotorMeshGroup.add(stageGroup);
+      towerGroup.add(rotorMeshGroup);
+      
+      // Adjust camera target
+      controls.target.set(0, currentY + (state.stages * STAGE_HEIGHT)/2, 0);
+    }
+
+    // --- WIND PARTICLE SYSTEM ---
+    const windParticleCount = 1000;
+    const windGeo = new THREE.BoxGeometry(0.1, 0.1, 4);
+    const windMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+    const windInstanced = new THREE.InstancedMesh(windGeo, windMat, windParticleCount);
+    scene.add(windInstanced);
+
+    const dummy = new THREE.Object3D();
+    const particleData = [];
+
+    for(let i=0; i<windParticleCount; i++) {
+      const x = (Math.random() - 0.5) * 150;
+      const y = Math.random() * 150;
+      const z = (Math.random() - 0.5) * 150;
+      dummy.position.set(x, y, z);
+      dummy.updateMatrix();
+      windInstanced.setMatrixAt(i, dummy.matrix);
+      particleData.push({
+        x: x, y: y, z: z,
+        speed: 1.0 + Math.random(),
+        offset: Math.random() * Math.PI * 2
+      });
+    }
+
+    function updateWindParticles(delta) {
+      const speedMultiplier = state.windSpeed * 1.5;
+      for(let i=0; i<windParticleCount; i++) {
+        const p = particleData[i];
+        p.z -= p.speed * speedMultiplier;
+        
+        // Slight swirl effect around turbine
+        if(Math.abs(p.x) < 20 && p.y < 100) {
+            p.x += Math.sin(p.z * 0.1 + p.offset) * 0.2;
+        }
+
+        if(p.z < -80) {
+          p.z = 80;
+          p.x = (Math.random() - 0.5) * 150;
+          p.y = Math.random() * 150;
+        }
+
+        dummy.position.set(p.x, p.y, p.z);
+        // Stretch based on speed
+        dummy.scale.set(1, 1, Math.max(1, state.windSpeed * 0.5));
+        dummy.updateMatrix();
+        windInstanced.setMatrixAt(i, dummy.matrix);
+      }
+      windInstanced.instanceMatrix.needsUpdate = true;
+      
+      // Update color based on speed
+      const intensity = Math.min(1.0, state.windSpeed / 15.0);
+      windMat.color.setHSL(0.55, 0.8, 0.5 + intensity * 0.5);
+      windMat.opacity = 0.1 + (intensity * 0.4);
+    }
+
+    // --- PHYSICS & ENERGY CALCULATOR ---
+    function updatePhysics() {
+      const typeData = ROTOR_TYPES[state.rotorType];
+      const TSR = typeData.tsr;
+      const Cp = typeData.cp;
+
+      // omega = (TSR * v) / R
+      const R = state.radius / 1000; // convert mm to meters
+      const v = state.windSpeed;
+      const omega = (TSR * v) / R; // rad/s
+      state.targetRPM = (omega / (2 * Math.PI)) * 60;
+      if (state.windSpeed === 0) state.targetRPM = 0;
+
+      // Energy Calc
+      // P = 0.5 * rho * A * v^3 * Cp * efficiency
+      const rho = 1.225;
+      const sweptArea = state.stages * 0.240 * (2 * R); // Height * Diameter
+      
+      // Efficiency scales up with multiple generators taking the load (up to a mechanical limit)
+      const eff = Math.min(0.9, 0.65 + (state.generators * 0.07)); 
+      
+      const P_wind = 0.5 * rho * sweptArea * Math.pow(v, 3);
+      const P_out = P_wind * Cp * eff;
+      
+      // Annual output (Capacity factor ~0.25 for this simulation)
+      const annualKwh = (P_out * 8760 * 0.25) / 1000;
+      const phonesPerDay = (P_out * 24) / 15; // 15Wh per phone
+
+      // Update DOM
+      document.getElementById('val-power-w').innerText = P_out.toFixed(1) + ' W';
+      document.getElementById('val-cp').innerText = (Cp * 100).toFixed(0) + '%';
+      document.getElementById('val-rpm').innerText = Math.round(state.currentRPM) + ' RPM';
+      document.getElementById('val-power-kwh').innerText = Math.round(annualKwh) + ' kWh/yr';
+      document.getElementById('val-phones').innerText = phonesPerDay.toFixed(1) + ' phones/day';
+
+      // Update Copper Coil Glow
+      matCopper.emissiveIntensity = Math.min(2.0, P_out / 20.0);
+    }
+
+    // --- UI EVENT LISTENERS ---
+    document.getElementById('select-rotor').addEventListener('change', (e) => {
+      state.rotorType = e.target.value;
+      buildTurbine();
+      updatePhysics();
+    });
+
+    document.getElementById('slider-stages').addEventListener('input', (e) => {
+      state.stages = parseInt(e.target.value);
+      document.getElementById('val-stages').innerText = state.stages;
+      document.getElementById('val-height').innerText = state.stages * 240;
+      buildTurbine();
+      updatePhysics();
+    });
+
+    document.getElementById('slider-gens').addEventListener('input', (e) => {
+      state.generators = parseInt(e.target.value);
+      document.getElementById('val-gens').innerText = state.generators;
+      buildTurbine();
+      updatePhysics();
+    });
+
+    document.getElementById('slider-radius').addEventListener('input', (e) => {
+      state.radius = parseInt(e.target.value);
+      document.getElementById('val-radius').innerText = state.radius + ' mm';
+      buildTurbine();
+      updatePhysics();
+    });
+
+    const windSlider = document.getElementById('slider-wind');
+    const windDisplay = document.getElementById('val-wind');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+
+    windSlider.addEventListener('input', (e) => {
+      state.windSpeed = parseFloat(e.target.value);
+      windDisplay.innerText = state.windSpeed.toFixed(1) + ' m/s';
+      presetBtns.forEach(b => b.classList.remove('active'));
+      updatePhysics();
+    });
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        state.windSpeed = parseFloat(e.target.dataset.wind);
+        windSlider.value = state.windSpeed;
+        windDisplay.innerText = state.windSpeed.toFixed(1) + ' m/s';
+        updatePhysics();
+      });
+    });
+
+    document.getElementById('btn-explode').addEventListener('click', (e) => {
+      state.exploded = !state.exploded;
+      e.target.innerText = state.exploded ? "🔄 Assemble Turbine" : "🔍 Explore Parts (Exploded View)";
+      e.target.classList.toggle('active');
+      
+      // Stop rotation if exploded
+      if (state.exploded) {
+        state.targetRPM = 0;
+      } else {
+        updatePhysics(); // Restore RPM target
+      }
+    });
+
+    // --- RAYCASTER (TOOLTIPS) ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const partCard = document.getElementById('part-card');
+    let hoveredPart = null;
+
+    window.addEventListener('mousemove', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      // Update tooltip position
+      partCard.style.left = (event.clientX + 20) + 'px';
+      partCard.style.top = (event.clientY + 20) + 'px';
+    });
+
+    // --- MAIN ANIMATION LOOP ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+
+      // Smooth RPM transition (Inertia)
+      state.currentRPM += (state.targetRPM - state.currentRPM) * delta * 0.5;
+
+      // Rotate rotor
+      if (rotorMeshGroup && !state.exploded) {
+        // Visual scale for RPM so it's readable. 1000 RPM in real life is too fast for 60fps screen
+        const visualRPS = (state.currentRPM / 60) * 0.2; 
+        rotorMeshGroup.rotation.y -= visualRPS * Math.PI * 2 * delta;
+      }
+
+      // Exploded View Tweening
+      state.parts.forEach(part => {
+        if(part.userData) {
+           // If it's attached to the rotor group, we need to handle its position relative to the group
+           const targetY = state.exploded ? part.userData.explodedY : part.userData.assembledY;
+           part.position.y += (targetY - part.position.y) * delta * 5.0;
+        }
+      });
+
+      // Raycasting for Tooltips
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(state.parts, false);
+
+      if (intersects.length > 0) {
+        const object = intersects[0].object;
+        if (hoveredPart !== object) {
+          hoveredPart = object;
+          outlinePass.selectedObjects = [hoveredPart];
+          
+          if(hoveredPart.userData && hoveredPart.userData.name) {
+             document.getElementById('pc-title').innerText = hoveredPart.userData.name;
+             document.getElementById('pc-desc').innerText = hoveredPart.userData.desc;
+             partCard.style.opacity = 1;
+          }
+          controls.autoRotate = false;
+        }
+      } else {
+        if (hoveredPart) {
+          hoveredPart = null;
+          outlinePass.selectedObjects = [];
+          partCard.style.opacity = 0;
+          controls.autoRotate = true;
+        }
+      }
+
+      updateWindParticles(delta);
+      controls.update();
+      composer.render();
+    }
+
+    // --- INITIALIZATION ---
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Start everything
+    setTimeout(() => {
+      document.getElementById('loader').style.opacity = 0;
+      setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+      
+      buildTurbine();
+      updatePhysics();
+      animate();
+    }, 1000); 
+
+  </script>
+</body>
+</html>

@@ -74,7 +74,7 @@ def create_blade_wire(offset_dicke, extra_radius=0):
     return Part.Wire([arc_out.toShape(), Part.makeLine(p_out_end, p_in_end), arc_in.toShape(), Part.makeLine(p_in_start, p_out_start)])
 
 base_wire = create_blade_wire(dicke)
-cutter_wire = create_blade_wire(dicke + toleranz, toleranz / 2.0)
+cutter_wire = create_blade_wire(dicke + toleranz, toleranz)  # full toleranz (0.5mm) outward clearance for reliable insertion
 shell_wire = create_blade_wire(dicke + 6.0, 3.0)
 
 # ==========================================
@@ -162,6 +162,7 @@ for i in range(4):
     m3_loch.translate(App.Vector(-10, 0, vielzahn_h + (kragen_h / 2.0)))
     m3_loch.rotate(App.Vector(0,0,0), App.Vector(0,0,1), angle)
     
+    # Insert flush with collar outer surface — intentional, heat-set inserts are pressed in from outside
     m3_insert = Part.makeCylinder(einschmelzmutter_d / 2.0, einschmelzmutter_t)
     m3_insert.rotate(App.Vector(0,0,0), App.Vector(0,1,0), 90)
     m3_insert.translate(App.Vector((kragen_d / 2.0) - einschmelzmutter_t, 0, vielzahn_h + (kragen_h / 2.0)))

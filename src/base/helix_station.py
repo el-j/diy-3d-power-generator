@@ -46,9 +46,9 @@ gehaeuse = gehaeuse.cut(inner_chamber)
 front_opening = Part.makeBox(213.0, 150.0, gehaeuse_h + 2.0).translate(App.Vector(-106.5, -150.0, -1.0))
 gehaeuse = gehaeuse.cut(front_opening)
 
-# STATOR SCHLITZ IM GEHÄUSE (Z=25.8 bis Z=34.2)
-s_cyl = Part.makeCylinder(99.5, 8.4).translate(App.Vector(0,0,25.8))
-s_box = Part.makeBox(200.0, 140.0, 8.4).translate(App.Vector(-100.0, -140.0, 25.8))
+# STATOR SCHLITZ IM GEHÄUSE (Z=25.8 bis Z=35.3 — 9.5mm = stator_dicke 9mm + 0.5mm Gleitspiel)
+s_cyl = Part.makeCylinder(99.5, 9.5).translate(App.Vector(0,0,25.8))
+s_box = Part.makeBox(200.0, 140.0, 9.5).translate(App.Vector(-100.0, -140.0, 25.8))
 gehaeuse = gehaeuse.cut(s_cyl).cut(s_box)
 
 # 🔥 WAND-FLANSCH PADS (Alle drei Pads schließen nun bündig auf 121.5mm ab!)
@@ -124,8 +124,8 @@ klappe = missing_cyl.fuse(bp_out)
 cavity = Part.makeBox(201.0, 145.0, gehaeuse_h - 6.0).translate(App.Vector(-100.5, -145.0, -1.0))
 klappe = klappe.cut(cavity)
 
-# STATOR SCHLITZ IM ARM
-stator_slot = Part.makeBox(199.0, 120.0, 8.4).translate(App.Vector(-99.5, -120.0, 25.8))
+# STATOR SCHLITZ IM ARM (9.5mm = stator_dicke 9mm + 0.5mm Gleitspiel)
+stator_slot = Part.makeBox(199.0, 120.0, 9.5).translate(App.Vector(-99.5, -120.0, 25.8))
 klappe = klappe.cut(stator_slot)
 
 # Rotor Freilauf schneiden

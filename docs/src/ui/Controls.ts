@@ -13,7 +13,6 @@ export function wireControls(state: AppState, handlers: Handlers): void {
   const radiusSlider = document.getElementById('slider-radius') as HTMLInputElement;
   const windSlider = document.getElementById('slider-wind') as HTMLInputElement;
   const presetBtns = document.querySelectorAll<HTMLButtonElement>('.preset-btn');
-  const explodeBtn = document.getElementById('btn-explode') as HTMLButtonElement;
 
   rotorSelect.addEventListener('change', (e) => {
     state.rotorType = (e.target as HTMLSelectElement).value as RotorType;
@@ -56,13 +55,6 @@ export function wireControls(state: AppState, handlers: Handlers): void {
       (document.getElementById('val-wind') as HTMLElement).innerText = `${state.windSpeed.toFixed(1)} m/s`;
       handlers.onPhysicsChanged();
     });
-  });
-
-  explodeBtn.addEventListener('click', () => {
-    state.exploded = !state.exploded;
-    explodeBtn.innerText = state.exploded ? 'Assemble Turbine' : 'Explore Parts (Exploded View)';
-    explodeBtn.classList.toggle('active');
-    handlers.onExplodeToggle();
   });
 }
 

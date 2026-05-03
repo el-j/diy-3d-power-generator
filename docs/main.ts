@@ -183,12 +183,6 @@ function applySceneMode(mode: SceneMode): void {
     }
   }
 
-  const explodeBtn = document.getElementById('btn-explode') as HTMLButtonElement | null;
-  if (explodeBtn) {
-    explodeBtn.innerText = state.exploded ? 'Assemble Turbine' : 'Explore Parts (Exploded View)';
-    explodeBtn.classList.toggle('active', state.exploded);
-  }
-
   refreshPhysicsUI();
 }
 

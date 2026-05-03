@@ -90,10 +90,25 @@ function parseCpValue(cp: string): number {
   return parseFloat(match) || 0;
 }
 
-export function WingTypeSwitcher(): React.JSX.Element {
+interface WingTypeSwitcherProps {
+  selected?: string;
+  onSelect?: (key: string) => void;
+}
+
+export function WingTypeSwitcher({ selected: controlledSelected, onSelect }: WingTypeSwitcherProps = {}): React.JSX.Element {
   const keys = Object.keys(BLADE_TYPES);
-  const [activeKey, setActiveKey] = useState<string>(keys[0]);
-  const blade = BLADE_TYPES[activeKey];
+  const [internalKey, setInternalKey] = useState<string>(keys[0]);
+  const activeKey = controlledSelected ?? internalKey;
+
+  function handleSelect(key: string) {
+    if (onSelect) {
+      onSelect(key);
+    } else {
+      setInternalKey(key);
+    }
+  }
+
+  const blade = BLADE_TYPES[activeKey] ?? BLADE_TYPES[keys[0]];
   const cpValue = parseCpValue(blade.cp);
   const cpPct = (cpValue / BETZ_LIMIT) * 100;
 
@@ -133,7 +148,7 @@ export function WingTypeSwitcher(): React.JSX.Element {
             <button
               key={key}
               className={`tab-btn${isActive ? ' active' : ''}`}
-              onClick={() => setActiveKey(key)}
+              onClick={() => handleSelect(key)}
               style={{
                 borderLeftWidth: 3,
                 borderLeftStyle: 'solid',

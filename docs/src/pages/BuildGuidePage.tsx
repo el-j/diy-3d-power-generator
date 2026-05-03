@@ -6,7 +6,7 @@ import { getMarkdown } from '../md-loader';
 import { buildGuideLinks } from '../content/siteContent';
 
 // ---------------------------------------------------------------------------
-// Checklist data per section (keyed by buildGuideLinks[i].title)
+// Per-section checklist definitions
 // ---------------------------------------------------------------------------
 
 interface SectionChecklist {
@@ -18,12 +18,11 @@ const SECTION_CHECKLISTS: Record<string, SectionChecklist> = {
   '01 Tower': {
     id: 'build-guide-tower',
     items: [
-      'Printed all tower parts (blade, connector, plug, disc)',
+      'Printed all tower parts for selected blade type',
       'Verified vielzahn spline fit (12-tooth, 30° indexing)',
       'Checked blade wall thickness ≥ 2.4 mm',
       'Stacked stages and confirmed 240 mm height per stage',
       'Inserted square shaft (10×10 mm) through all stages',
-      'Blade orientation confirmed: 90° twist per stage (Helix)',
       'Test rotation: no binding or vibration',
     ],
   },
@@ -83,14 +82,33 @@ const SECTION_CHECKLISTS: Record<string, SectionChecklist> = {
 };
 
 // ---------------------------------------------------------------------------
+// Blade-type → markdown file mapping (Tower section only)
+// ---------------------------------------------------------------------------
+
+const BLADE_GUIDE_PATHS: Record<string, string> = {
+  'savonius-helix':    'build-guide/01_tower.md',
+  'savonius-straight': 'build-guide/tower-savonius-straight.md',
+  'lenz2':             'build-guide/tower-lenz2.md',
+  'darrieus-h':        'build-guide/tower-darrieus-h.md',
+  'gorlov':            'build-guide/tower-gorlov.md',
+};
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export function BuildGuidePage(): React.JSX.Element {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedBlade, setSelectedBlade] = useState<string>('savonius-helix');
+
   const active = buildGuideLinks[activeIndex];
   const checklist = SECTION_CHECKLISTS[active.title];
   const isTower = active.title === '01 Tower';
+
+  // On the Tower section, swap markdown based on selected blade
+  const markdownPath = isTower
+    ? (BLADE_GUIDE_PATHS[selectedBlade] ?? 'build-guide/01_tower.md')
+    : active.path;
 
   return (
     <div className="reader-shell">
@@ -111,15 +129,20 @@ export function BuildGuidePage(): React.JSX.Element {
       </aside>
 
       <main className="reader-content">
-        {/* Wing type comparison — only on Tower section */}
-        {isTower && <WingTypeSwitcher />}
+        {/* Wing type switcher — Tower section only. Drives the markdown shown below. */}
+        {isTower && (
+          <WingTypeSwitcher
+            selected={selectedBlade}
+            onSelect={setSelectedBlade}
+          />
+        )}
 
-        {/* Markdown content */}
-        <MarkdownRenderer content={getMarkdown(active.path)} />
+        {/* Build instructions — swaps when blade selection changes on Tower section */}
+        <MarkdownRenderer content={getMarkdown(markdownPath)} />
 
-        {/* Checklist — shown for every section that has one */}
+        {/* Persistent build checklist */}
         {checklist && (
-          <Checklist id={checklist.id} items={checklist.items} />
+          <Checklist id={`${checklist.id}-${selectedBlade}`} items={checklist.items} />
         )}
       </main>
     </div>

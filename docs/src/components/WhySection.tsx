@@ -8,9 +8,9 @@ type WhySectionProps = {
 export function WhySection({ cards }: WhySectionProps): React.JSX.Element {
   return (
     <section className="section" id="why">
-      <h2>Why This Refactor</h2>
+      <h2>What This Build Is</h2>
       <p className="section-lead">
-        Typed components, explicit data models, and smaller render units are easier to evolve than one monolithic page.
+        An open-source 3D-printable vertical-axis wind generator — from aerodynamic blades to axial-flux generator to wall-mounted base station.
       </p>
       <div className="card-grid">
         {cards.map((feature) => (

@@ -14,16 +14,28 @@ export const navItems: NavItem[] = [
 
 export const featureCards: FeatureCard[] = [
   {
+    title: 'Aero-Fan Generator',
+    body: '20-pole axial-flux generator with an 11-blade fan integrated directly into the magnetic rotor — cools the coils while generating power. 12 capsule coils, 3-phase AC output.'
+  },
+  {
+    title: '5 Hot-Swap Blade Types',
+    body: 'Helix, Savonius, Darrieus H, Gorlov, and Lenz2 — all sharing a unified 12-tooth vielzahn spline. Swap blade types without tools to match your wind conditions.'
+  },
+  {
+    title: 'Ultra-Flat Base Station',
+    body: 'XXL base station at only 68 mm height. U-form opening lets the stator slide in and out without disassembly. 3D-printed tapered bearing cup included.'
+  },
+  {
     title: 'Parametric + Printable',
-    body: 'All geometry is generated from FreeCAD Python and centralized parameters, so dimensions stay consistent across parts.'
+    body: 'All geometry generated from FreeCAD Python with centralized parameters. Bambu P1S optimized — every part fits the 256×256 mm bed.'
   },
   {
-    title: 'Open Build Workflow',
-    body: 'Assembly manifests, BOM, and step-by-step build docs are in-repo and versioned for transparent iterations.'
+    title: 'Interactive Build Guide',
+    body: 'Step-by-step assembly with persistent checkboxes, wing-type comparison, and inline markdown documentation — track your build progress directly in the browser.'
   },
   {
-    title: 'Field-Ready System',
-    body: 'Tower, generator, and base station are split for practical printing, transport, and maintenance.'
+    title: 'Open Hardware Workflow',
+    body: 'Assembly manifests, BOM, and build docs are versioned in-repo. FreeCAD Python scripts regenerate any part from parameters.json.'
   }
 ];
 

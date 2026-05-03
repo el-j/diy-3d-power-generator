@@ -19,6 +19,24 @@ export const repo = {
 
 export const docsLinks: LinkItem[] = [
   {
+    title: 'Aero-Fan Generator Design',
+    description: 'The core invention: dual-function rotor, 20-pole axial-flux, capsule coils.',
+    path: 'docs/GENERATOR_DESIGN.md',
+    type: 'markdown'
+  },
+  {
+    title: 'XXL Base Station Design',
+    description: 'Ultra-flat chassis, U-form stator access, 3D-printed bearing cup.',
+    path: 'docs/BASE_STATION_DESIGN.md',
+    type: 'markdown'
+  },
+  {
+    title: 'Blade Type Comparison',
+    description: 'All 5 interchangeable VAWT blade designs: Helix, Savonius, Darrieus, Gorlov, Lenz2.',
+    path: 'docs/BLADE_COMPARISON.md',
+    type: 'markdown'
+  },
+  {
     title: 'Architecture Overview',
     description: 'System structure, module responsibilities, and assembly strategy.',
     path: 'docs/ARCHITECTURE.md',

@@ -15,22 +15,24 @@ export interface MaterialSet {
 export function createMaterials(): MaterialSet {
   return {
     petgTeal: new THREE.MeshPhysicalMaterial({
-      color: 0x00e5ff,
-      metalness: 0.1,
-      roughness: 0.3,
-      transmission: 0.6,
-      thickness: 1.0,
+      color: 0x0ccde0,
+      metalness: 0.08,
+      roughness: 0.24,
+      transmission: 0.34,
+      thickness: 0.8,
       ior: 1.5,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.94,
+      clearcoat: 0.38,
+      clearcoatRoughness: 0.3,
       side: THREE.DoubleSide
     }),
-    carbon: new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7, metalness: 0.3 }),
-    stator: new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.6, metalness: 0.1 }),
-    base: new THREE.MeshStandardMaterial({ color: 0x1a1c23, roughness: 0.8, metalness: 0.2 }),
+    carbon: new THREE.MeshStandardMaterial({ color: 0x2a3138, roughness: 0.56, metalness: 0.24 }),
+    stator: new THREE.MeshStandardMaterial({ color: 0xf0f3f8, roughness: 0.52, metalness: 0.06 }),
+    base: new THREE.MeshStandardMaterial({ color: 0x141a22, roughness: 0.86, metalness: 0.08 }),
     copper: new THREE.MeshStandardMaterial({
       color: 0xff6b35,
-      roughness: 0.3,
+      roughness: 0.26,
       metalness: 0.8,
       emissive: 0xff6b35,
       emissiveIntensity: 0.0

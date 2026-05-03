@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { marked } from 'marked';
 import { createSceneManager } from './src/scene/SceneManager';
 import { createPostProcessing } from './src/scene/PostProcessing';
 import { createMaterials, buildTower } from './src/assembly/HelixTower';
@@ -12,6 +13,7 @@ import type { AppState, TurbinePart } from './src/types';
 import bomDataRaw from './bom/master_bom.json';
 
 type RouteId = 'playground' | 'docs' | 'bom' | 'downloads' | 'build-guide';
+type SceneMode = 'inspect' | 'learn' | 'print';
 
 interface BomData {
   totals: Record<string, string | number>;
@@ -19,6 +21,14 @@ interface BomData {
 }
 
 const bomData = bomDataRaw as BomData;
+
+const markdownFiles = import.meta.glob('./**/*.md', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+}) as Record<string, string>;
+
+marked.setOptions({ gfm: true, breaks: false });
 
 const state: AppState = {
   rotorType: 'savonius-helix',
@@ -43,9 +53,14 @@ scene.add(towerGroup);
 
 let rotorMeshGroup: THREE.Group | null = null;
 let currentRoute: RouteId = 'playground';
+let currentSceneMode: SceneMode = 'inspect';
 let lightMode: LightMode = 'current-light';
 let userLocation: { lat: number; lon: number } | null = null;
 let lastLightUpdateMs = 0;
+let mobileViewport = window.matchMedia('(max-width: 980px)').matches;
+let mobileHintTimer: ReturnType<typeof setTimeout> | null = null;
+
+const MOBILE_HINT_KEY = 'helix-mobile-scene-hint-dismissed-v1';
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -57,6 +72,51 @@ const PART_CARD_H = 80;
 
 const desiredCamera = new THREE.Vector3(60, 40, 80);
 const desiredTarget = new THREE.Vector3(0, 30, 0);
+const mobileSceneHintEl = document.getElementById('mobile-scene-hint') as HTMLDivElement | null;
+const mobileSceneHintDismissEl = document.getElementById('mobile-scene-hint-dismiss') as HTMLButtonElement | null;
+
+function setControlPanelCollapsed(collapsed: boolean): void {
+  const controlPanel = document.querySelector<HTMLElement>('.control-panel');
+  const panelChevron = document.getElementById('panel-chevron');
+  if (!controlPanel) return;
+
+  controlPanel.classList.toggle('collapsed', collapsed);
+  if (panelChevron) panelChevron.textContent = collapsed ? '▼' : '▲';
+}
+
+function hideMobileSceneHint(persist = false): void {
+  if (!mobileSceneHintEl) return;
+  if (mobileHintTimer !== null) {
+    clearTimeout(mobileHintTimer);
+    mobileHintTimer = null;
+  }
+
+  mobileSceneHintEl.classList.remove('visible');
+  if (persist) {
+    localStorage.setItem(MOBILE_HINT_KEY, '1');
+  }
+}
+
+function maybeShowMobileSceneHint(): void {
+  if (!mobileSceneHintEl || !mobileViewport || currentRoute !== 'playground') {
+    hideMobileSceneHint(false);
+    return;
+  }
+
+  if (localStorage.getItem(MOBILE_HINT_KEY) === '1') {
+    return;
+  }
+
+  if (mobileHintTimer !== null) {
+    clearTimeout(mobileHintTimer);
+  }
+
+  mobileHintTimer = setTimeout(() => {
+    if (mobileViewport && currentRoute === 'playground') {
+      mobileSceneHintEl.classList.add('visible');
+    }
+  }, 700);
+}
 
 function rebuildTower(): void {
   const result = buildTower(towerGroup, state, mats);
@@ -87,8 +147,53 @@ function refreshPhysicsUI(): void {
   });
 }
 
+function applySceneMode(mode: SceneMode): void {
+  currentSceneMode = mode;
+  document.querySelectorAll<HTMLButtonElement>('.scene-mode-btn').forEach((button) => {
+    button.classList.toggle('active', button.dataset.sceneMode === mode);
+  });
+
+  if (mode === 'inspect') {
+    state.exploded = false;
+    controls.autoRotate = false;
+    if (mobileViewport) {
+      desiredCamera.set(45, 30, 60);
+    } else {
+      desiredCamera.set(60, 40, 80);
+    }
+  }
+
+  if (mode === 'learn') {
+    state.exploded = true;
+    controls.autoRotate = false;
+    if (mobileViewport) {
+      desiredCamera.set(48, 32, 62);
+    } else {
+      desiredCamera.set(52, 36, 65);
+    }
+  }
+
+  if (mode === 'print') {
+    state.exploded = false;
+    controls.autoRotate = false;
+    if (mobileViewport) {
+      desiredCamera.set(36, 22, 43);
+    } else {
+      desiredCamera.set(42, 26, 48);
+    }
+  }
+
+  const explodeBtn = document.getElementById('btn-explode') as HTMLButtonElement | null;
+  if (explodeBtn) {
+    explodeBtn.innerText = state.exploded ? 'Assemble Turbine' : 'Explore Parts (Exploded View)';
+    explodeBtn.classList.toggle('active', state.exploded);
+  }
+
+  refreshPhysicsUI();
+}
+
 function setSectionMode(sectionId: string): void {
-  if (currentRoute !== 'playground') {
+  if (currentRoute !== 'playground' || mobileViewport) {
     return;
   }
 
@@ -99,21 +204,15 @@ function setSectionMode(sectionId: string): void {
   }
 
   if (sectionId === 'playground') {
-    controls.autoRotate = false;
-    state.exploded = false;
-    desiredCamera.set(60, 40, 80);
+    applySceneMode('inspect');
   }
 
   if (sectionId === 'how-it-works') {
-    controls.autoRotate = false;
-    state.exploded = true;
-    desiredCamera.set(52, 36, 65);
+    applySceneMode('learn');
   }
 
   if (sectionId === 'print-it') {
-    controls.autoRotate = false;
-    state.exploded = false;
-    desiredCamera.set(42, 26, 48);
+    applySceneMode('print');
   }
 
   if (sectionId === 'contribute') {
@@ -126,6 +225,10 @@ function setSectionMode(sectionId: string): void {
 }
 
 function setupScrollytelling(): void {
+  if (mobileViewport) {
+    return;
+  }
+
   const sections = Array.from(document.querySelectorAll<HTMLElement>('section.scene-section'));
   const observer = new IntersectionObserver(
     (entries) => {
@@ -164,56 +267,104 @@ function applyRoute(route: RouteId): void {
   });
 
   if (route === 'playground') {
-    controls.autoRotate = true;
-    desiredCamera.set(66, 44, 90);
+    applySceneMode(currentSceneMode);
+    if (!mobileViewport) {
+      controls.autoRotate = true;
+    }
+    maybeShowMobileSceneHint();
   } else {
     controls.autoRotate = false;
     state.exploded = false;
     partCard.style.opacity = '0';
     desiredCamera.set(54, 34, 66);
+    hideMobileSceneHint(false);
+  }
+
+  if (mobileViewport) {
+    setControlPanelCollapsed(true);
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function renderDocsLinks(): void {
-  const docsGrid = document.getElementById('docs-link-grid');
-  if (!docsGrid) return;
+function repoPathToLocalMarkdown(path: string): string {
+  return path.startsWith('docs/') ? path.slice(5) : path;
+}
 
-  docsGrid.innerHTML = docsLinks
-    .map((item) => {
-      const href = toRepoBlobUrl(item.path);
-      return `
-        <article class="link-card">
-          <h4>${item.title}</h4>
-          <p>${item.description}</p>
-          <a href="${href}" target="_blank" rel="noreferrer">Open source file</a>
-        </article>
-      `;
+function renderMarkdownInto(el: HTMLElement, markdown: string): void {
+  el.innerHTML = marked.parse(markdown, { async: false }) as string;
+}
+
+function getMarkdown(path: string): string {
+  const localPath = repoPathToLocalMarkdown(path);
+  return markdownFiles[`./${localPath}`] ?? `# Missing File\n\nCould not find ${path} in bundled docs.`;
+}
+
+function renderDocsReader(): void {
+  const list = document.getElementById('docs-list');
+  const viewer = document.getElementById('docs-viewer');
+  if (!list || !viewer) return;
+
+  list.innerHTML = '';
+  docsLinks.forEach((item, index) => {
+    const button = document.createElement('button');
+    button.textContent = item.title;
+    button.classList.toggle('active', index === 0);
+    button.addEventListener('click', () => {
+      list.querySelectorAll('button').forEach((node) => node.classList.remove('active'));
+      button.classList.add('active');
+      renderMarkdownInto(viewer, getMarkdown(item.path));
+    });
+    list.appendChild(button);
+  });
+
+  renderMarkdownInto(viewer, getMarkdown(docsLinks[0].path));
+}
+
+function renderBuildGuideReader(): void {
+  const list = document.getElementById('guide-list');
+  const viewer = document.getElementById('guide-viewer');
+  if (!list || !viewer) return;
+
+  list.innerHTML = '';
+  buildGuideLinks.forEach((item, index) => {
+    const button = document.createElement('button');
+    button.textContent = item.title;
+    button.classList.toggle('active', index === 0);
+    button.addEventListener('click', () => {
+      list.querySelectorAll('button').forEach((node) => node.classList.remove('active'));
+      button.classList.add('active');
+      renderMarkdownInto(viewer, getMarkdown(item.path));
+    });
+    list.appendChild(button);
+  });
+
+  renderMarkdownInto(viewer, getMarkdown(buildGuideLinks[0].path));
+}
+
+function buildBomSummaryHtml(): string {
+  const rows = Object.entries(bomData.assemblies)
+    .map(([assemblyName, assemblyValue]) => {
+      const count = countEntries(assemblyValue);
+      return `<tr><td>${formatKey(assemblyName)}</td><td>${count}</td></tr>`;
     })
     .join('');
 
-  const guideGrid = document.getElementById('guide-link-grid');
-  if (!guideGrid) return;
-
-  guideGrid.innerHTML = buildGuideLinks
-    .map((item) => {
-      const href = toRepoBlobUrl(item.path);
-      return `
-        <article class="link-card">
-          <h4>${item.title}</h4>
-          <p>${item.description}</p>
-          <a href="${href}" target="_blank" rel="noreferrer">Open guide file</a>
-        </article>
-      `;
-    })
-    .join('');
+  return `
+    <h3>BOM Summary</h3>
+    <p>Live summary generated from docs/bom/master_bom.json.</p>
+    <table>
+      <thead><tr><th>Assembly</th><th>Entries</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
 }
 
 function renderBom(): void {
   const totalsEl = document.getElementById('bom-totals');
-  const breakdownEl = document.getElementById('bom-breakdown');
-  if (!totalsEl || !breakdownEl) return;
+  const viewer = document.getElementById('bom-viewer');
+  const tabs = document.getElementById('bom-tabs');
+  if (!totalsEl || !viewer || !tabs) return;
 
   totalsEl.innerHTML = Object.entries(bomData.totals)
     .map(([key, value]) => {
@@ -226,33 +377,44 @@ function renderBom(): void {
     })
     .join('');
 
-  const assemblyCards = Object.entries(bomData.assemblies)
-    .map(([assemblyName, assemblyValue]) => {
-      const count = countEntries(assemblyValue);
-      return `
-        <article class="link-card">
-          <h4>${formatKey(assemblyName)}</h4>
-          <p>Registered entries: ${count}</p>
-          <a href="${toRepoBlobUrl(`assemblies/${assemblyName}`)}" target="_blank" rel="noreferrer">Open assembly folder</a>
-        </article>
-      `;
-    })
-    .join('');
+  const tabDefs = [
+    {
+      id: 'summary',
+      label: 'Summary',
+      render: () => {
+        viewer.innerHTML = buildBomSummaryHtml();
+      }
+    },
+    {
+      id: 'markdown',
+      label: 'BOM Markdown',
+      render: () => {
+        renderMarkdownInto(viewer, getMarkdown('docs/bom/master_bom.md'));
+      }
+    },
+    {
+      id: 'json',
+      label: 'BOM JSON',
+      render: () => {
+        viewer.innerHTML = `<pre><code>${escapeHtml(JSON.stringify(bomDataRaw, null, 2))}</code></pre>`;
+      }
+    }
+  ];
 
-  breakdownEl.innerHTML =
-    assemblyCards +
-    `
-      <article class="link-card">
-        <h4>Master BOM Source</h4>
-        <p>Use markdown for reading and JSON for automation, scripts, and external integrations.</p>
-        <a href="${toRepoBlobUrl('docs/bom/master_bom.md')}" target="_blank" rel="noreferrer">Open BOM markdown</a>
-      </article>
-      <article class="link-card">
-        <h4>Machine-Readable BOM</h4>
-        <p>Structured inventory data with assembly-specific part definitions.</p>
-        <a href="${toRepoRawUrl('docs/bom/master_bom.json')}" target="_blank" rel="noreferrer">Download BOM JSON</a>
-      </article>
-    `;
+  tabs.innerHTML = '';
+  tabDefs.forEach((tab, index) => {
+    const button = document.createElement('button');
+    button.textContent = tab.label;
+    button.classList.toggle('active', index === 0);
+    button.addEventListener('click', () => {
+      tabs.querySelectorAll('button').forEach((node) => node.classList.remove('active'));
+      button.classList.add('active');
+      tab.render();
+    });
+    tabs.appendChild(button);
+  });
+
+  tabDefs[0].render();
 }
 
 function renderDownloads(): void {
@@ -295,7 +457,8 @@ function updateLighting(force = false): void {
   lastLightUpdateMs = nowMs;
 
   const snapshot = setLightingMode(scene, lightRig, lightMode, new Date(), userLocation);
-  renderer.toneMappingExposure = 0.9 + snapshot.brightness * 0.35;
+  const modeBias = lightMode === 'studio' ? 0.1 : lightMode === 'night' ? 0.12 : 0;
+  renderer.toneMappingExposure = Math.min(1.18, 0.86 + snapshot.brightness * 0.32 + modeBias);
   document.body.dataset.sunPhase = snapshot.phase;
 
   const statusEl = document.getElementById('sun-status');
@@ -314,9 +477,15 @@ wireControls(state, {
   onExplodeToggle: () => {
     if (state.exploded) {
       state.targetRPM = 0;
+      currentSceneMode = 'learn';
     } else {
+      currentSceneMode = 'inspect';
       refreshPhysicsUI();
     }
+
+    document.querySelectorAll<HTMLButtonElement>('.scene-mode-btn').forEach((button) => {
+      button.classList.toggle('active', button.dataset.sceneMode === currentSceneMode);
+    });
   }
 });
 
@@ -325,6 +494,20 @@ if (lightModeSelect) {
   lightModeSelect.addEventListener('change', () => {
     lightMode = lightModeSelect.value as LightMode;
     updateLighting(true);
+  });
+}
+
+document.querySelectorAll<HTMLButtonElement>('.scene-mode-btn').forEach((button) => {
+  button.addEventListener('click', () => {
+    const mode = (button.dataset.sceneMode ?? 'inspect') as SceneMode;
+    applySceneMode(mode);
+    hideMobileSceneHint(true);
+  });
+});
+
+if (mobileSceneHintDismissEl) {
+  mobileSceneHintDismissEl.addEventListener('click', () => {
+    hideMobileSceneHint(true);
   });
 }
 
@@ -369,17 +552,25 @@ window.addEventListener('touchend', (event: TouchEvent) => {
 });
 
 window.addEventListener('resize', () => {
+  mobileViewport = window.matchMedia('(max-width: 980px)').matches;
   resizeScene();
   resizeFx();
+
+  if (mobileViewport && currentRoute === 'playground') {
+    applySceneMode(currentSceneMode);
+    setControlPanelCollapsed(true);
+    maybeShowMobileSceneHint();
+  } else {
+    hideMobileSceneHint(false);
+  }
 });
 
 const panelHeaderToggle = document.getElementById('panel-header-toggle');
 const controlPanelEl = document.querySelector<HTMLElement>('.control-panel');
-const panelChevronEl = document.getElementById('panel-chevron');
 if (panelHeaderToggle && controlPanelEl) {
   panelHeaderToggle.addEventListener('click', () => {
-    const collapsed = controlPanelEl.classList.toggle('collapsed');
-    if (panelChevronEl) panelChevronEl.textContent = collapsed ? '▼' : '▲';
+    const collapsed = !controlPanelEl.classList.contains('collapsed');
+    setControlPanelCollapsed(collapsed);
   });
 }
 
@@ -442,6 +633,15 @@ function countEntries(value: unknown): number {
   return 0;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 setTimeout(() => {
   const loader = document.getElementById('loader') as HTMLDivElement;
   loader.style.opacity = '0';
@@ -452,11 +652,18 @@ setTimeout(() => {
   rebuildTower();
   refreshPhysicsUI();
   setupScrollytelling();
-  renderDocsLinks();
+  renderDocsReader();
   renderBom();
   renderDownloads();
+  renderBuildGuideReader();
+
+  if (mobileViewport) {
+    setControlPanelCollapsed(true);
+    maybeShowMobileSceneHint();
+  }
 
   applyRoute(getRouteFromHash());
+  applySceneMode('inspect');
   updateLighting(true);
 
   getUserLocation().then((location) => {

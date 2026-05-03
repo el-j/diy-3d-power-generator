@@ -23,13 +23,13 @@ export interface LightSnapshot {
 }
 
 export function createEnvironmentLighting(scene: THREE.Scene): LightRig {
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.36);
   scene.add(ambientLight);
 
-  const hemiLight = new THREE.HemisphereLight(0xbcdcff, 0x2b2f33, 0.7);
+  const hemiLight = new THREE.HemisphereLight(0xc8e2ff, 0x232a31, 0.62);
   scene.add(hemiLight);
 
-  const sunLight = new THREE.DirectionalLight(0xfff0cc, 1.8);
+  const sunLight = new THREE.DirectionalLight(0xfff0cc, 2.2);
   sunLight.position.set(68, 96, 42);
   sunLight.castShadow = true;
   sunLight.shadow.camera.top = 140;
@@ -40,7 +40,7 @@ export function createEnvironmentLighting(scene: THREE.Scene): LightRig {
   sunLight.shadow.mapSize.height = 2048;
   scene.add(sunLight);
 
-  const rimLight = new THREE.DirectionalLight(0x83c5ff, 0.7);
+  const rimLight = new THREE.DirectionalLight(0x83c5ff, 0.92);
   rimLight.position.set(-85, 35, -75);
   scene.add(rimLight);
 
@@ -124,25 +124,29 @@ function applyPreset(
     scene.fog.density = 0.0022 - brightness * 0.001;
   }
 
-  rig.ambientLight.intensity = 0.23 + brightness * 0.62;
-  rig.hemiLight.intensity = 0.28 + brightness * 0.9;
-  rig.sunLight.intensity = 0.35 + brightness * 2.1;
-  rig.rimLight.intensity = 0.16 + (1 - brightness) * 1.0;
+  rig.ambientLight.intensity = 0.16 + brightness * 0.5;
+  rig.hemiLight.intensity = 0.2 + brightness * 0.76;
+  rig.sunLight.intensity = 0.55 + brightness * 2.35;
+  rig.rimLight.intensity = 0.26 + (1 - brightness) * 1.08;
 
   rig.hemiLight.color.set(phase === 'night' ? 0x8ab8ff : phase === 'dawn' ? 0xffd5a1 : 0xcce9ff);
-  rig.hemiLight.groundColor.set(phase === 'night' ? 0x1a2332 : 0x465443);
+  rig.hemiLight.groundColor.set(phase === 'night' ? 0x18212d : 0x3f4e3f);
 
   rig.sunLight.color.set(phase === 'night' ? 0x9eb7ff : phase === 'dawn' || phase === 'dusk' ? 0xffc47d : 0xfff2d2);
   rig.rimLight.color.set(phase === 'night' ? 0x70a8ff : 0x8dc9ff);
 
-  rig.ground.material.color.set(phase === 'night' ? 0x1f3327 : phase === 'day' ? 0x4d7a49 : 0x6e6f45);
+  rig.ground.material.color.set(phase === 'night' ? 0x18261f : phase === 'day' ? 0x3f6640 : 0x5b5f3f);
 
   rig.sunGlow.material.color.set(phase === 'night' ? 0x7aa1ff : 0xffcf87);
   rig.sunGlow.material.opacity = phase === 'night' ? 0.28 : 0.62;
 
-  const bottomMix = 0.35 + skyMix * 0.5;
+  const bottomMix = 0.42 + skyMix * 0.42;
   rig.ground.material.emissive = new THREE.Color().lerpColors(skyBottom, new THREE.Color(0x111111), bottomMix);
-  rig.ground.material.emissiveIntensity = 0.08 + brightness * 0.1;
+  rig.ground.material.emissiveIntensity = 0.05 + brightness * 0.07;
+
+  if (scene.fog instanceof THREE.FogExp2) {
+    scene.fog.density = clamp(0.00195 - brightness * 0.00075, 0.0011, 0.00205);
+  }
 
   return { phase, brightness, sunHeight };
 }

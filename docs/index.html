@@ -79,17 +79,21 @@
     <section data-route="docs" class="route-view">
       <div class="content-page">
         <h2>Documentation Hub</h2>
-        <p class="content-lead">Complete docs access for architecture, physical review, and source manifests.</p>
-        <div id="docs-link-grid" class="link-grid"></div>
+        <p class="content-lead">Read project docs inline without leaving the playground.</p>
+        <div class="reader-layout">
+          <aside id="docs-list" class="doc-list"></aside>
+          <article id="docs-viewer" class="doc-viewer"></article>
+        </div>
       </div>
     </section>
 
     <section data-route="bom" class="route-view">
       <div class="content-page">
         <h2>Master BOM</h2>
-        <p class="content-lead">Live assembly inventory with printed/purchased totals and active XXL system specs.</p>
+        <p class="content-lead">Inspect BOM totals and full source content directly in this page.</p>
         <div id="bom-totals" class="metric-grid"></div>
-        <div id="bom-breakdown" class="link-grid"></div>
+        <div id="bom-tabs" class="reader-tabs"></div>
+        <article id="bom-viewer" class="doc-viewer"></article>
       </div>
     </section>
 
@@ -104,8 +108,11 @@
     <section data-route="build-guide" class="route-view">
       <div class="content-page">
         <h2>Build Guide</h2>
-        <p class="content-lead">Step-by-step assembly flow from tower stages to final integration.</p>
-        <div id="guide-link-grid" class="link-grid"></div>
+        <p class="content-lead">Step-by-step assembly guide rendered inline for fast inspection.</p>
+        <div class="reader-layout">
+          <aside id="guide-list" class="doc-list"></aside>
+          <article id="guide-viewer" class="doc-viewer"></article>
+        </div>
       </div>
     </section>
   </main>
@@ -127,6 +134,17 @@
       </div>
 
       <button id="btn-explode" class="toggle-btn top-button">Explore Parts (Exploded View)</button>
+
+      <div class="scene-mode-row" id="scene-mode-row">
+        <button class="scene-mode-btn active" data-scene-mode="inspect">Inspect</button>
+        <button class="scene-mode-btn" data-scene-mode="learn">Exploded</button>
+        <button class="scene-mode-btn" data-scene-mode="print">Print Focus</button>
+      </div>
+
+      <div id="mobile-scene-hint" class="mobile-scene-hint" role="status" aria-live="polite">
+        <span>Tap Inspect, Exploded, or Print Focus to switch camera modes.</span>
+        <button id="mobile-scene-hint-dismiss" type="button">Got it</button>
+      </div>
     </div>
 
     <div class="control-panel">

@@ -8,19 +8,19 @@ export function createPostProcessing(renderer: THREE.WebGLRenderer, scene: THREE
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
 
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.35, 0.9);
-  bloomPass.threshold = 0.72;
-  bloomPass.strength = 0.42;
-  bloomPass.radius = 0.34;
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.6, 0.28, 1.0);
+  bloomPass.threshold = 0.81;
+  bloomPass.strength = 0.24;
+  bloomPass.radius = 0.22;
   composer.addPass(bloomPass);
 
   const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-  outlinePass.edgeStrength = 5.2;
-  outlinePass.edgeGlow = 0.65;
-  outlinePass.edgeThickness = 2.4;
+  outlinePass.edgeStrength = 6.3;
+  outlinePass.edgeGlow = 0.38;
+  outlinePass.edgeThickness = 2.8;
   outlinePass.pulsePeriod = 0;
   outlinePass.visibleEdgeColor.set('#7ce8ff');
-  outlinePass.hiddenEdgeColor.set('#0d3f56');
+  outlinePass.hiddenEdgeColor.set('#082736');
   composer.addPass(outlinePass);
 
   function resize(): void {

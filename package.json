@@ -15,6 +15,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
+    "marked": "^15.0.12",
     "three": "^0.179.1"
   }
 }

@@ -52,36 +52,34 @@ export function PlaygroundPage({ navigate }: Props): React.JSX.Element {
             estimation.
           </p>
 
-         
+          <div className="light-control">
+            <label htmlFor="select-light-mode">Scene Light</label>
+            <select id="select-light-mode" className="ui-select">
+              <option value="current-light">Current Light (Local Time)</option>
+              <option value="day">Day Boost</option>
+              <option value="night">Night Focus</option>
+              <option value="studio">Studio Contrast</option>
+            </select>
+            <p id="sun-status" className="sun-status">Finding local light profile...</p>
+          </div>
 
-          
           <div className="scene-mode-row">
-            <button className="pg-back-btn" onClick={() => navigate('home')}>
-            ← Overview
-          </button>
             <button className="scene-mode-btn active" data-scene-mode="inspect">Inspect</button>
             <button className="scene-mode-btn" data-scene-mode="learn">Exploded</button>
             <button className="scene-mode-btn" data-scene-mode="print">Print Focus</button>
           </div>
-          <div className="light-control">
-              <label htmlFor="select-light-mode">Scene Light</label>
-              <select id="select-light-mode" className="ui-select">
-                <option value="current-light">Current Light (Local Time)</option>
-                <option value="day">Day Boost</option>
-                <option value="night">Night Focus</option>
-                <option value="studio">Studio Contrast</option>
-              </select>
-              <p id="sun-status" className="sun-status">Finding local light profile...</p>
-            </div>
+
+          <button className="pg-back-btn" onClick={() => navigate('home')}>
+            ← Overview
+          </button>
         </div>
-        
 
         {/* Right: full control panel */}
         <div 
           className={`control-panel ${isCollapsed ? 'collapsed' : ''}`}
           style={{ 
             transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s',
-            maxHeight: isCollapsed ? '52px' : '900px',
+            maxHeight: isCollapsed ? '52px' : '950px',
             overflow: isCollapsed ? 'hidden' : 'visible'
           }}
         >
@@ -117,13 +115,23 @@ export function PlaygroundPage({ navigate }: Props): React.JSX.Element {
             <div className="hint">Tower Height: <span id="val-height">720</span> mm</div>
           </div>
 
-          {/* Generators */}
+          {/* Generators Count */}
           <div className="control-group">
             <div className="control-header">
               <span>Generators</span>
               <span className="val-display" id="val-gens">1</span>
             </div>
             <input type="range" id="slider-gens" min="1" max="4" defaultValue="1" step="1" />
+          </div>
+
+          {/* Generator Type */}
+          <div className="control-group compact-top">
+            <div className="control-header"><span>Generator Type</span></div>
+            <select id="select-generator-type" className="ui-select" defaultValue="custom-freecad">
+              <option value="custom-freecad">Custom Axial Flux (FreeCAD)</option>
+              <option value="standard-axial">Standard Axial Flux (Reference)</option>
+              <option value="radial-flux">Radial Flux (Reference)</option>
+            </select>
           </div>
 
           {/* Radius */}

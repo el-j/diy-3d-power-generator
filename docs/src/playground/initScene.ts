@@ -5,7 +5,7 @@ import { createMaterials } from '../assembly/HelixTower';
 import { createWindSystem } from '../simulation/WindSystem';
 import { wireControls } from '../ui/Controls';
 import { getUserLocation, setLightingMode, type LightMode } from '../scene/EnvironmentLighting';
-import type { AppState, PartUserData, TurbinePart } from '../types';
+import type { AppState, PartUserData, RotorType, TurbinePart } from '../types';
 
 type SceneMode = 'inspect' | 'learn' | 'print';
 
@@ -109,6 +109,17 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
     }, 700);
   }
 
+
+function makeTurbinePart<
+  G extends THREE.BufferGeometry = THREE.BufferGeometry,
+  M extends THREE.Material | THREE.Material[] = THREE.Material
+>(
+  mesh: THREE.Mesh<G, M>,
+  userData: PartUserData
+): TurbinePart {
+  mesh.userData = userData as PartUserData;
+  return mesh as unknown as TurbinePart;
+}
   function rebuildTower(): void {
     while (towerGroup.children.length > 0) {
       towerGroup.remove(towerGroup.children[0]);
@@ -123,10 +134,9 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
 
     // 1. Base Station
     const baseHeight = 15;
-    const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(8, 10, baseHeight, 32), mats.base);
+    const baseMesh = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(8, 10, baseHeight, 32), mats.base), { name: "Base Station Housing", desc: "Houses power electronics.", assembledY: baseHeight / 2, explodedY: -10 });
     baseMesh.position.y = baseHeight / 2;
     baseMesh.castShadow = true; baseMesh.receiveShadow = true;
-    baseMesh.userData = { name: "Base Station Housing", desc: "Houses power electronics.", assembledY: baseMesh.position.y, explodedY: -10 }
     state.parts.push(baseMesh);
     towerGroup.add(baseMesh);
     currentY += baseHeight;
@@ -135,21 +145,18 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
     const genHeight = 6;
     for (let g = 0; g < state.generators; g++) {
       const genCenterY = currentY + genHeight/2;
-      const stator = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 2, 32), mats.stator);
+      const stator = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 2, 32), mats.stator), { name: `Stator (Gen ${g+1})`, desc: "Holds 9 copper wire coils.", assembledY: genCenterY - 2, explodedY: genCenterY - 2 - 15 - (g*5) });
       stator.position.y = genCenterY - 2;
-      stator.userData = { name: `Stator (Gen ${g+1})`, desc: "Holds 9 copper wire coils.", assembledY: stator.position.y, explodedY: stator.position.y - 15 - (g*5) };
       towerGroup.add(stator); state.parts.push(stator);
 
-      const coils = new THREE.Mesh(new THREE.TorusGeometry(6, 1.5, 16, 32), mats.copper);
+      const coils = makeTurbinePart(new THREE.Mesh(new THREE.TorusGeometry(6, 1.5, 16, 32), mats.copper), { name: `Copper Coils (Gen ${g+1})`, desc: "3-phase configuration.", assembledY: genCenterY - 2, explodedY: genCenterY - 2 - 15 - (g*5) });
       coils.rotation.x = Math.PI / 2; coils.position.y = genCenterY - 2;
-      coils.userData = { name: `Copper Coils (Gen ${g+1})`, desc: "3-phase configuration.", assembledY: coils.position.y, explodedY: coils.position.y - 15 - (g*5) };
       towerGroup.add(coils); state.parts.push(coils);
 
-      const rotorDisk = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 2, 32), mats.carbon);
+      const rotorDisk = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 2, 32), mats.carbon), { name: `Rotor Disk (Gen ${g+1})`, desc: "Holds magnets.", assembledY: genCenterY + 2, explodedY: genCenterY + 2 - 5 + (g*5) });  
       rotorDisk.position.y = genCenterY + 2;
-      rotorDisk.userData = { name: `Rotor Disk (Gen ${g+1})`, desc: "Holds magnets.", assembledY: rotorDisk.position.y, explodedY: rotorDisk.position.y - 5 + (g*5) };
       
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, genHeight, 16), mats.carbon);
+      const shaft = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, genHeight, 16), mats.carbon), { name: `Shaft (Gen ${g+1})`, desc: "Carbon Fiber Tube.", assembledY: genCenterY, explodedY: genCenterY + (g*5) });
       shaft.position.y = genCenterY;
       rotorMeshGroup.add(rotorDisk); rotorMeshGroup.add(shaft);
       state.parts.push(rotorDisk);
@@ -184,16 +191,14 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
       const stageCenterY = s * STAGE_HEIGHT + (STAGE_HEIGHT / 2);
       
       if (useShaft) {
-        const stageShaft = new THREE.Mesh(new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, STAGE_HEIGHT, 16), mats.carbon);
+        const stageShaft = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, STAGE_HEIGHT, 16), mats.carbon), { name: `Center Shaft (Stage ${s+1})`, desc: "Carbon Fiber Tube.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) });
         stageShaft.position.y = stageCenterY;
-        stageShaft.userData = { name: `Center Shaft (Stage ${s+1})`, desc: "Carbon Fiber Tube.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) };
         stageGroup.add(stageShaft); state.parts.push(stageShaft);
       }
 
       if (useDisks) {
-        const connector = new THREE.Mesh(new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32), mats.carbon);
+        const connector = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32), mats.carbon), { name: `Connector Ring (Stage ${s+1})`, desc: "PLA-CF interlocking ring.", assembledY: stageCenterY - STAGE_HEIGHT/2, explodedY: stageCenterY - STAGE_HEIGHT/2 + (s*15) });
         connector.position.y = stageCenterY - STAGE_HEIGHT/2;
-        connector.userData = { name: `Connector Ring (Stage ${s+1})`, desc: "PLA-CF interlocking ring.", assembledY: connector.position.y, explodedY: connector.position.y + (s*15) };
         stageGroup.add(connector); state.parts.push(connector);
       }
 
@@ -201,7 +206,7 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
         const angle = (b * (Math.PI * 2 / 3));
         const bx = Math.cos(angle) * bladeRadius;
         const bz = Math.sin(angle) * bladeRadius;
-        const blade = new THREE.Mesh(bladeGeo!, mats.petgTeal);
+        const blade = makeTurbinePart(new THREE.Mesh(bladeGeo!, mats.petgTeal), { name: `Blade (Stage ${s+1}, Blade ${b+1})`, desc: "Aerodynamic profile.", assembledY: stageCenterY, explodedY: stageCenterY + (s*15) + 5 });
         blade.castShadow = true; blade.receiveShadow = true;
 
         if (state.rotorType.startsWith('savonius')) {
@@ -230,24 +235,21 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
         if (useStruts) {
             const strutGeo = new THREE.CylinderGeometry(0.4, 0.4, bladeRadius, 8);
             strutGeo.rotateZ(Math.PI/2);
-            const strut1 = new THREE.Mesh(strutGeo, mats.carbon);
+            const strut1 = makeTurbinePart(new THREE.Mesh(strutGeo, mats.carbon), { name: `Strut (Stage ${s+1}, Blade ${b+1})`, desc: "PLA-CF", assembledY: stageCenterY + STAGE_HEIGHT/2 - 2, explodedY: stageCenterY + STAGE_HEIGHT/2 - 2 + (s*15) + 5 });
             strut1.position.set(bx/2, stageCenterY + STAGE_HEIGHT/2 - 2, bz/2);
             strut1.rotation.y = -angle;
-            strut1.userData = { name: `Strut`, desc: "PLA-CF", assembledY: strut1.position.y, explodedY: strut1.position.y + (s*15) + 5 };
             stageGroup.add(strut1); state.parts.push(strut1);
 
-            const strut2 = new THREE.Mesh(strutGeo, mats.carbon);
+            const strut2 = makeTurbinePart(new THREE.Mesh(strutGeo, mats.carbon), { name: `Strut (Stage ${s+1}, Blade ${b+1})`, desc: "PLA-CF", assembledY: stageCenterY - STAGE_HEIGHT/2 + 2, explodedY: stageCenterY - STAGE_HEIGHT/2 + 2 + (s*15) + 5 });
             strut2.position.set(bx/2, stageCenterY - STAGE_HEIGHT/2 + 2, bz/2);
             strut2.rotation.y = -angle;
-            strut2.userData = { name: `Strut`, desc: "PLA-CF", assembledY: strut2.position.y, explodedY: strut2.position.y + (s*15) + 5 };
             stageGroup.add(strut2); state.parts.push(strut2);
         }
       }
     }
     
-    const topCap = new THREE.Mesh(new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32), mats.carbon);
+    const topCap = makeTurbinePart(new THREE.Mesh(new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32), mats.carbon), { name: "Top Cap", desc: "Seals tower, holds bearing.", assembledY: state.stages * STAGE_HEIGHT, explodedY: state.stages * STAGE_HEIGHT + (state.stages*15) + 10 });
     topCap.position.y = state.stages * STAGE_HEIGHT;
-    topCap.userData = { name: "Top Cap", desc: "Seals tower, holds bearing.", assembledY: topCap.position.y, explodedY: topCap.position.y + (state.stages*15) + 10 };
     stageGroup.add(topCap); state.parts.push(topCap);
 
     if (rotorMeshGroup) {
@@ -357,7 +359,7 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
   const windSlider = document.getElementById('slider-wind') as HTMLInputElement | null;
   const presetBtns = document.querySelectorAll('.preset-btn');
 
-  if (rotorSelect) rotorSelect.addEventListener('change', (e) => { state.rotorType = (e.target as HTMLSelectElement).value; rebuildTower(); refreshPhysicsUI(); });
+  if (rotorSelect) rotorSelect.addEventListener('change', (e) => { state.rotorType = (e.target as HTMLSelectElement).value as RotorType; rebuildTower(); refreshPhysicsUI(); });
   if (gensSlider) gensSlider.addEventListener('input', (e) => { state.generators = parseInt((e.target as HTMLInputElement).value); rebuildTower(); refreshPhysicsUI(); });
   if (radiusSlider) radiusSlider.addEventListener('input', (e) => { state.radius = parseInt((e.target as HTMLInputElement).value); rebuildTower(); refreshPhysicsUI(); });
   if (stagesSlider) stagesSlider.addEventListener('input', (e) => { state.stages = parseInt((e.target as HTMLInputElement).value); rebuildTower(); refreshPhysicsUI(); });

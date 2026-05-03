@@ -9,7 +9,7 @@ export interface PartUserData {
   explodedY: number;
 }
 
-export type TurbinePart = THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial> & {
+export type TurbinePart = THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial | THREE.Material[]> & {
   userData: PartUserData;
 };
 

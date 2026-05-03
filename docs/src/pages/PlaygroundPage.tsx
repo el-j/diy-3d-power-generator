@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import type { RouteId } from '../hooks/useHashRoute';
 import { initPlaygroundScene } from '../playground/initScene';
 
@@ -8,6 +8,7 @@ type Props = {
 
 export function PlaygroundPage({ navigate }: Props): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -51,39 +52,53 @@ export function PlaygroundPage({ navigate }: Props): React.JSX.Element {
             estimation.
           </p>
 
-          <div className="light-control">
-            <label htmlFor="select-light-mode">Scene Light</label>
-            <select id="select-light-mode" className="ui-select">
-              <option value="current-light">Current Light (Local Time)</option>
-              <option value="day">Day Boost</option>
-              <option value="night">Night Focus</option>
-              <option value="studio">Studio Contrast</option>
-            </select>
-            <p id="sun-status" className="sun-status">Finding local light profile...</p>
-          </div>
+         
 
+          
           <div className="scene-mode-row">
+            <button className="pg-back-btn" onClick={() => navigate('home')}>
+            ← Overview
+          </button>
             <button className="scene-mode-btn active" data-scene-mode="inspect">Inspect</button>
             <button className="scene-mode-btn" data-scene-mode="learn">Exploded</button>
             <button className="scene-mode-btn" data-scene-mode="print">Print Focus</button>
           </div>
-
-          <button className="pg-back-btn" onClick={() => navigate('home')}>
-            ← Overview
-          </button>
+          <div className="light-control">
+              <label htmlFor="select-light-mode">Scene Light</label>
+              <select id="select-light-mode" className="ui-select">
+                <option value="current-light">Current Light (Local Time)</option>
+                <option value="day">Day Boost</option>
+                <option value="night">Night Focus</option>
+                <option value="studio">Studio Contrast</option>
+              </select>
+              <p id="sun-status" className="sun-status">Finding local light profile...</p>
+            </div>
         </div>
+        
 
         {/* Right: full control panel */}
-        <div className="control-panel">
-          <div className="panel-header" id="panel-header-toggle">
-            Tower Configuration{' '}
-            <i className="panel-chevron" id="panel-chevron">▲</i>
+        <div 
+          className={`control-panel ${isCollapsed ? 'collapsed' : ''}`}
+          style={{ 
+            transition: 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s',
+            maxHeight: isCollapsed ? '52px' : '900px',
+            overflow: isCollapsed ? 'hidden' : 'visible'
+          }}
+        >
+          <div 
+            className="panel-header" 
+            id="panel-header-toggle"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <span>⚙️ Tower Configuration</span>
+            <i className="panel-chevron" style={{ transition: 'transform 0.3s', transform: isCollapsed ? 'rotate(-180deg)' : 'none' }}>▲</i>
           </div>
 
           {/* Rotor type */}
           <div className="control-group">
             <div className="control-header"><span>Rotor Principle</span></div>
-            <select id="select-rotor" className="ui-select">
+            <select id="select-rotor" className="ui-select" defaultValue="savonius-helix">
               <option value="savonius-helix">Savonius (Helical) – Drag Based</option>
               <option value="savonius-straight">Savonius (Straight) – Drag Based</option>
               <option value="lenz2">Lenz2 (Hybrid) – Lift &amp; Drag Based</option>

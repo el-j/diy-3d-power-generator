@@ -2,7 +2,7 @@
   "assembly_id": "tower",
   "name": "Helix-Turm / Helix Tower",
   "description": "Modularer Helix-Windturm mit Stecksystem. Jede Etage besteht aus 2 Helix-Flügeln, einem Mittelverbinder und einem Vielzahn-Plug.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "components": [
     {
       "id": "TWR-LEAF-01",
@@ -23,13 +23,49 @@
       "name": "Vielzahn-Plug / Spline Plug",
       "directory": "spline-plug",
       "quantity_per_stage": 1
+    },
+    {
+      "id": "TWR-LEAF-02",
+      "name": "Savonius Straight Blade Set",
+      "directory": "savonius-straight",
+      "quantity_per_stage": 2,
+      "variant": "savonius-straight"
+    },
+    {
+      "id": "TWR-LEAF-03",
+      "name": "Lenz2 Blade Set",
+      "directory": "lenz2",
+      "quantity_per_stage": 3,
+      "variant": "lenz2"
+    },
+    {
+      "id": "TWR-LEAF-04",
+      "name": "Darrieus H Rotor Stage",
+      "directory": "darrieus-h",
+      "quantity_per_stage": 1,
+      "variant": "darrieus-h"
+    },
+    {
+      "id": "TWR-LEAF-05",
+      "name": "Gorlov Helical Rotor Stage",
+      "directory": "gorlov",
+      "quantity_per_stage": 1,
+      "variant": "gorlov"
     }
   ],
   "source_scripts": {
     "tower": "src/leaf/helix_leaf+connector.py",
-    "note": "Generiert alle Turm-Teile: Coreless_Helix_Fluegel, Mittel_Verbinder_Skelett_FLACH, Zwischen_Vielzahn_Plug, Start_Scheibe_FLACH"
+    "savonius_straight": "src/leaf/savonius_straight_leaf.py",
+    "lenz2": "src/leaf/lenz2_leaf.py",
+    "darrieus_h": "src/leaf/darrieus_h_leaf.py",
+    "gorlov": "src/leaf/gorlov_leaf.py",
+    "note": "Generiert Helix-Turmteile und zusätzliche Rotorvarianten aus der Landing-Page-Simulation"
   },
   "changelog": {
+    "1.1.0": [
+      "Neue Rotor-Varianten ergänzt: Savonius Straight, Lenz2, Darrieus H, Gorlov",
+      "Source scripts für alle Varianten im Assembly-Manifest registriert"
+    ],
     "1.0.1": [
       "cutter_wire extra_radius: toleranz/2 → toleranz (0.25 → 0.5mm) — doppelte Einführ-Toleranz verhindert Klemmen beim Einstecken der Flügelspitze",
       "Heat-set Insert im Plug korrekt dokumentiert (flush mit Kragen-Außenfläche = korrekte Montage)"

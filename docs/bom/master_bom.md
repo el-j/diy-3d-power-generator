@@ -1,7 +1,7 @@
 # 📋 Stückliste / Bill of Materials
 
 > **Projekt**: Helix Helix Wind-Generator
-> **Version**: 3.0.0
+> **Version**: 3.1.0
 > **Stand**: 2026-05-02
 > **Konfiguration**: XXL Basis (68mm) + Aero-Fan Generator (20-Pol) + Helix-Turm
 
@@ -14,11 +14,15 @@
 | # | ID | Bauteil | STL-Name | Material | Menge/Etage | Infill |
 |---|-----|---------|----------|----------|:-----------:|:------:|
 | 1 | TWR-LEAF-01 | Helix-Flügel | Coreless_Helix_Fluegel | PETG | 2 | 15% |
-| 2 | TWR-CONN-01 | Mittelverbinder Skelett | Mittel_Verbinder_Skelett_FLACH | PETG | 1 | 40% |
-| 3 | TWR-PLUG-01 | Vielzahn-Plug | Zwischen_Vielzahn_Plug | PETG | 1 | 60% |
-| 4 | TWR-DISC-01 | Start-Scheibe Flach | Start_Scheibe_FLACH | PETG | 1 (gesamt) | 30% |
+| 2 | TWR-LEAF-02 | Savonius Straight Blade Set | Savonius_Straight_Blade_A/B | PETG | 2 | 20% |
+| 3 | TWR-LEAF-03 | Lenz2 Rotor Stage | Lenz2_Rotor_Stage | PETG | 1 | 25% |
+| 4 | TWR-LEAF-04 | Darrieus H Rotor Stage | Darrieus_H_Rotor_Stage | PETG | 1 | 30% |
+| 5 | TWR-LEAF-05 | Gorlov Helical Rotor Stage | Gorlov_Helical_Rotor_Stage | PETG | 1 | 30% |
+| 6 | TWR-CONN-01 | Mittelverbinder Skelett | Mittel_Verbinder_Skelett_FLACH | PETG | 1 | 40% |
+| 7 | TWR-PLUG-01 | Vielzahn-Plug | Zwischen_Vielzahn_Plug | PETG | 1 | 60% |
+| 8 | TWR-DISC-01 | Start-Scheibe Flach | Start_Scheibe_FLACH | PETG | 1 (gesamt) | 30% |
 
-> 💡 **Turm ist modular** — empfohlen 3–5 Etagen. Start-Scheibe nur 1× ganz unten.
+> 💡 **Turm ist modular** — wähle pro Build genau ein Rotorprinzip (Helix, Straight, Lenz2, Darrieus-H, Gorlov). Start-Scheibe nur 1× ganz unten.
 
 ---
 
@@ -135,6 +139,7 @@
 
 | Version | Datum | Änderungen |
 |---------|-------|------------|
+| 3.1.0 | 2026-05-02 | Rotorvariantenset ergänzt (Savonius Straight, Lenz2, Darrieus-H, Gorlov) + Landing-Page Playground Struktur |
 | 3.0.0 | 2026-05-02 | Aero-Fan Rotor v3, Clamp-System, Lager-Reduzierung, 68mm Basis, neue src/ Struktur |
 | 2.1.0 | 2026-04-30 | XLG-PLUG-01, XLG-SPACER-01/02, Stator-Deckel Lochfix |
 | 2.0.0 | 2026-04-29 | XXL Basis 220mm, XXL Generator Capsule-Spulen |

@@ -5,13 +5,34 @@
     "base_branch": "main",
     "last_run": "2026-05-02"
   },
-  "project_version": "3.0.0",
+  "project_version": "3.1.0",
   "active_assemblies": ["xl-generator", "xl-base-station", "tower", "tools"],
   "legacy_assemblies": [],
   "tasks": {},
   "queue": [],
   "active": [],
   "history": [
+    {
+      "id": "sync-2026-05-02-landing-page",
+      "description": "v3.1.0 — Landing-Page Playground (modular docs app) + Rotorvarianten-Skripte (Savonius Straight, Lenz2, Darrieus-H, Gorlov) inkl. Parameters/BOM/Assembly Sync",
+      "result": "done",
+      "timestamp": "2026-05-02",
+      "files_updated": [
+        "docs/index.html",
+        "docs/style.css",
+        "docs/main.js",
+        "docs/src/",
+        "src/leaf/savonius_straight_leaf.py",
+        "src/leaf/lenz2_leaf.py",
+        "src/leaf/darrieus_h_leaf.py",
+        "src/leaf/gorlov_leaf.py",
+        "shared/parameters.json",
+        "assemblies/tower/tower_assembly.json",
+        "docs/bom/master_bom.json",
+        "docs/bom/master_bom.md",
+        "docs/build-guide/01_tower.md"
+      ]
+    },
     {
       "id": "sync-2026-05-02",
       "description": "v3.0.0 — Komplette Neukonstruktion: Aero-Fan Rotor, Clamp-System, Lager-Reduzierung, 68mm Basis, neue src/-Struktur (generator/, base/, leaf/), Legacy-Skripte entfernt",

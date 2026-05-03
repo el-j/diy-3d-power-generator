@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "generated": "2026-05-02",
   "assemblies": {
 
@@ -7,6 +7,10 @@
       "_note": "Helix-Turm — src/leaf/helix_leaf+connector.py",
       "printed_parts": [
         { "id": "TWR-LEAF-01", "name": "Helix-Flügel",                 "stl": "Coreless_Helix_Fluegel",           "material": "PETG", "qty_per_stage": 2 },
+        { "id": "TWR-LEAF-02", "name": "Savonius Straight Blade",       "stl": "Savonius_Straight_Blade_A/B",      "material": "PETG", "qty_per_stage": 2, "variant": "savonius-straight" },
+        { "id": "TWR-LEAF-03", "name": "Lenz2 Rotor Stage",             "stl": "Lenz2_Rotor_Stage",                "material": "PETG", "qty_per_stage": 1, "variant": "lenz2" },
+        { "id": "TWR-LEAF-04", "name": "Darrieus H Rotor Stage",        "stl": "Darrieus_H_Rotor_Stage",           "material": "PETG", "qty_per_stage": 1, "variant": "darrieus-h" },
+        { "id": "TWR-LEAF-05", "name": "Gorlov Helical Rotor Stage",    "stl": "Gorlov_Helical_Rotor_Stage",       "material": "PETG", "qty_per_stage": 1, "variant": "gorlov" },
         { "id": "TWR-CONN-01", "name": "Mittelverbinder Skelett",        "stl": "Mittel_Verbinder_Skelett_FLACH",   "material": "PETG", "qty_per_stage": 1 },
         { "id": "TWR-PLUG-01", "name": "Vielzahn-Plug",                 "stl": "Zwischen_Vielzahn_Plug",           "material": "PETG", "qty_per_stage": 1 },
         { "id": "TWR-DISC-01", "name": "Start-Scheibe Flach",           "stl": "Start_Scheibe_FLACH",              "material": "PETG", "qty": 1 }

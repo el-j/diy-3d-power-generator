@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "description": "Simplified Cp lookup by rotor type and TSR for UI interpolation",
+    "version": "1.0.0"
+  },
+  "curves": {
+    "savonius-helix": [
+      { "tsr": 0.2, "cp": 0.08 },
+      { "tsr": 0.6, "cp": 0.16 },
+      { "tsr": 1.2, "cp": 0.18 },
+      { "tsr": 1.6, "cp": 0.15 }
+    ],
+    "savonius-straight": [
+      { "tsr": 0.2, "cp": 0.06 },
+      { "tsr": 0.8, "cp": 0.14 },
+      { "tsr": 1.0, "cp": 0.14 },
+      { "tsr": 1.4, "cp": 0.11 }
+    ],
+    "lenz2": [
+      { "tsr": 0.4, "cp": 0.12 },
+      { "tsr": 1.0, "cp": 0.18 },
+      { "tsr": 1.5, "cp": 0.22 },
+      { "tsr": 2.0, "cp": 0.21 }
+    ],
+    "darrieus-h": [
+      { "tsr": 1.5, "cp": 0.12 },
+      { "tsr": 2.4, "cp": 0.22 },
+      { "tsr": 3.5, "cp": 0.28 },
+      { "tsr": 4.2, "cp": 0.25 }
+    ],
+    "gorlov": [
+      { "tsr": 1.0, "cp": 0.16 },
+      { "tsr": 1.8, "cp": 0.28 },
+      { "tsr": 2.2, "cp": 0.32 },
+      { "tsr": 2.8, "cp": 0.3 }
+    ]
+  }
+}

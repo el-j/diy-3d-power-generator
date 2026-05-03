@@ -104,4 +104,20 @@
 
 Dein Turm sollte jetzt frei auf der Achse rotieren. Teste den Lauf von Hand — er sollte smooth und ohne Unwucht drehen.
 
+---
+
+## Rotor-Varianten (Landing-Page kompatibel)
+
+Für die zusätzlichen Rotorprinzipien aus der interaktiven Landing-Page sind nun eigene FreeCAD-Skripte verfügbar:
+
+- `src/leaf/savonius_straight_leaf.py`
+- `src/leaf/lenz2_leaf.py`
+- `src/leaf/darrieus_h_leaf.py`
+- `src/leaf/gorlov_leaf.py`
+
+### Hinweise
+1. Alle Varianten nutzen `shared/parameters.json` als zentrale Parameterquelle.
+2. Das Vielzahn-Interface bleibt identisch (`12 Zähne`, `R9.0/R7.8`) und ist kompatibel zur bestehenden Achse.
+3. Druckprofil: PETG empfohlen für alle Blatt-Varianten (mind. 3 Wände, 20-30% Infill je nach Profil).
+
 **Weiter mit**: [⚡ Generator-Bauanleitung](02_generator.md)

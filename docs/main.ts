@@ -35,6 +35,10 @@ const mouse = new THREE.Vector2();
 const partCard = document.getElementById('part-card') as HTMLDivElement;
 let hoveredPart: TurbinePart | null = null;
 
+// Matches #part-card { width: 260px } in style.css
+const PART_CARD_W = 260;
+const PART_CARD_H = 80;
+
 const desiredCamera = new THREE.Vector3(60, 40, 80);
 const desiredTarget = new THREE.Vector3(0, 30, 0);
 
@@ -134,14 +138,56 @@ wireControls(state, {
 window.addEventListener('mousemove', (event: MouseEvent) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  partCard.style.left = `${event.clientX + 20}px`;
-  partCard.style.top = `${event.clientY + 20}px`;
+  // Clamp so the card never goes off-screen
+  partCard.style.left = `${Math.min(event.clientX + 20, window.innerWidth - PART_CARD_W)}px`;
+  partCard.style.top = `${Math.min(event.clientY + 20, window.innerHeight - PART_CARD_H)}px`;
+});
+
+// Touch-based part inspection (tap to reveal, auto-hides after 3 s)
+let partCardHideTimer: ReturnType<typeof setTimeout> | null = null;
+window.addEventListener('touchend', (event: TouchEvent) => {
+  if (event.changedTouches.length === 0) return;
+  const touch = event.changedTouches[0];
+  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersections = raycaster.intersectObjects(state.parts, false);
+  if (intersections.length > 0) {
+    const hit = intersections[0].object as TurbinePart;
+    hoveredPart = hit;
+    outlinePass.selectedObjects = [hoveredPart];
+    (document.getElementById('pc-title') as HTMLElement).innerText = hoveredPart.userData.name;
+    (document.getElementById('pc-desc') as HTMLElement).innerText = hoveredPart.userData.desc;
+
+    partCard.style.left = `${Math.min(touch.clientX + 20, window.innerWidth - PART_CARD_W)}px`;
+    partCard.style.top = `${Math.min(touch.clientY + 20, window.innerHeight - PART_CARD_H)}px`;
+    partCard.style.opacity = '1';
+
+    if (partCardHideTimer !== null) clearTimeout(partCardHideTimer);
+    partCardHideTimer = setTimeout(() => {
+      partCard.style.opacity = '0';
+      hoveredPart = null;
+      outlinePass.selectedObjects = [];
+    }, 3000);
+  }
 });
 
 window.addEventListener('resize', () => {
   resizeScene();
   resizeFx();
 });
+
+// Mobile: tap the panel header to collapse / expand the control panel
+const panelHeaderToggle = document.getElementById('panel-header-toggle');
+const controlPanelEl = document.querySelector<HTMLElement>('.control-panel');
+const panelChevronEl = document.getElementById('panel-chevron');
+if (panelHeaderToggle && controlPanelEl) {
+  panelHeaderToggle.addEventListener('click', () => {
+    const collapsed = controlPanelEl.classList.toggle('collapsed');
+    if (panelChevronEl) panelChevronEl.textContent = collapsed ? '▼' : '▲';
+  });
+}
 
 const clock = new THREE.Clock();
 function animate(): void {

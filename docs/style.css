@@ -380,16 +380,39 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 
 @media (max-width: 768px) {
+  /* Keep pointer-events: none on the layer so the canvas and scroll-shell */
+  /* receive touch/scroll events everywhere except the control panel itself. */
   #ui-layer {
     flex-direction: column;
-    padding: 1rem;
-    overflow-y: visible;
+    padding: 0.75rem;
+    justify-content: space-between;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .header-panel {
+    pointer-events: none;
+    gap: 0.5rem;
+  }
+
+  .top-button {
     pointer-events: auto;
+    margin-top: 0;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.85rem;
   }
 
   .scene-section {
     justify-content: center;
-    padding: 7rem 1rem;
+    /* Extra bottom padding keeps story cards above the control panel */
+    padding: 5rem 1rem 45vh;
   }
 
   .story-card {
@@ -397,11 +420,81 @@ input[type=range]::-webkit-slider-runnable-track {
     max-width: 100%;
   }
 
-  .header-panel { pointer-events: none; }
-
+  /* ── Control panel: scrollable bottom sheet ──────────────────────────── */
   .control-panel {
     width: 100%;
-    margin-top: auto;
+    /* Allow at most half the screen; panel content scrolls inside */
+    max-height: 52vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     flex-shrink: 0;
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+    /* Collapsed state managed by JS toggle */
+    transition: max-height 0.3s ease;
+  }
+
+  /* Collapsed: only the header row is visible */
+  .control-panel.collapsed {
+    max-height: 44px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    position: sticky;
+    top: 0;
+    background: var(--color-surface);
+    padding: 0.75rem 0;
+    margin-bottom: 0;
+    z-index: 1;
+    cursor: pointer;
+    /* Row layout so the chevron sits on the right */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Chevron rotates when collapsed */
+  .panel-chevron {
+    display: inline-block;
+    font-style: normal;
+    font-size: 0.7rem;
+    transition: transform 0.25s ease;
+    color: var(--color-accent);
+  }
+
+  .control-panel.collapsed .panel-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Slightly larger touch targets for sliders */
+  input[type=range]::-webkit-slider-thumb {
+    height: 22px;
+    width: 22px;
+    margin-top: -9px;
+  }
+
+  /* Bigger tap targets for preset buttons */
+  .preset-row .toggle-btn {
+    padding: 0.65rem 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  /* Compact energy card on mobile */
+  .energy-card {
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+  }
+
+  .energy-val.large {
+    font-size: 1.2rem;
+  }
+
+  /* Part-info tooltip: show on mobile (touch taps trigger it via JS) */
+  #part-card {
+    /* Reposition so it never clips out of the right/bottom edge */
+    max-width: calc(100vw - 2rem);
   }
 }

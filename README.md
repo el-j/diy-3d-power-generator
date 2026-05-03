@@ -109,6 +109,26 @@ run("Helix_Leaf+Connector")             # Turm
 run("tools/komplexSPooler/Traversier-Basis & Skeleton")  # Wickelmaschine
 ```
 
+### 6. Landing Page (TypeScript + Vite)
+```bash
+npm install
+npm run typecheck
+npm run dev
+```
+
+Production build:
+```bash
+npm run build
+```
+Das Ergebnis liegt in `dist/` und wird von GitHub Pages deployed.
+
+### 7. GitHub Actions CI/CD (Static Hosting)
+- CI Workflow: `.github/workflows/ci.yml` (führt `npm ci`, `npm run typecheck`, `npm run build` aus)
+- Pages Deploy: `.github/workflows/deploy-pages.yml` (baut Artifact und deployed nach GitHub Pages)
+
+Wichtig in GitHub Repo Settings:
+- `Settings > Pages > Build and deployment` auf **GitHub Actions** setzen
+
 ---
 
 ## 📋 Stückliste (Kurzfassung)

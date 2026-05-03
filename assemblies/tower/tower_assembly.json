@@ -2,7 +2,7 @@
   "assembly_id": "tower",
   "name": "Helix-Turm / Helix Tower",
   "description": "Modularer Helix-Windturm mit Stecksystem. Jede Etage besteht aus 2 Helix-Flügeln, einem Mittelverbinder und einem Vielzahn-Plug.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "components": [
     {
       "id": "TWR-LEAF-01",
@@ -62,6 +62,9 @@
     "note": "Generiert Helix-Turmteile und zusätzliche Rotorvarianten aus der Landing-Page-Simulation"
   },
   "changelog": {
+    "1.1.1": [
+      "Komponenten-Manifeste für alle neuen Rotor-Varianten unter assemblies/tower/components ergänzt"
+    ],
     "1.1.0": [
       "Neue Rotor-Varianten ergänzt: Savonius Straight, Lenz2, Darrieus H, Gorlov",
       "Source scripts für alle Varianten im Assembly-Manifest registriert"

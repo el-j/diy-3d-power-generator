@@ -17,18 +17,80 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-font-smoothing: antialiased;
 }
 
 #canvas-container {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 1;
 }
 
+#scroll-shell {
+  position: relative;
+  z-index: 3;
+}
+
+.scene-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8rem 2rem;
+}
+
+.story-card {
+  max-width: 520px;
+  background: rgba(12, 18, 34, 0.7);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  border-radius: 18px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+}
+
+.hero-card h2 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  line-height: 1;
+  margin: 0.75rem 0;
+}
+
+.story-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  margin-bottom: 0.55rem;
+}
+
+.story-card p {
+  color: #cfdef5;
+  line-height: 1.55;
+}
+
+.eyebrow {
+  display: inline-flex;
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.cta-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--font-display);
+  color: #061324;
+  background: var(--color-accent);
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
 #ui-layer {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 10;
   pointer-events: none;
@@ -321,8 +383,18 @@ input[type=range]::-webkit-slider-runnable-track {
   #ui-layer {
     flex-direction: column;
     padding: 1rem;
-    overflow-y: auto;
+    overflow-y: visible;
     pointer-events: auto;
+  }
+
+  .scene-section {
+    justify-content: center;
+    padding: 7rem 1rem;
+  }
+
+  .story-card {
+    width: 100%;
+    max-width: 100%;
   }
 
   .header-panel { pointer-events: none; }

@@ -1,0 +1,24 @@
+{
+  "id": "TWR-LEAF-02",
+  "name": "Savonius Straight Blade Set",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 20,
+    "supports": false,
+    "wall_count": 3,
+    "orientation": "standing"
+  },
+  "quantity_per_stage": 2,
+  "variant": "savonius-straight",
+  "parameters_ref": "shared/parameters.json#tower_variants.savonius_straight",
+  "freecad_script": "src/leaf/savonius_straight_leaf.py",
+  "exports": [
+    "Savonius_Straight_Blade_A.stl",
+    "Savonius_Straight_Blade_B.stl",
+    "Savonius_Straight_Connector.stl",
+    "Savonius_Straight_Plug.stl"
+  ]
+}

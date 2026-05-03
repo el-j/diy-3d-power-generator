@@ -1,0 +1,23 @@
+{
+  "id": "TWR-LEAF-05",
+  "name": "Gorlov Helical Rotor Stage",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 30,
+    "supports": false,
+    "wall_count": 4,
+    "orientation": "standing"
+  },
+  "quantity_per_stage": 1,
+  "variant": "gorlov",
+  "parameters_ref": "shared/parameters.json#tower_variants.gorlov",
+  "freecad_script": "src/leaf/gorlov_leaf.py",
+  "exports": [
+    "Gorlov_Helical_Rotor_Stage.stl",
+    "Gorlov_Connector_Ring.stl",
+    "Gorlov_Spline_Plug.stl"
+  ]
+}

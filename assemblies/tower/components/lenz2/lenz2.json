@@ -1,0 +1,23 @@
+{
+  "id": "TWR-LEAF-03",
+  "name": "Lenz2 Rotor Stage",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 25,
+    "supports": false,
+    "wall_count": 3,
+    "orientation": "standing"
+  },
+  "quantity_per_stage": 1,
+  "variant": "lenz2",
+  "parameters_ref": "shared/parameters.json#tower_variants.lenz2",
+  "freecad_script": "src/leaf/lenz2_leaf.py",
+  "exports": [
+    "Lenz2_Rotor_Stage.stl",
+    "Lenz2_Connector_Ring.stl",
+    "Lenz2_Spline_Plug.stl"
+  ]
+}

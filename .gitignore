@@ -17,3 +17,6 @@ obsolete
 # Temp
 *.tmp
 *.bak
+
+node_modules/
+dist/

@@ -1,4 +1,16 @@
-export function computePower({ windSpeed, stages, radiusMm, cp, generators }) {
+export function computePower({
+  windSpeed,
+  stages,
+  radiusMm,
+  cp,
+  generators
+}: {
+  windSpeed: number;
+  stages: number;
+  radiusMm: number;
+  cp: number;
+  generators: number;
+}) {
   const rho = 1.225;
   const radiusM = radiusMm / 1000;
   const sweptArea = stages * 0.240 * (2 * radiusM);

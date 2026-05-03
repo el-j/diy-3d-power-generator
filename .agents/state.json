@@ -3,15 +3,38 @@
     "status": "idle",
     "phase": null,
     "base_branch": "main",
-    "last_run": "2026-05-02"
+    "last_run": "2026-05-03"
   },
-  "project_version": "3.1.0",
+  "project_version": "3.2.0",
   "active_assemblies": ["xl-generator", "xl-base-station", "tower", "tools"],
   "legacy_assemblies": [],
   "tasks": {},
   "queue": [],
   "active": [],
   "history": [
+    {
+      "id": "sync-2026-05-03-pages-ts",
+      "description": "v3.2.0 — Vite+TypeScript Migration der Landing-Page, Scrollytelling-Sections, GitHub Actions CI + Pages Deployment, Tower-Variant Komponenten-Manifeste",
+      "result": "done",
+      "timestamp": "2026-05-03",
+      "files_updated": [
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "vite.config.ts",
+        ".github/workflows/ci.yml",
+        ".github/workflows/deploy-pages.yml",
+        "docs/index.html",
+        "docs/style.css",
+        "docs/main.ts",
+        "docs/src/**/*.ts",
+        "assemblies/tower/components/savonius-straight/savonius_straight.json",
+        "assemblies/tower/components/lenz2/lenz2.json",
+        "assemblies/tower/components/darrieus-h/darrieus_h.json",
+        "assemblies/tower/components/gorlov/gorlov.json",
+        "assemblies/tower/tower_assembly.json"
+      ]
+    },
     {
       "id": "sync-2026-05-02-landing-page",
       "description": "v3.1.0 — Landing-Page Playground (modular docs app) + Rotorvarianten-Skripte (Savonius Straight, Lenz2, Darrieus-H, Gorlov) inkl. Parameters/BOM/Assembly Sync",

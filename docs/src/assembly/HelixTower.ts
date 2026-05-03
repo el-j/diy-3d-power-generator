@@ -1,9 +1,18 @@
 import * as THREE from 'three';
+import type { AppState, TurbinePart } from '../types';
 
 const STAGE_HEIGHT = 24.0;
 const HUB_RADIUS = 1.2;
 
-export function createMaterials() {
+export interface MaterialSet {
+  petgTeal: THREE.MeshPhysicalMaterial;
+  carbon: THREE.MeshStandardMaterial;
+  stator: THREE.MeshStandardMaterial;
+  base: THREE.MeshStandardMaterial;
+  copper: THREE.MeshStandardMaterial;
+}
+
+export function createMaterials(): MaterialSet {
   return {
     petgTeal: new THREE.MeshPhysicalMaterial({
       color: 0x00e5ff,
@@ -29,12 +38,25 @@ export function createMaterials() {
   };
 }
 
-function twistGeometry(geometry, totalAngle) {
+function createPart(
+  geometry: THREE.BufferGeometry,
+  material: THREE.Material,
+  name: string,
+  desc: string,
+  assembledY: number,
+  explodedY: number
+): TurbinePart {
+  const mesh = new THREE.Mesh(geometry, material) as TurbinePart;
+  mesh.userData = { name, desc, assembledY, explodedY };
+  return mesh;
+}
+
+function twistGeometry(geometry: THREE.CylinderGeometry, totalAngle: number): void {
   const pos = geometry.attributes.position;
   const vec = new THREE.Vector3();
   geometry.computeBoundingBox();
-  const minY = geometry.boundingBox.min.y;
-  const maxY = geometry.boundingBox.max.y;
+  const minY = geometry.boundingBox!.min.y;
+  const maxY = geometry.boundingBox!.max.y;
   const height = maxY - minY;
 
   for (let i = 0; i < pos.count; i += 1) {
@@ -48,27 +70,28 @@ function twistGeometry(geometry, totalAngle) {
   geometry.computeVertexNormals();
 }
 
-export function buildTower(group, state, mats) {
+export function buildTower(group: THREE.Group, state: AppState, mats: MaterialSet) {
   while (group.children.length > 0) {
     group.remove(group.children[0]);
   }
 
-  const parts = [];
+  const parts: TurbinePart[] = [];
   const rotorMeshGroup = new THREE.Group();
   let currentY = 0;
   const bladeRadius = state.radius / 10.0;
 
   const baseHeight = 15;
-  const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(8, 10, baseHeight, 32), mats.base);
-  baseMesh.position.y = baseHeight / 2;
+  const baseMesh = createPart(
+    new THREE.CylinderGeometry(8, 10, baseHeight, 32),
+    mats.base,
+    'Base Station Housing',
+    'Material: Dark Grey PETG\nHouses the power electronics, rectifier, and grid-tie interface.',
+    baseHeight / 2,
+    -10
+  );
   baseMesh.castShadow = true;
   baseMesh.receiveShadow = true;
-  baseMesh.userData = {
-    name: 'Base Station Housing',
-    desc: 'Material: Dark Grey PETG\nHouses the power electronics, rectifier, and grid-tie interface.',
-    assembledY: baseMesh.position.y,
-    explodedY: -10
-  };
+  baseMesh.position.y = baseHeight / 2;
   parts.push(baseMesh);
   group.add(baseMesh);
   currentY += baseHeight;
@@ -77,48 +100,51 @@ export function buildTower(group, state, mats) {
   for (let g = 0; g < state.generators; g += 1) {
     const genCenterY = currentY + genHeight / 2;
 
-    const stator = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 2, 32), mats.stator);
+    const stator = createPart(
+      new THREE.CylinderGeometry(9, 9, 2, 32),
+      mats.stator,
+      `Stator (Gen ${g + 1})`,
+      'Material: White PETG\nHolds 9 copper wire coils. Static.',
+      genCenterY - 2,
+      genCenterY - 2 - 15 - g * 5
+    );
     stator.position.y = genCenterY - 2;
-    stator.userData = {
-      name: `Stator (Gen ${g + 1})`,
-      desc: 'Material: White PETG\nHolds 9 copper wire coils. Static.',
-      assembledY: stator.position.y,
-      explodedY: stator.position.y - 15 - g * 5
-    };
     group.add(stator);
     parts.push(stator);
 
-    const coils = new THREE.Mesh(new THREE.TorusGeometry(6, 1.5, 16, 32), mats.copper);
+    const coils = createPart(
+      new THREE.TorusGeometry(6, 1.5, 16, 32),
+      mats.copper,
+      `Copper Coils (Gen ${g + 1})`,
+      'Material: Enamelled Copper Wire\n3-phase configuration.',
+      genCenterY - 2,
+      genCenterY - 2 - 15 - g * 5
+    );
     coils.rotation.x = Math.PI / 2;
     coils.position.y = genCenterY - 2;
-    coils.userData = {
-      name: `Copper Coils (Gen ${g + 1})`,
-      desc: 'Material: Enamelled Copper Wire\n3-phase configuration.',
-      assembledY: coils.position.y,
-      explodedY: coils.position.y - 15 - g * 5
-    };
     group.add(coils);
     parts.push(coils);
 
-    const rotorDisk = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 2, 32), mats.carbon);
+    const rotorDisk = createPart(
+      new THREE.CylinderGeometry(9, 9, 2, 32),
+      mats.carbon,
+      `Rotor Disk (Gen ${g + 1})`,
+      'Material: PLA-CF\nHolds 12 neodymium magnets.',
+      genCenterY + 2,
+      genCenterY + 2 - 5 + g * 5
+    );
     rotorDisk.position.y = genCenterY + 2;
-    rotorDisk.userData = {
-      name: `Rotor Disk (Gen ${g + 1})`,
-      desc: 'Material: PLA-CF\nHolds 12 neodymium magnets.',
-      assembledY: rotorDisk.position.y,
-      explodedY: rotorDisk.position.y - 5 + g * 5
-    };
+    rotorMeshGroup.add(rotorDisk);
+    parts.push(rotorDisk);
 
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, genHeight, 16), mats.carbon);
     shaft.position.y = genCenterY;
-
-    rotorMeshGroup.add(rotorDisk);
     rotorMeshGroup.add(shaft);
-    parts.push(rotorDisk);
+
     currentY += genHeight;
   }
 
-  let bladeGeometry;
+  let bladeGeometry: THREE.CylinderGeometry;
   if (state.rotorType === 'savonius-helix' || state.rotorType === 'savonius-straight') {
     bladeGeometry = new THREE.CylinderGeometry(bladeRadius, bladeRadius, STAGE_HEIGHT, 16, 16, true, 0, Math.PI * 0.85);
     if (state.rotorType === 'savonius-helix') {
@@ -138,7 +164,6 @@ export function buildTower(group, state, mats) {
 
   const stageGroup = new THREE.Group();
   stageGroup.position.y = currentY;
-
   const useDisks = ['savonius-helix', 'savonius-straight', 'gorlov', 'lenz2'].includes(state.rotorType);
   const useShaft = ['darrieus-h', 'gorlov', 'lenz2'].includes(state.rotorType);
   const useStruts = state.rotorType === 'darrieus-h';
@@ -147,27 +172,30 @@ export function buildTower(group, state, mats) {
     const stageCenterY = s * STAGE_HEIGHT + STAGE_HEIGHT / 2;
 
     if (useShaft) {
-      const stageShaft = new THREE.Mesh(new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, STAGE_HEIGHT, 16), mats.carbon);
+      const stageShaft = createPart(
+        new THREE.CylinderGeometry(HUB_RADIUS, HUB_RADIUS, STAGE_HEIGHT, 16),
+        mats.carbon,
+        `Center Shaft (Stage ${s + 1})`,
+        'Material: Carbon Fiber Tube\nCentral axis supporting the structure.',
+        stageCenterY,
+        stageCenterY + s * 15
+      );
       stageShaft.position.y = stageCenterY;
-      stageShaft.userData = {
-        name: `Center Shaft (Stage ${s + 1})`,
-        desc: 'Material: Carbon Fiber Tube\nCentral axis supporting the structure.',
-        assembledY: stageCenterY,
-        explodedY: stageCenterY + s * 15
-      };
       stageGroup.add(stageShaft);
       parts.push(stageShaft);
     }
 
     if (useDisks) {
-      const connector = new THREE.Mesh(new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32), mats.carbon);
-      connector.position.y = stageCenterY - STAGE_HEIGHT / 2;
-      connector.userData = {
-        name: `Connector Ring (Stage ${s + 1})`,
-        desc: 'Material: PLA-CF\nInterlocking ring joining vertical stages and maintaining blade rigidity.',
-        assembledY: connector.position.y,
-        explodedY: connector.position.y + s * 15
-      };
+      const connectorY = stageCenterY - STAGE_HEIGHT / 2;
+      const connector = createPart(
+        new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32),
+        mats.carbon,
+        `Connector Ring (Stage ${s + 1})`,
+        'Material: PLA-CF\nInterlocking ring joining vertical stages and maintaining blade rigidity.',
+        connectorY,
+        connectorY + s * 15
+      );
+      connector.position.y = connectorY;
       stageGroup.add(connector);
       parts.push(connector);
     }
@@ -177,7 +205,14 @@ export function buildTower(group, state, mats) {
       const bx = Math.cos(angle) * bladeRadius;
       const bz = Math.sin(angle) * bladeRadius;
 
-      const blade = new THREE.Mesh(bladeGeometry, mats.petgTeal);
+      const blade = createPart(
+        bladeGeometry,
+        mats.petgTeal,
+        'Blade',
+        'Rotor blade segment.',
+        stageCenterY,
+        stageCenterY + s * 15 + 5
+      );
       blade.castShadow = true;
       blade.receiveShadow = true;
 
@@ -226,27 +261,15 @@ export function buildTower(group, state, mats) {
         const strutGeo = new THREE.CylinderGeometry(0.4, 0.4, bladeRadius, 8);
         strutGeo.rotateZ(Math.PI / 2);
 
-        const strutTop = new THREE.Mesh(strutGeo, mats.carbon);
+        const strutTop = createPart(strutGeo, mats.carbon, 'Strut', 'Material: PLA-CF', stageCenterY + STAGE_HEIGHT / 2 - 2, stageCenterY + STAGE_HEIGHT / 2 - 2 + s * 15 + 5);
         strutTop.position.set(bx / 2, stageCenterY + STAGE_HEIGHT / 2 - 2, bz / 2);
         strutTop.rotation.y = -angle;
-        strutTop.userData = {
-          name: 'Strut',
-          desc: 'Material: PLA-CF',
-          assembledY: strutTop.position.y,
-          explodedY: strutTop.position.y + s * 15 + 5
-        };
         stageGroup.add(strutTop);
         parts.push(strutTop);
 
-        const strutBottom = new THREE.Mesh(strutGeo, mats.carbon);
+        const strutBottom = createPart(strutGeo, mats.carbon, 'Strut', 'Material: PLA-CF', stageCenterY - STAGE_HEIGHT / 2 + 2, stageCenterY - STAGE_HEIGHT / 2 + 2 + s * 15 + 5);
         strutBottom.position.set(bx / 2, stageCenterY - STAGE_HEIGHT / 2 + 2, bz / 2);
         strutBottom.rotation.y = -angle;
-        strutBottom.userData = {
-          name: 'Strut',
-          desc: 'Material: PLA-CF',
-          assembledY: strutBottom.position.y,
-          explodedY: strutBottom.position.y + s * 15 + 5
-        };
         stageGroup.add(strutBottom);
         parts.push(strutBottom);
       }
@@ -254,14 +277,15 @@ export function buildTower(group, state, mats) {
   }
 
   const topCapY = state.stages * STAGE_HEIGHT;
-  const topCap = new THREE.Mesh(new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32), mats.carbon);
+  const topCap = createPart(
+    new THREE.CylinderGeometry(bladeRadius + 0.5, bladeRadius + 0.5, 1, 32),
+    mats.carbon,
+    'Top Cap & Bearing',
+    'Material: PLA-CF\nSeals the tower and holds the upper bearing.',
+    topCapY,
+    topCapY + state.stages * 15 + 10
+  );
   topCap.position.y = topCapY;
-  topCap.userData = {
-    name: 'Top Cap & Bearing',
-    desc: 'Material: PLA-CF\nSeals the tower and holds the upper bearing.',
-    assembledY: topCap.position.y,
-    explodedY: topCap.position.y + state.stages * 15 + 10
-  };
   stageGroup.add(topCap);
   parts.push(topCap);
 

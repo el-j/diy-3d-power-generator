@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-export function createSceneManager(container) {
+export function createSceneManager(container: HTMLElement) {
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x0a1628, 0.003);
   scene.background = new THREE.Color(0x0a1628);
@@ -46,7 +46,7 @@ export function createSceneManager(container) {
   fillLight.position.set(-50, 20, -50);
   scene.add(fillLight);
 
-  function resize() {
+  function resize(): void {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);

@@ -1,0 +1,24 @@
+{
+  "id": "TWR-LEAF-04",
+  "name": "Darrieus H Rotor Stage",
+  "assembly": "tower",
+  "version": "1.0",
+  "material": "PETG",
+  "print_settings": {
+    "layer_height": 0.2,
+    "infill": 30,
+    "supports": false,
+    "wall_count": 4,
+    "orientation": "standing"
+  },
+  "quantity_per_stage": 1,
+  "variant": "darrieus-h",
+  "parameters_ref": "shared/parameters.json#tower_variants.darrieus_h",
+  "freecad_script": "src/leaf/darrieus_h_leaf.py",
+  "exports": [
+    "Darrieus_H_Rotor_Stage.stl",
+    "Darrieus_H_Top_Disc.stl",
+    "Darrieus_H_Bottom_Disc.stl",
+    "Darrieus_H_Spline_Plug.stl"
+  ]
+}

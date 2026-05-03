@@ -4,16 +4,11 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
 
-export function createPostProcessing(renderer, scene, camera) {
+export function createPostProcessing(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
 
-  const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
-    1.0,
-    0.4,
-    0.85
-  );
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85);
   bloomPass.threshold = 0.8;
   bloomPass.strength = 0.6;
   bloomPass.radius = 0.5;
@@ -28,7 +23,7 @@ export function createPostProcessing(renderer, scene, camera) {
   outlinePass.hiddenEdgeColor.set('#005566');
   composer.addPass(outlinePass);
 
-  function resize() {
+  function resize(): void {
     composer.setSize(window.innerWidth, window.innerHeight);
   }
 

@@ -1,21 +1,23 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createEnvironmentLighting } from './EnvironmentLighting';
 
 export function createSceneManager(container: HTMLElement) {
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x0a1628, 0.003);
-  scene.background = new THREE.Color(0x0a1628);
+  scene.fog = new THREE.FogExp2(0x0a1628, 0.0022);
+  scene.background = new THREE.Color(0x0b1728);
 
   const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(60, 40, 80);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.07;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
 
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -28,23 +30,7 @@ export function createSceneManager(container: HTMLElement) {
   controls.maxDistance = 200;
   controls.target.set(0, 30, 0);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambientLight);
-
-  const keyLight = new THREE.DirectionalLight(0xfffaed, 2.0);
-  keyLight.position.set(50, 100, 30);
-  keyLight.castShadow = true;
-  keyLight.shadow.camera.top = 100;
-  keyLight.shadow.camera.bottom = -100;
-  keyLight.shadow.camera.left = -100;
-  keyLight.shadow.camera.right = 100;
-  keyLight.shadow.mapSize.width = 2048;
-  keyLight.shadow.mapSize.height = 2048;
-  scene.add(keyLight);
-
-  const fillLight = new THREE.DirectionalLight(0x4a8ab5, 1.0);
-  fillLight.position.set(-50, 20, -50);
-  scene.add(fillLight);
+  const lightRig = createEnvironmentLighting(scene);
 
   function resize(): void {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -52,5 +38,5 @@ export function createSceneManager(container: HTMLElement) {
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  return { scene, camera, renderer, controls, resize };
+  return { scene, camera, renderer, controls, lightRig, resize };
 }

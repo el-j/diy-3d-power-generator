@@ -6,21 +6,13 @@
   <meta property="og:title" content="Helix Wind Generator - 3D Printable">
   <meta property="og:description" content="Open-source axial-flux wind generator. Print, assemble, generate.">
   <meta property="og:image" content="assets/og_preview.png">
-  <title>Helix Wind Generator | Interactive Playground</title>
+  <title>Helix Wind Generator | Interactive Docs + Playground</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2728870159466670"
      crossorigin="anonymous"></script>
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
 </head>
 <body>
   <div id="loader">
@@ -30,49 +22,110 @@
 
   <div id="canvas-container"></div>
 
-  <main id="scroll-shell">
-    <section id="hero" class="scene-section">
-      <article class="story-card hero-card">
-        <p class="eyebrow">Open Source Vertical Wind</p>
-        <h2>Print. Assemble. Harvest.</h2>
-        <p>The Helix tower comes alive in real time. Scroll to switch scene states, inspect internals, and estimate realistic power yield.</p>
-        <a class="cta-link" href="#playground">Explore the playground</a>
-      </article>
+  <header class="global-nav">
+    <a href="#/playground" class="brand">Helix Wind Lab</a>
+    <nav class="nav-links">
+      <a data-nav-link href="#/playground">Playground</a>
+      <a data-nav-link href="#/docs">Docs</a>
+      <a data-nav-link href="#/bom">BOM</a>
+      <a data-nav-link href="#/downloads">Downloads</a>
+      <a data-nav-link href="#/build-guide">Build Guide</a>
+      <a href="https://github.com/el-j/diy-3d-power-generator" target="_blank" rel="noreferrer">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="route-shell">
+    <section data-route="playground" class="route-view route-visible">
+      <div id="scroll-shell">
+        <section id="hero" class="scene-section">
+          <article class="story-card hero-card">
+            <p class="eyebrow">Open Source Vertical Wind</p>
+            <h2>Print. Assemble. Harvest.</h2>
+            <p>The Helix tower comes alive in real time. Scroll to switch scene states, inspect internals, and estimate realistic power yield.</p>
+            <a class="cta-link" href="#/downloads">Get printable files</a>
+          </article>
+        </section>
+
+        <section id="playground" class="scene-section">
+          <article class="story-card">
+            <h3>Interactive Playground</h3>
+            <p>Change rotor principle, stage count, and wind speed. The control panel drives the same aerodynamic and power model used across docs.</p>
+          </article>
+        </section>
+
+        <section id="how-it-works" class="scene-section">
+          <article class="story-card">
+            <h3>How It Works</h3>
+            <p>Exploded mode reveals each printed and purchased subsystem. Hover a part to inspect role, material, and stack order.</p>
+          </article>
+        </section>
+
+        <section id="print-it" class="scene-section">
+          <article class="story-card">
+            <h3>Print It</h3>
+            <p>Jump to the BOM and downloads views for active part IDs, source scripts, and STL/3MF packages.</p>
+          </article>
+        </section>
+
+        <section id="contribute" class="scene-section">
+          <article class="story-card">
+            <h3>Contribute</h3>
+            <p>Improve geometry, optimize printing, or extend tooling workflows. All manifests and guides are linked from this site.</p>
+          </article>
+        </section>
+      </div>
     </section>
 
-    <section id="playground" class="scene-section">
-      <article class="story-card">
-        <h3>Interactive Playground</h3>
-        <p>Change rotor principle, stage count, and wind speed. The UI panel controls the same simulation stack used in this prototype.</p>
-      </article>
+    <section data-route="docs" class="route-view">
+      <div class="content-page">
+        <h2>Documentation Hub</h2>
+        <p class="content-lead">Complete docs access for architecture, physical review, and source manifests.</p>
+        <div id="docs-link-grid" class="link-grid"></div>
+      </div>
     </section>
 
-    <section id="how-it-works" class="scene-section">
-      <article class="story-card">
-        <h3>How It Works</h3>
-        <p>This section toggles exploded mode for part learning. Hover pieces to inspect materials and part roles in the turbine stack.</p>
-      </article>
+    <section data-route="bom" class="route-view">
+      <div class="content-page">
+        <h2>Master BOM</h2>
+        <p class="content-lead">Live assembly inventory with printed/purchased totals and active XXL system specs.</p>
+        <div id="bom-totals" class="metric-grid"></div>
+        <div id="bom-breakdown" class="link-grid"></div>
+      </div>
     </section>
 
-    <section id="print-it" class="scene-section">
-      <article class="story-card">
-        <h3>Print It</h3>
-        <p>Use the BOM and build-guide in this repo for active assemblies. Camera focus shifts closer to highlight generator and stator relation.</p>
-      </article>
+    <section data-route="downloads" class="route-view">
+      <div class="content-page">
+        <h2>STL + 3MF Downloads</h2>
+        <p class="content-lead">Direct package and part links from the repository exports. Files open/download via raw GitHub URLs.</p>
+        <div id="download-grid" class="download-grid"></div>
+      </div>
     </section>
 
-    <section id="contribute" class="scene-section">
-      <article class="story-card">
-        <h3>Contribute</h3>
-        <p>Contributions are welcome: geometry improvements, performance optimizations, and localized build documentation.</p>
-      </article>
+    <section data-route="build-guide" class="route-view">
+      <div class="content-page">
+        <h2>Build Guide</h2>
+        <p class="content-lead">Step-by-step assembly flow from tower stages to final integration.</p>
+        <div id="guide-link-grid" class="link-grid"></div>
+      </div>
     </section>
   </main>
 
   <div id="ui-layer">
     <div class="header-panel">
       <h1>Helix Wind<br>Generator</h1>
-      <p class="subtitle">Interactive open-source axial-flux wind generator. Adjust conditions, explore components, and simulate energy output.</p>
+      <p class="subtitle">Interactive open-source axial-flux wind generator with live docs, BOM and download routing.</p>
+
+      <div class="light-control">
+        <label for="select-light-mode">Scene Light</label>
+        <select id="select-light-mode" class="ui-select">
+          <option value="current-light">Current Light (Local Time)</option>
+          <option value="day">Day Boost</option>
+          <option value="night">Night Focus</option>
+          <option value="studio">Studio Contrast</option>
+        </select>
+        <p id="sun-status" class="sun-status">Finding local light profile...</p>
+      </div>
+
       <button id="btn-explode" class="toggle-btn top-button">Explore Parts (Exploded View)</button>
     </div>
 

@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import type { RotorType } from '../types';
 import { makeBladeGeometry } from '../utils/bladeGeometry';
+import { BLADE_TYPES } from '../data/bladeTypes';
 
 const STAGE_HEIGHT = 24.0;
 const BLADE_RADIUS = 6.6; // default 66 mm / 10
@@ -66,14 +67,17 @@ export function BladePreviewCanvas({ rotorType }: { rotorType: RotorType }): Rea
 
       const bladeGeo = makeBladeGeometry(type, BLADE_RADIUS, STAGE_HEIGHT);
       const stageCenterY = STAGE_HEIGHT / 2;
+      // Always render 3 symmetric instances for a balanced 360° preview
+      // (BLADE_TYPES.blades counts distinct profiles, not visualisation meshes)
+      const previewCount = Math.max(3, BLADE_TYPES[type]?.blades ?? 3);
 
       // Bottom connector ring
       const connGeo = new THREE.CylinderGeometry(BLADE_RADIUS + 0.5, BLADE_RADIUS + 0.5, 1, 32);
       bladeGroup.add(new THREE.Mesh(connGeo, connectorMat));
 
-      // 3 blade instances (all types use a 3-blade arrangement in preview)
-      for (let b = 0; b < 3; b += 1) {
-        const angle = b * (Math.PI * 2 / 3);
+      // 3 blade instances (symmetric 360° preview; previewCount ensures correct spacing)
+      for (let b = 0; b < previewCount; b += 1) {
+        const angle = b * (Math.PI * 2 / previewCount);
         const bx = Math.cos(angle) * BLADE_RADIUS;
         const bz = Math.sin(angle) * BLADE_RADIUS;
         const blade = new THREE.Mesh(bladeGeo, bladeMat);

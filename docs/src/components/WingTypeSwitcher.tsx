@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { BLADE_TYPES, BETZ_LIMIT, ROTOR_TYPE_KEYS } from '../data/bladeTypes';
 
-function parseCpValue(cp: string): number {
-  const match = cp.replace('~', '').replace('%', '').trim();
-  return parseFloat(match) || 0;
-}
-
 interface WingTypeSwitcherProps {
   selected?: string;
   onSelect?: (key: string) => void;
@@ -25,8 +20,7 @@ export function WingTypeSwitcher({ selected: controlledSelected, onSelect }: Win
   }
 
   const blade = BLADE_TYPES[activeKey as keyof typeof BLADE_TYPES] ?? BLADE_TYPES[keys[0]];
-  const cpValue = parseCpValue(blade.cpDisplay);
-  const cpPct = (cpValue / BETZ_LIMIT) * 100;
+  const cpPct = (blade.cpValue / BETZ_LIMIT) * 100;
 
   return (
     <div

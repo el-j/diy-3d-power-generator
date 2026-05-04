@@ -1,94 +1,5 @@
 import React, { useState } from 'react';
-
-interface BladeType {
-  name: string;
-  principle: string;
-  blades: number;
-  twist: string;
-  tsr: string;
-  cp: string;
-  selfStarting: boolean;
-  bestFor: string;
-  partId: string;
-  color: string;
-  sourceFile: string;
-}
-
-const BLADE_TYPES: Record<string, BladeType> = {
-  'savonius-helix': {
-    name: 'Helix (Coreless)',
-    principle: 'Hybrid drag/lift',
-    blades: 1,
-    twist: '90°',
-    tsr: '1.0–1.5',
-    cp: '~18%',
-    selfStarting: true,
-    bestFor: 'Variable/gusty wind, urban, low cut-in speed',
-    partId: 'TWR-LEAF-01',
-    color: '#6ce0ff',
-    sourceFile: 'src/leaf/helix_leaf+connector.py',
-  },
-  'savonius-straight': {
-    name: 'Savonius Straight',
-    principle: 'Pure drag',
-    blades: 2,
-    twist: '0°',
-    tsr: '0.8–1.0',
-    cp: '~14%',
-    selfStarting: true,
-    bestFor: 'Very low wind, highest torque, pumping',
-    partId: 'TWR-STR-01',
-    color: '#ffd08b',
-    sourceFile: 'src/leaf/savonius_straight_leaf.py',
-  },
-  'lenz2': {
-    name: 'Lenz2 Cup',
-    principle: 'Drag + vortex lift',
-    blades: 3,
-    twist: '0°',
-    tsr: '1.2–1.8',
-    cp: '~22%',
-    selfStarting: true,
-    bestFor: 'Urban turbulence, moderate efficiency',
-    partId: 'TWR-LEN-01',
-    color: '#a8ff78',
-    sourceFile: 'src/leaf/lenz2_leaf.py',
-  },
-  'darrieus-h': {
-    name: 'Darrieus H-Rotor',
-    principle: 'Pure lift',
-    blades: 3,
-    twist: '0°',
-    tsr: '3.0–4.0',
-    cp: '~28%',
-    selfStarting: false,
-    bestFor: 'Consistent wind, efficiency priority',
-    partId: 'TWR-DAR-01',
-    color: '#ff8a3d',
-    sourceFile: 'src/leaf/darrieus_h_leaf.py',
-  },
-  'gorlov': {
-    name: 'Gorlov Helical',
-    principle: 'Lift-drag hybrid',
-    blades: 3,
-    twist: '120°',
-    tsr: '2.0–3.0',
-    cp: '~32%',
-    selfStarting: true,
-    bestFor: 'Best efficiency + smooth power output',
-    partId: 'TWR-GOR-01',
-    color: '#c084fc',
-    sourceFile: 'src/leaf/gorlov_leaf.py',
-  },
-};
-
-const BETZ_LIMIT = 59.3;
-
-function parseCpValue(cp: string): number {
-  // e.g. "~18%" -> 18
-  const match = cp.replace('~', '').replace('%', '').trim();
-  return parseFloat(match) || 0;
-}
+import { BLADE_TYPES, BETZ_LIMIT, ROTOR_TYPE_KEYS } from '../data/bladeTypes';
 
 interface WingTypeSwitcherProps {
   selected?: string;
@@ -96,7 +7,7 @@ interface WingTypeSwitcherProps {
 }
 
 export function WingTypeSwitcher({ selected: controlledSelected, onSelect }: WingTypeSwitcherProps = {}): React.JSX.Element {
-  const keys = Object.keys(BLADE_TYPES);
+  const keys = ROTOR_TYPE_KEYS;
   const [internalKey, setInternalKey] = useState<string>(keys[0]);
   const activeKey = controlledSelected ?? internalKey;
 
@@ -108,9 +19,8 @@ export function WingTypeSwitcher({ selected: controlledSelected, onSelect }: Win
     }
   }
 
-  const blade = BLADE_TYPES[activeKey] ?? BLADE_TYPES[keys[0]];
-  const cpValue = parseCpValue(blade.cp);
-  const cpPct = (cpValue / BETZ_LIMIT) * 100;
+  const blade = BLADE_TYPES[activeKey as keyof typeof BLADE_TYPES] ?? BLADE_TYPES[keys[0]];
+  const cpPct = (blade.cpValue / BETZ_LIMIT) * 100;
 
   return (
     <div
@@ -254,8 +164,8 @@ export function WingTypeSwitcher({ selected: controlledSelected, onSelect }: Win
               ['Operating Principle', blade.principle],
               ['Blades', String(blade.blades)],
               ['Blade Twist', blade.twist],
-              ['Tip Speed Ratio', blade.tsr],
-              ['Peak Efficiency (Cp)', blade.cp],
+              ['Tip Speed Ratio', blade.tsrRange],
+              ['Peak Efficiency (Cp)', blade.cpDisplay],
               ['Part ID', blade.partId],
             ] as [string, string][]
           ).map(([label, value]) => (
@@ -350,7 +260,7 @@ export function WingTypeSwitcher({ selected: controlledSelected, onSelect }: Win
                 fontWeight: 700,
               }}
             >
-              {blade.cp}
+              {blade.cpDisplay}
             </span>
           </div>
           {/* Track */}

@@ -5,6 +5,8 @@ import { createMaterials } from '../assembly/HelixTower';
 import { createWindSystem } from '../simulation/WindSystem';
 import { wireControls } from '../ui/Controls';
 import { getUserLocation, setLightingMode, type LightMode } from '../scene/EnvironmentLighting';
+import { makeBladeGeometry } from '../utils/bladeGeometry';
+import { BLADE_TYPES } from '../data/bladeTypes';
 import type { AppState, PartUserData, RotorType, TurbinePart } from '../types';
 
 type SceneMode = 'inspect' | 'learn' | 'print';
@@ -62,30 +64,6 @@ export function initPlaygroundScene(container: HTMLDivElement): () => void {
     controls.autoRotate = false;
   });
 
-  const ROTOR_TYPES: Record<string, any> = {
-    'savonius-helix': { cp: 0.18, tsr: 1.2 },
-    'savonius-straight': { cp: 0.14, tsr: 1.0 },
-    'lenz2': { cp: 0.22, tsr: 1.5 },
-    'darrieus-h': { cp: 0.28, tsr: 3.5 },
-    'gorlov': { cp: 0.32, tsr: 2.2 }
-  };
-
-  function twistGeometry(geometry: THREE.BufferGeometry, totalAngle: number) {
-    const pos = geometry.attributes.position;
-    const vec = new THREE.Vector3();
-    geometry.computeBoundingBox();
-    const minY = geometry.boundingBox!.min.y;
-    const height = geometry.boundingBox!.max.y - minY;
-    for (let i = 0; i < pos.count; i++) {
-      vec.fromBufferAttribute(pos, i);
-      const ratio = (vec.y - minY) / height;
-      const angle = ratio * totalAngle;
-      const x = vec.x * Math.cos(angle) - vec.z * Math.sin(angle);
-      const z = vec.x * Math.sin(angle) + vec.z * Math.cos(angle);
-      pos.setXYZ(i, x, vec.y, z);
-    }
-    geometry.computeVertexNormals();
-  }
 
   function hideMobileSceneHint(persist = false): void {
     if (!mobileSceneHintEl) return;
@@ -167,21 +145,7 @@ function makeTurbinePart<
     const stageGroup = new THREE.Group();
     stageGroup.position.y = currentY;
 
-    let bladeGeo: THREE.BufferGeometry | null = null;
-    if (state.rotorType === 'savonius-helix' || state.rotorType === 'savonius-straight') {
-      bladeGeo = new THREE.CylinderGeometry(bladeRadius, bladeRadius, STAGE_HEIGHT, 16, 16, true, 0, Math.PI * 0.85);
-      if (state.rotorType === 'savonius-helix') twistGeometry(bladeGeo, Math.PI * 0.6);
-    } else if (state.rotorType === 'darrieus-h') {
-      bladeGeo = new THREE.CylinderGeometry(HUB_RADIUS * 2.5, HUB_RADIUS * 0.5, STAGE_HEIGHT, 16);
-      bladeGeo.scale(0.2, 1, 1); 
-    } else if (state.rotorType === 'gorlov') {
-      bladeGeo = new THREE.CylinderGeometry(HUB_RADIUS * 2.5, HUB_RADIUS * 0.5, STAGE_HEIGHT, 16, 16);
-      bladeGeo.scale(0.2, 1, 1);
-      bladeGeo.translate(bladeRadius, 0, 0); 
-      twistGeometry(bladeGeo, Math.PI * 0.6); 
-    } else if (state.rotorType === 'lenz2') {
-      bladeGeo = new THREE.CylinderGeometry(bladeRadius * 0.35, bladeRadius * 0.35, STAGE_HEIGHT, 16, 1, false, 0, Math.PI * 1.2);
-    }
+    let bladeGeo: THREE.BufferGeometry | null = makeBladeGeometry(state.rotorType, bladeRadius, STAGE_HEIGHT);
 
     const useDisks = ['savonius-helix', 'savonius-straight', 'gorlov', 'lenz2'].includes(state.rotorType);
     const useShaft = ['darrieus-h', 'gorlov', 'lenz2'].includes(state.rotorType);
@@ -261,16 +225,16 @@ function makeTurbinePart<
   }
 
   function refreshPhysicsUI(): void {
-    const typeData = ROTOR_TYPES[state.rotorType] || ROTOR_TYPES['savonius-helix'];
+    const typeData = BLADE_TYPES[state.rotorType] ?? BLADE_TYPES['savonius-helix'];
     const R = state.radius / 1000;
     const v = state.windSpeed;
-    const omega = (typeData.tsr * v) / R;
+    const omega = (typeData.tsrValue * v) / R;
     state.targetRPM = state.exploded || v === 0 ? 0 : (omega / (2 * Math.PI)) * 60;
 
     const sweptArea = state.stages * 0.240 * (2 * R);
     const eff = Math.min(0.9, 0.65 + (state.generators * 0.07));
     const pWind = 0.5 * 1.225 * sweptArea * Math.pow(v, 3);
-    const pOut = pWind * typeData.cp * eff;
+    const pOut = pWind * typeData.cpValue * eff;
     const annualKwh = (pOut * 8760 * 0.25) / 1000;
     const phonesPerDay = (pOut * 24) / 15;
 
@@ -279,7 +243,7 @@ function makeTurbinePart<
     const wEl = document.getElementById('val-power-w');
     if (wEl) wEl.innerText = pOut.toFixed(1) + ' W';
     const cpEl = document.getElementById('val-cp');
-    if (cpEl) cpEl.innerText = (typeData.cp * 100).toFixed(0) + '%';
+    if (cpEl) cpEl.innerText = (typeData.cpValue * 100).toFixed(0) + '%';
     const rpmEl = document.getElementById('val-rpm');
     if (rpmEl) rpmEl.innerText = Math.round(state.currentRPM) + ' RPM';
     const kwhEl = document.getElementById('val-power-kwh');

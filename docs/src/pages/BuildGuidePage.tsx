@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import { Checklist } from '../components/Checklist';
 import { WingTypeSwitcher } from '../components/WingTypeSwitcher';
+import { BladePreviewCanvas } from '../components/BladePreviewCanvas';
 import { getMarkdown } from '../md-loader';
 import { buildGuideLinks } from '../content/siteContent';
+import type { RotorType } from '../types';
 
 // ---------------------------------------------------------------------------
 // Per-section checklist definitions
@@ -99,7 +101,7 @@ const BLADE_GUIDE_PATHS: Record<string, string> = {
 
 export function BuildGuidePage(): React.JSX.Element {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedBlade, setSelectedBlade] = useState<string>('savonius-helix');
+  const [selectedBlade, setSelectedBlade] = useState<RotorType>('savonius-helix');
 
   const active = buildGuideLinks[activeIndex];
   const checklist = SECTION_CHECKLISTS[active.title];
@@ -133,8 +135,13 @@ export function BuildGuidePage(): React.JSX.Element {
         {isTower && (
           <WingTypeSwitcher
             selected={selectedBlade}
-            onSelect={setSelectedBlade}
+            onSelect={(key) => setSelectedBlade(key as RotorType)}
           />
+        )}
+
+        {/* 3D blade preview — Tower section only */}
+        {isTower && (
+          <BladePreviewCanvas rotorType={selectedBlade} />
         )}
 
         {/* Build instructions — swaps when blade selection changes on Tower section */}

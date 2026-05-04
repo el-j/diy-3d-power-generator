@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { AppState, TurbinePart } from '../types';
+import { makeBladeGeometry } from '../utils/bladeGeometry';
 
 const STAGE_HEIGHT = 24.0;
 const HUB_RADIUS = 1.2;
@@ -53,24 +54,6 @@ function createPart(
   return mesh;
 }
 
-function twistGeometry(geometry: THREE.CylinderGeometry, totalAngle: number): void {
-  const pos = geometry.attributes.position;
-  const vec = new THREE.Vector3();
-  geometry.computeBoundingBox();
-  const minY = geometry.boundingBox!.min.y;
-  const maxY = geometry.boundingBox!.max.y;
-  const height = maxY - minY;
-
-  for (let i = 0; i < pos.count; i += 1) {
-    vec.fromBufferAttribute(pos, i);
-    const ratio = (vec.y - minY) / height;
-    const angle = ratio * totalAngle;
-    const x = vec.x * Math.cos(angle) - vec.z * Math.sin(angle);
-    const z = vec.x * Math.sin(angle) + vec.z * Math.cos(angle);
-    pos.setXYZ(i, x, vec.y, z);
-  }
-  geometry.computeVertexNormals();
-}
 
 export function buildTower(group: THREE.Group, state: AppState, mats: MaterialSet) {
   while (group.children.length > 0) {
@@ -146,23 +129,7 @@ export function buildTower(group: THREE.Group, state: AppState, mats: MaterialSe
     currentY += genHeight;
   }
 
-  let bladeGeometry: THREE.CylinderGeometry;
-  if (state.rotorType === 'savonius-helix' || state.rotorType === 'savonius-straight') {
-    bladeGeometry = new THREE.CylinderGeometry(bladeRadius, bladeRadius, STAGE_HEIGHT, 16, 16, true, 0, Math.PI * 0.85);
-    if (state.rotorType === 'savonius-helix') {
-      twistGeometry(bladeGeometry, Math.PI * 0.6);
-    }
-  } else if (state.rotorType === 'darrieus-h') {
-    bladeGeometry = new THREE.CylinderGeometry(HUB_RADIUS * 2.5, HUB_RADIUS * 0.5, STAGE_HEIGHT, 16);
-    bladeGeometry.scale(0.2, 1, 1);
-  } else if (state.rotorType === 'gorlov') {
-    bladeGeometry = new THREE.CylinderGeometry(HUB_RADIUS * 2.5, HUB_RADIUS * 0.5, STAGE_HEIGHT, 16, 16);
-    bladeGeometry.scale(0.2, 1, 1);
-    bladeGeometry.translate(bladeRadius, 0, 0);
-    twistGeometry(bladeGeometry, Math.PI * 0.6);
-  } else {
-    bladeGeometry = new THREE.CylinderGeometry(bladeRadius * 0.35, bladeRadius * 0.35, STAGE_HEIGHT, 16, 1, false, 0, Math.PI * 1.2);
-  }
+  const bladeGeometry = makeBladeGeometry(state.rotorType, bladeRadius, STAGE_HEIGHT);
 
   const stageGroup = new THREE.Group();
   stageGroup.position.y = currentY;
